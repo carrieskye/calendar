@@ -5,7 +5,7 @@ from typing import List
 
 import requests
 
-from src.models.watch import EpisodeWatch, Watch
+from src.models.watch import EpisodeWatch, Watch, MovieWatch
 
 
 class TraktAPI:
@@ -13,7 +13,7 @@ class TraktAPI:
     def __init__(self):
         self.base_url = 'https://api.trakt.tv'
         self.client_id = os.environ.get('TRAKT_CLIENT_ID')
-        with open('trakt_token.json', 'r') as file:
+        with open('src/credentials/trakt_token.json', 'r') as file:
             self.token = json.load(file).get('access_token')
 
     def get_headers(self):
@@ -40,7 +40,7 @@ class TraktAPI:
         response = requests.post(url, headers=self.get_headers(), json=body)
         return response.json()
 
-    def get_show_id(self, title):
+    def get_show_details(self, title):
         url = f'{self.base_url}/search/show'
         response = self.get_request(url, {'query': title})
         return response[0]['show']
@@ -65,6 +65,10 @@ class TraktAPI:
     def add_episodes_to_history(self, watches: List[Watch]):
         url = 'https://api.trakt.tv/sync/history'
         body = {
+            'movies': [{
+                'watched_at': watch.end.isoformat() + 'Z',
+                'ids': {'trakt': watch.trakt_id}
+            } for watch in watches if isinstance(watch, MovieWatch)],
             'episodes': [{
                 'watched_at': watch.end.isoformat() + 'Z',
                 'ids': {'trakt': watch.episode_id}
@@ -75,6 +79,9 @@ class TraktAPI:
     def remove_episodes_from_history(self, watches: List[Watch]):
         url = 'https://api.trakt.tv/sync/history/remove'
         body = {
+            'movies': [{
+                'ids': {'trakt': watch.trakt_id}
+            } for watch in watches if isinstance(watch, MovieWatch)],
             'episodes': [{
                 'ids': {'trakt': watch.episode_id}
             } for watch in watches if isinstance(watch, EpisodeWatch)]

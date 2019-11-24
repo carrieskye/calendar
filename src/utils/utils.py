@@ -1,3 +1,4 @@
+import functools
 import json
 import re
 from datetime import datetime
@@ -25,3 +26,10 @@ class Utils:
     @classmethod
     def trakt_datetime(cls, original):
         return datetime.strptime(original, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+    @classmethod
+    def get_recursive_attr(cls, obj, attr, *args):
+        def _get_recursive_attr(sub_obj, sub_attr):
+            return getattr(sub_obj, sub_attr, *args)
+
+        return functools.reduce(_get_recursive_attr, [obj] + attr.split('.'))
