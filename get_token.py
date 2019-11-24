@@ -28,7 +28,7 @@ def trakt_callback():
         abort(403)
     code = request.args.get('code')
     token = get_token(code)
-    with open(f'trakt_token.json', 'w') as file:
+    with open('src/credentials/trakt_token.json', 'w') as file:
         json.dump(token, file, indent='\t')
     return token
 

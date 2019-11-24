@@ -1,4 +1,9 @@
+python-dateutil
+pytz
 google
-googleapiclient
+google-api-python-client
+google-auth-oauthlib
 flask
 requests
+psycopg2-binary
+geopy
