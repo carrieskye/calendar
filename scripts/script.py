@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from src.connectors.google_calendar import GoogleCalendarAPI
 from src.connectors.trakt import TraktAPI
+from src.utils.location import LocationUtils
 from src.utils.output import Output
 
 
@@ -33,7 +34,6 @@ class Work(Script):
 class Media(Script):
 
     def __init__(self):
-        Output.make_title('Input')
         self.trakt_api = TraktAPI()
         self.google_cal = GoogleCalendarAPI()
 
@@ -43,5 +43,16 @@ class Media(Script):
         self.gap = 30
 
     @abstractmethod
+    def run(self):
+        pass
+
+
+class Locations(Script):
+
+    def __init__(self):
+        Output.make_title('Input')
+
+        self.utils = LocationUtils()
+
     def run(self):
         pass

@@ -1,3 +1,5 @@
+from datetime import datetime, time
+
 from dateutil.relativedelta import relativedelta
 
 from scripts.script import Work
@@ -106,13 +108,17 @@ class CopyToLarry(Work):
     def __init__(self):
         super(CopyToLarry, self).__init__()
 
-        Output.make_title('Input')
-        self.start = Input.get_date_input('Start')
+        start = Input.get_date_input('Start')
+        self.start = datetime.combine(start, time(4, 0))
         days = Input.get_int_input('Days')
         self.end = self.start + relativedelta(days=days)
 
     def run(self):
         Output.make_title('Processing')
+
+        print(self.cal_id_work_larry)
+        print(self.start)
+        print(self.end)
 
         results = self.google_cal.get_events(self.cal_id_work_larry, 1000, self.start, self.end)
         for result in results:

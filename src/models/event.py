@@ -175,6 +175,6 @@ class Event:
 
     @staticmethod
     def get_calendar_name(calendar_id: str):
-        calendars = Utils.read_json('exports/calendars.json')
+        calendars = Utils.read_json('data/google/calendars.json')
         hits = [cal_name for cal_name, cal_id in calendars.items() if cal_id == calendar_id]
         return hits[0] if hits else ''

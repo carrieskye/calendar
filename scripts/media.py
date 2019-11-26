@@ -17,6 +17,9 @@ class UpdatePeriod(Media):
     def __init__(self, start: datetime = None, days: int = None):
         super(UpdatePeriod, self).__init__()
 
+        if not start and not days:
+            Output.make_title('Input')
+
         if not start:
             start = Input.get_date_input('Start')
         if not days:
@@ -33,8 +36,8 @@ class UpdatePeriod(Media):
         Output.make_title('Processing')
 
         history = sorted(self.trakt_api.get_history(self.start, self.end), key=lambda x: x.get('watched_at'))
-        watches = MediaUtils.get_watches_from_history(history)
-        MediaUtils.process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
+        watches = MediaUtils().get_watches_from_history(history)
+        MediaUtils().process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
 
         Output.make_bold('Updated trakt history\n')
 
@@ -44,6 +47,7 @@ class UpdateToday(Media):
     def __init__(self):
         super(UpdateToday, self).__init__()
 
+        Output.make_title('Input')
         today = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
         self.update_trakt_period = UpdatePeriod(start=today, days=1)
 
@@ -56,6 +60,7 @@ class UpdateYesterday(Media):
     def __init__(self):
         super(UpdateYesterday, self).__init__()
 
+        Output.make_title('Input')
         today = datetime(datetime.now().year, datetime.now().month, datetime.now().day) - relativedelta(days=1)
         self.update_trakt_period = UpdatePeriod(start=today, days=1)
 
@@ -68,6 +73,7 @@ class AddToHistory(Media):
     def __init__(self):
         super(AddToHistory, self).__init__()
 
+        Output.make_title('Input')
         self.show_title = Input.get_string_input('Show title')
         self.season = Input.get_int_input('Season')
         self.first_episode = Input.get_int_input('First episode')
@@ -94,6 +100,6 @@ class AddToHistory(Media):
             start += relativedelta(minutes=episode.get('runtime'))
             watches.append(watch)
 
-        MediaUtils.process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
+        MediaUtils().process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
 
         Output.make_bold('Added to history\n')

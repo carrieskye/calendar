@@ -44,6 +44,8 @@ class UKAddress(Address):
 
     @staticmethod
     def deserialise(serialised: dict):
+        serialised.pop('state')
+        serialised.pop('country_code')
         return UKAddress(**serialised)
 
     @staticmethod

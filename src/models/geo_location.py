@@ -3,7 +3,7 @@ from math import sqrt, radians, sin, cos, atan2, degrees
 from geopy import Point as GeoPoint
 from geopy.distance import geodesic
 
-from src.models.address import Address
+from src.models.address import Address, UKAddress
 from src.models.bounding_box import BoundingBox
 from src.models.location_event import LocationEvent
 from src.models.point import Point
@@ -58,7 +58,10 @@ class GeoLocation:
     @staticmethod
     def deserialise(serialised: dict):
         serialised['bounding_box'] = BoundingBox.deserialise(serialised.get('bounding_box'))
-        serialised['address'] = Address.deserialise(serialised.get('address'))
+        addresses = {
+            'UK': UKAddress
+        }
+        serialised['address'] = addresses[serialised['address']['country_code']].deserialise(serialised.get('address'))
         return GeoLocation(**serialised)
 
     @staticmethod
