@@ -1,6 +1,8 @@
 from datetime import datetime
 from math import radians, atan2, sin, cos, sqrt
 
+from src.models.point import Point
+
 
 class LocationEvent:
 
@@ -42,3 +44,6 @@ class LocationEvent:
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return earth_radius * c
+
+    def get_point(self):
+        return Point(self.latitude, self.longitude)

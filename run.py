@@ -1,6 +1,6 @@
 import sys
 
-from scripts.locations import Test, AddLocation
+from scripts.locations import UpdateEventTimes, AddLocation, UpdateEventHistory
 from scripts.media import UpdatePeriod, UpdateToday, UpdateYesterday, AddToHistory
 from scripts.takeout import SplitByDay, SplitByDayFormatted
 from scripts.work import AddDays, UpdateProject, CopyToLarry
@@ -16,7 +16,8 @@ if __name__ == '__main__':
         'add_to_history': AddToHistory,
         'split_takeout': SplitByDay,
         'split_takeout_formatted': SplitByDayFormatted,
-        'locations': Test,
+        'update_event_times': UpdateEventTimes,
+        'update_event_history': UpdateEventHistory,
         'add_location': AddLocation
     }
 

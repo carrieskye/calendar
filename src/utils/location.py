@@ -1,4 +1,5 @@
 from datetime import datetime, time, date
+from math import radians, sin, atan2, sqrt, cos
 from typing import List
 
 import psycopg2
@@ -6,7 +7,7 @@ import pytz
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalendarAPI
-from src.models.address import UKAddress
+from src.models.address import UKAddress, BEAddress
 from src.models.bounding_box import BoundingBox
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
@@ -26,7 +27,8 @@ class LocationUtils:
         self.geo_locations = {geo_location.get('label'): GeoLocation.deserialise(geo_location)
                               for geo_location in Utils.read_json('data/geo_locations.json')}
         self.addresses = {
-            'gb': UKAddress
+            'gb': UKAddress,
+            'be': BEAddress
         }
 
     @staticmethod
@@ -42,7 +44,25 @@ class LocationUtils:
             latitude, longitude = lat_lon.split(', ')
             bounding_box.append(Point(float(latitude), float(longitude)))
 
+        bounding_box.append(LocationUtils.get_intersection(*bounding_box))
         return BoundingBox(*bounding_box)
+
+    @staticmethod
+    def get_intersection(bottom_left: Point, top_left: Point, top_right: Point, bottom_right: Point):
+        # m = (y_2 - y_1) / (x_2 - x_1)
+        # y = mx + b
+        # b = -mx + y
+        m_1 = (top_right.longitude - bottom_left.longitude) / (top_right.latitude - bottom_left.latitude)
+        b_1 = - (top_right.latitude * m_1) + top_right.longitude
+        m_2 = (bottom_right.longitude - top_left.longitude) / (bottom_right.latitude - top_left.latitude)
+        b_2 = - (bottom_right.latitude * m_2) + bottom_right.longitude
+
+        # m_1 * x + b_1 = m_2 * x + b_2
+        # m_1 * x - m_2 * x = b_2 - b_1
+        # (m_1 - m_2) * x = b_2 - b_1
+        x = (b_2 - b_1) / (m_1 - m_2)
+        y = x * m_1 + b_1
+        return Point(x, y)
 
     @staticmethod
     def get_records(start: datetime, end: datetime, user_id: int = 3, accuracy: int = 20):
@@ -143,9 +163,19 @@ class LocationUtils:
         return morning and afternoon
 
     def get_closest_location(self, location: LocationEvent):
+        matches = []
         for label, geo_location in self.geo_locations.items():
             if geo_location.within_bounding_box(location):
-                return label
+                matches.append(label)
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            distances = {}
+            for match in matches:
+                intersection = self.geo_locations[match].bounding_box.intersection
+                distances[match] = LocationUtils.get_distance(location.get_point(), intersection)
+            match = min(distances.items(), key=lambda x: x[1])
+            return match[0]
 
     def process_events(self, start: date, history: List[LocationEventTemp], larry: bool):
         events = self.get_day_events(start)
@@ -203,6 +233,7 @@ class LocationUtils:
 
         if matches:
             match = min(matches, key=lambda x: x.get('offset')).get('history_entry')
+            print(match.start, match.end)
             event.start.date_time = match.start
             event.end.date_time = match.end
             self.google_cal.update_event(event.calendar_id, event.event_id, event)
@@ -213,3 +244,16 @@ class LocationUtils:
         start_diff = abs((event.start - day_event.start.date_time).total_seconds())
         end_diff = abs((event.end - day_event.end.date_time).total_seconds())
         return max(start_diff, end_diff)
+
+    @staticmethod
+    def get_distance(point1: Point, point2: Point):
+        earth_radius = 6371e3
+        phi_1 = radians(point1.latitude)
+        phi_2 = radians(point2.latitude)
+        df = radians(point2.latitude - point1.latitude)
+        dl = radians(point2.longitude - point2.longitude)
+
+        a = sin(df / 2) * sin(df / 2) + cos(phi_1) * cos(phi_2) * sin(dl / 2) * sin(dl / 2)
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earth_radius * c
