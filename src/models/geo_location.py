@@ -3,7 +3,7 @@ from math import sqrt, radians, sin, cos, atan2, degrees
 from geopy import Point as GeoPoint
 from geopy.distance import geodesic
 
-from src.models.address import Address, UKAddress
+from src.models.address import Address, UKAddress, BEAddress
 from src.models.bounding_box import BoundingBox
 from src.models.location_event import LocationEvent
 from src.models.point import Point
@@ -47,7 +47,7 @@ class GeoLocation:
         new_top_right = GeoLocation.extend_point(bb.top_right, bb.bottom_right, bb.top_left, d)
         new_bottom_right = GeoLocation.extend_point(bb.bottom_right, bb.bottom_left, bb.top_right, d)
 
-        return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right)
+        return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right, bb.intersection)
 
     def serialise(self):
         serialised = self.__dict__
@@ -59,23 +59,11 @@ class GeoLocation:
     def deserialise(serialised: dict):
         serialised['bounding_box'] = BoundingBox.deserialise(serialised.get('bounding_box'))
         addresses = {
-            'UK': UKAddress
+            'UK': UKAddress,
+            'BE': BEAddress
         }
         serialised['address'] = addresses[serialised['address']['country_code']].deserialise(serialised.get('address'))
         return GeoLocation(**serialised)
-
-    @staticmethod
-    def get_distance(point1: Point, point2: Point):
-        earth_radius = 6371e3
-        phi_1 = radians(point1.latitude)
-        phi_2 = radians(point2.latitude)
-        df = radians(point2.latitude - point1.latitude)
-        dl = radians(point2.longitude - point2.longitude)
-
-        a = sin(df / 2) * sin(df / 2) + cos(phi_1) * cos(phi_2) * sin(dl / 2) * sin(dl / 2)
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return earth_radius * c
 
     @staticmethod
     def get_bearing(point1: Point, point2: Point):
