@@ -23,14 +23,14 @@ class UpdatePeriod(Media):
         if not start:
             start = Input.get_date_input('Start')
         if not days:
-            days = Input.get_int_input('Days')
+            days = Input.get_int_input('Days', input_type='#days')
 
         self.start = start + relativedelta(hours=4)
-        self.end = start + relativedelta(days=int(days))
+        self.end = self.start + relativedelta(days=int(days))
 
-        self.calendar = Input.get_string_input('Calendar', self.calendar)
-        self.location = Input.get_string_input('Location', self.location)
-        self.gap = Input.get_int_input('Maximum gap', self.gap)
+        self.calendar = Input.get_string_input('Calendar', input_type='name', default=self.calendar)
+        self.location = Input.get_string_input('Location', input_type='name', default=self.location)
+        self.gap = Input.get_int_input('Maximum gap', input_type='#min', default=self.gap)
 
     def run(self):
         Output.make_title('Processing')
@@ -74,15 +74,15 @@ class AddToHistory(Media):
         super(AddToHistory, self).__init__()
 
         Output.make_title('Input')
-        self.show_title = Input.get_string_input('Show title')
-        self.season = Input.get_int_input('Season')
-        self.first_episode = Input.get_int_input('First episode')
-        self.last_episode = Input.get_int_input('Last episode', self.first_episode)
+        self.show_title = Input.get_string_input('Show', 'title')
+        self.season = Input.get_int_input('Season', 'no')
+        self.first_episode = Input.get_int_input('First episode', 'no')
+        self.last_episode = Input.get_int_input('Last episode', 'no', self.first_episode)
         self.start = Input.get_date_time_input('Start')
-        self.time_zone = Input.get_string_input('Time zone', self.time_zone)
-        self.calendar = Input.get_string_input('Calendar', self.calendar)
-        self.location = Input.get_string_input('Location', self.location)
-        self.gap = Input.get_int_input('Gap', self.gap)
+        self.time_zone = Input.get_string_input('Time zone', 'name', self.time_zone)
+        self.calendar = Input.get_string_input('Calendar', 'name', self.calendar)
+        self.location = Input.get_string_input('Location', 'name', self.location)
+        self.gap = Input.get_int_input('Gap', '#min', self.gap)
 
     def run(self):
         Output.make_title('Processing')

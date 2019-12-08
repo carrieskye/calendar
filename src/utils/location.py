@@ -17,6 +17,7 @@ from src.models.location_event_temp import LocationEventTemp
 from src.models.point import Point
 from src.utils.input import Input
 from src.utils.output import Output
+from src.utils.table_print import TablePrint
 from src.utils.utils import Utils
 
 
@@ -108,7 +109,41 @@ class LocationUtils:
                 grouped_events.append(event)
             index += 1
 
-        return LocationUtils.clean_work(grouped_events)
+        LocationUtils.print_events('Grouped events', grouped_events)
+        return LocationUtils.merge_events(grouped_events)
+
+    @staticmethod
+    def merge_events(events: List[LocationEventTemp]):
+        merged_events = []
+        index = 0
+
+        merge_start = 0
+
+        work_day = LocationUtils.is_work_day(events)
+        if not work_day:
+            while index < len(events):
+                event = events[index]
+
+                if event.start + relativedelta(minutes=5) > event.end:
+                    if not merge_start:
+                        merge_start = index
+
+                else:
+                    if merge_start:
+                        if events[merge_start - 1].name == event.name:
+                            event.start = events[merge_start - 1].start
+                            merged_events.pop(-1)
+                        else:
+                            event.start = events[merge_start].start
+                    merged_events.append(event)
+                    merge_start = 0
+
+                index += 1
+        else:
+            merged_events = events
+
+        LocationUtils.print_events('Merged events', merged_events)
+        return LocationUtils.clean_work(merged_events)
 
     @staticmethod
     def clean_work(events: List[LocationEventTemp]):
@@ -116,43 +151,73 @@ class LocationUtils:
         index = 0
 
         work_day = LocationUtils.is_work_day(events)
-        while index < len(events):
-            event = events[index]
+        if work_day:
+            while index < len(events):
+                event = events[index]
 
-            morning = event.start.time() < time(12)
-            noon = event.start.time() > time(12) and time(4) < event.end.time() < time(14)
-            afternoon = event.end.time() > time(14)
+                morning = event.start.time() < time(12)
+                noon = event.start.time() > time(12) and time(4) < event.end.time() < time(14)
+                afternoon = event.end.time() > time(14)
 
-            if event.name == 'Tramshed Tech' and (morning or afternoon):
-                name = event.name
-                start = event.start
-                end = event.end
-                event_list = event.events
-                if events[index + 1].name == 'Amplyfi':
-                    name = events[index + 1].name
-                    end = events[index + 1].end
-                    event_list += events[index + 1].events
-                    index += 1
-                if cleaned_events[-1].name == 'Amplyfi':
-                    previous = cleaned_events.pop(-1)
-                    name = previous.name
-                    start = previous.start
-                    event_list = previous.events + event_list
-                cleaned_events.append(LocationEventTemp(name, event_list, start, end))
-            elif work_day and event.name != 'Amplyfi' and noon and events[index + 1].name == 'Amplyfi':
-                first_index = len(cleaned_events)
-                while first_index > 2 and cleaned_events[first_index - 1].name != 'Amplyfi':
-                    first_index -= 1
-                start = cleaned_events[first_index].start
-                event_list = []
-                for x in range(len(cleaned_events) - 1, first_index - 1, -1):
-                    event_list += cleaned_events.pop(x).events
-                event_list += event.events
-                cleaned_events.append(LocationEventTemp('Tramshed Tech', event_list, start, event.end))
+                short_event = event.start + relativedelta(minutes=30) > event.end
 
-            else:
-                cleaned_events.append(event)
-            index += 1
+                if event.name == 'Tramshed Tech' and (morning or afternoon):
+                    name = event.name
+                    start = event.start
+                    end = event.end
+                    event_list = event.events
+                    if events[index + 1].name == 'Amplyfi':
+                        name = events[index + 1].name
+                        end = events[index + 1].end
+                        event_list += events[index + 1].events
+                        index += 1
+                    if cleaned_events[-1].name == 'Amplyfi':
+                        previous = cleaned_events.pop(-1)
+                        name = previous.name
+                        start = previous.start
+                        event_list = previous.events + event_list
+                    cleaned_events.append(LocationEventTemp(name, event_list, start, end))
+                elif event.name == 'Amplyfi' and noon and short_event:
+                    name = event.name
+                    start = event.start
+                    end = event.end
+                    event_list = event.events
+                    if events[index + 1].name == 'Tramshed Tech':
+                        name = events[index + 1].name
+                        end = events[index + 1].end
+                        event_list += events[index + 1].events
+                        index += 1
+                    if cleaned_events[-1].name == 'Tramshed Tech':
+                        previous = cleaned_events.pop(-1)
+                        name = previous.name
+                        start = previous.start
+                        event_list = previous.events + event_list
+                    cleaned_events.append(LocationEventTemp(name, event_list, start, end))
+                elif work_day and index < len(events) - 1 and event.name != 'Amplyfi' and noon and events[
+                    index + 1].name == 'Amplyfi':
+                    first_index = len(cleaned_events)
+                    while first_index > 1 and cleaned_events[first_index - 1].name != 'Amplyfi':
+                        first_index -= 1
+                    if first_index < len(cleaned_events):
+                        start = cleaned_events[first_index].start
+                    else:
+                        start = event.start
+                    event_list = []
+                    for x in range(len(cleaned_events) - 1, first_index - 1, -1):
+                        event_list += cleaned_events.pop(x).events
+                    event_list += event.events
+                    if start + relativedelta(minutes=30) > event.end:
+                        event.end = start + relativedelta(minutes=30)
+                        events[index + 1].start = event.end
+                    cleaned_events.append(LocationEventTemp('Tramshed Tech', event_list, start, event.end))
+
+                else:
+                    cleaned_events.append(event)
+                index += 1
+
+            LocationUtils.print_events('Cleaned work events', cleaned_events)
+        else:
+            cleaned_events = events
 
         return cleaned_events
 
@@ -164,7 +229,8 @@ class LocationUtils:
 
     def get_closest_location(self, location: LocationEvent):
         matches = []
-        for label, geo_location in self.geo_locations.items():
+        geo_locations = self.filter_geo_locations(location)
+        for label, geo_location in geo_locations.items():
             if geo_location.within_bounding_box(location):
                 matches.append(label)
         if len(matches) == 1:
@@ -179,23 +245,33 @@ class LocationUtils:
 
     def process_events(self, start: date, history: List[LocationEventTemp], larry: bool):
         events = self.get_day_events(start)
+
+        table_print = TablePrint('Updated events', ['START', 'END', 'SUMMARY'], [10, 10, 30])
         for event in events:
             popped_event = self.get_closest_event(event, history)
-            if popped_event and (event.calendar != 'work' or not larry):
-                history.pop(history.index(popped_event))
+            if popped_event:
+                start = popped_event.start.strftime('%H:%M:%S')
+                end = popped_event.end.strftime('%H:%M:%S')
+                table_print.print_line([start, end, event.summary])
+                if event.calendar != 'work' or not larry:
+                    history.pop(history.index(popped_event))
+            else:
+                table_print.print_line(['?', '?', event.summary])
 
+        table_print = TablePrint('New events', ['START', 'END', 'LOCATION'], [10, 10, 30])
         for remaining_entry in history:
             unknown = remaining_entry.name == 'unknown'
             too_short = remaining_entry.start + relativedelta(minutes=30) >= remaining_entry.end
             category = self.geo_locations[remaining_entry.name].category if not unknown else 'unknown'
             home = category == 'Home'
             if not (too_short or home):
+                start = remaining_entry.start.strftime('%H:%M:%S')
+                end = remaining_entry.end.strftime('%H:%M:%S')
+                table_print.print_line([start, end, remaining_entry.name])
                 if not unknown:
                     event = self.create_default_event(remaining_entry)
                     calendar_id = self.google_cal.get_calendar_id('various')
                     self.google_cal.create_event(calendar_id, event)
-                else:
-                    print(remaining_entry)
 
     def create_default_event(self, history_entry: LocationEventTemp):
         time_zone = self.geo_locations[history_entry.name].time_zone
@@ -233,7 +309,6 @@ class LocationUtils:
 
         if matches:
             match = min(matches, key=lambda x: x.get('offset')).get('history_entry')
-            print(match.start, match.end)
             event.start.date_time = match.start
             event.end.date_time = match.end
             self.google_cal.update_event(event.calendar_id, event.event_id, event)
@@ -257,3 +332,21 @@ class LocationUtils:
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return earth_radius * c
+
+    @staticmethod
+    def print_events(title: str, events: List[LocationEventTemp]):
+        headers = ['START', 'END', 'LOCATION']
+        width = [10, 10, 30]
+        table_print = TablePrint(title, headers, width)
+
+        for event in events:
+            name = event.name if event.name != 'unknown' else ''
+            table_print.print_line([event.start.strftime('%H:%M:%S'), event.end.strftime('%H:%M:%S'), name])
+
+    def filter_geo_locations(self, location: LocationEvent):
+        geo_locations = {}
+        for label, geo_location in self.geo_locations.items():
+            point_a = Point(location.latitude, location.longitude)
+            if self.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
+                geo_locations[label] = geo_location
+        return geo_locations
