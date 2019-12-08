@@ -14,7 +14,7 @@ class AddDays(Work):
         super(AddDays, self).__init__()
 
         self.day = Input.get_date_input('Start')
-        days = Input.get_int_input('Days')
+        days = Input.get_int_input('Days', '#days')
         self.end = self.day + relativedelta(days=days - 1)
         self.project = Input.get_string_input('Project', 'CSET')
 
@@ -86,7 +86,7 @@ class UpdateProject(Work):
 
         Output.make_title('Input')
         self.start = Input.get_date_input('Start')
-        days = Input.get_int_input('Days')
+        days = Input.get_int_input('Days', '#days')
         self.end = self.start + relativedelta(days=days)
         self.project = Input.get_string_input('Project', 'CSET')
 
@@ -110,7 +110,7 @@ class CopyToLarry(Work):
 
         start = Input.get_date_input('Start')
         self.start = datetime.combine(start, time(4, 0))
-        days = Input.get_int_input('Days')
+        days = Input.get_int_input('Days', '#days')
         self.end = self.start + relativedelta(days=days)
 
     def run(self):

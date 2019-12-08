@@ -114,9 +114,9 @@ class BEAddress(Address):
 
     def stringify(self):
         address = ', '.join(line for line in self.address_lines if line)
-        street = ' '.join(part for part in [self.house_no, self.street] if part)
-        city = ' '.join(part for part in [self.city, self.postal_code] if part)
-        address_string = [address, street, city, self.country_code]
+        street = ' '.join(part for part in [self.street, self.house_no] if part)
+        city = ' '.join(part for part in [self.postal_code, self.city] if part)
+        address_string = [address, street, city, 'Belgium']
         return ', '.join(part for part in address_string if part)
 
     def serialise(self):
