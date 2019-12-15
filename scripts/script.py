@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from src.connectors.google_calendar import GoogleCalendarAPI
 from src.connectors.trakt import TraktAPI
 from src.utils.location import LocationUtils
+from src.utils.media import MediaUtils
 from src.utils.output import Output
 
 
@@ -36,6 +37,7 @@ class Media(Script):
     def __init__(self):
         self.trakt_api = TraktAPI()
         self.google_cal = GoogleCalendarAPI()
+        self.utils = MediaUtils()
 
         self.calendar = 'tv_shared'
         self.location = 'bromsgrove'

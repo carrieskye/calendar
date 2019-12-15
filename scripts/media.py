@@ -4,9 +4,9 @@ from dateutil import tz
 from dateutil.relativedelta import relativedelta
 
 from scripts.script import Media
-from src.models.watch import EpisodeWatch
+from src.models.event import Event
+from src.models.watch import EpisodeWatch, TempEpisodeWatch
 from src.utils.input import Input
-from src.utils.media import MediaUtils
 from src.utils.output import Output
 
 TODAY = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
@@ -36,8 +36,8 @@ class UpdatePeriod(Media):
         Output.make_title('Processing')
 
         history = sorted(self.trakt_api.get_history(self.start, self.end), key=lambda x: x.get('watched_at'))
-        watches = MediaUtils().get_watches_from_history(history)
-        MediaUtils().process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
+        watches = self.utils.get_watches_from_history(history)
+        self.utils.process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
 
         Output.make_bold('Updated trakt history\n')
 
@@ -92,14 +92,56 @@ class AddToHistory(Media):
         show_id = show.get('ids').get('trakt')
         watches = []
         for episode_index in range(self.first_episode, self.last_episode + 1):
-            episode = self.trakt_api.get_episode(show_id, self.season, episode_index)
-            watch = EpisodeWatch(
-                watched_at=(start + relativedelta(minutes=episode.get('runtime'))).isoformat(),
-                show=show,
-                episode=episode)
-            start += relativedelta(minutes=episode.get('runtime'))
+            details = self.utils.get_episode_details(show_id, self.season, str(episode_index))
+            temp_watch = TempEpisodeWatch(
+                watched_at=start + relativedelta(minutes=details['runtime']),
+                show_id=show_id,
+                show_title=self.show_title,
+                season_no=self.season,
+                episode_no=episode_index,
+                episode_id=details['trakt_id']
+            )
+            watch = EpisodeWatch(temp_watch, details['runtime'])
+            start += relativedelta(minutes=details['runtime'])
             watches.append(watch)
 
-        MediaUtils().process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
+        self.utils.process_watches(watches, self.google_cal.get_calendar_id(self.calendar), self.location, self.gap)
 
         Output.make_bold('Added to history\n')
+
+
+class ExportFromCalendar(Media):
+
+    def __init__(self):
+        super(ExportFromCalendar, self).__init__()
+
+    def run(self):
+        results = []
+        tv_calendar_id = self.google_cal.get_calendar_id('tv')
+        results += self.google_cal.get_events(tv_calendar_id, 10000, datetime(2012, 1, 1), datetime.now())
+
+        for result in results:
+            event = Event.get_event(result, tv_calendar_id, 'tv')
+            self.utils.process_calendar_event(event)
+
+        # TODO!!
+
+
+class ExportFromTrakt(Media):
+
+    def __init__(self):
+        super(ExportFromTrakt, self).__init__()
+
+    def run(self):
+        results = []
+
+        Output.make_title('Retrieving data')
+        period = relativedelta(weeks=1)
+        start = datetime(2013, 1, 1)
+        while start < datetime.now() + 2 * period:
+            end = start + period
+            print(f'Retrieving {start.strftime("%Y-%m-%d")} until {end.strftime("%Y-%m-%d")}')
+            results += self.trakt_api.get_history(start, end)
+            start += period
+
+        self.utils.export_history(results)
