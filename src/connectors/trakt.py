@@ -49,6 +49,10 @@ class TraktAPI:
         url = f'{self.base_url}/shows/{show_id}/seasons'
         return self.get_request(url, {'extended': 'full'})
 
+    def get_season_details(self, show_id, season):
+        url = f'{self.base_url}/shows/{show_id}/seasons/{season}'
+        return self.get_request(url, {'extended': 'full'})
+
     def get_episode(self, show_id, season, episode):
         url = f'{self.base_url}/shows/{show_id}/seasons/{season}/episodes/{episode}'
         return self.get_request(url, {'extended': 'full'})
@@ -62,8 +66,12 @@ class TraktAPI:
         params = {'start_at': start.isoformat() + 'Z', 'end_at': end.isoformat() + 'Z'}
         return self.get_request_paginated(url, params)
 
+    def get_history_for_episode(self, episode_id: str):
+        url = f'{self.base_url}/sync/history/episodes/{episode_id}'
+        return self.get_request(url, {'extended': 'full'})
+
     def add_episodes_to_history(self, watches: List[Watch]):
-        url = 'https://api.trakt.tv/sync/history'
+        url = f'{self.base_url}/sync/history'
         body = {
             'movies': [{
                 'watched_at': watch.end.isoformat() + 'Z',
@@ -77,7 +85,7 @@ class TraktAPI:
         return self.post_request(url, body)
 
     def remove_episodes_from_history(self, watches: List[Watch]):
-        url = 'https://api.trakt.tv/sync/history/remove'
+        url = f'{self.base_url}/sync/history/remove'
         body = {
             'movies': [{
                 'ids': {'trakt': watch.trakt_id}
