@@ -10,73 +10,54 @@ from src.utils.output import Output
 
 
 class AddDays(Work):
+
     def __init__(self):
         super(AddDays, self).__init__()
 
         self.day = Input.get_date_input('Start')
         days = Input.get_int_input('Days', '#days')
         self.end = self.day + relativedelta(days=days - 1)
-        self.project = Input.get_string_input('Project', 'CSET')
+        self.project = Input.get_string_input('Project', default='CSET')
+        self.skating = Input.get_bool_input('Skating')
+
+        self.addresses = {
+            'Viola': 'Viola Arena, Olympian Dr, Cardiff CF11 0JS, UK',
+            'Tramshed': 'Tramshed Tech, Pendyris St, Cardiff, UK'
+        }
 
     def run(self):
         Output.make_title('Processing')
 
         while self.day <= self.end:
             if self.day.weekday() == 7 or self.day.weekday() < 5:
-                skating = Event(
-                    summary='Ice skating',
-                    location='Viola Arena, Olympian Dr, Cardiff CF11 0JS, UK',
-                    description='',
-                    start=EventDateTime(
-                        date_time=self.day + relativedelta(hours=8), time_zone=self.time_zone),
-                    end=EventDateTime(
-                        date_time=self.day + relativedelta(hours=9), time_zone=self.time_zone)
-                )
+                if self.skating:
+                    self.create_event(self.cal_id_sports, 'Ice skating', 'Viola', '', time(8), time(9))
 
-                morning = Event(
-                    summary='Amplyfi',
-                    location='Tramshed Tech, Pendyris St, Cardiff, UK',
-                    description=self.project,
-                    start=EventDateTime(
-                        date_time=self.day + relativedelta(hours=10), time_zone=self.time_zone),
-                    end=EventDateTime(
-                        date_time=self.day + relativedelta(hours=12, minutes=30), time_zone=self.time_zone)
-                )
+                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(10), time(12, 30))
+                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(10), time(12, 30))
 
-                lunch = Event(
-                    summary='Lunch',
-                    location='Tramshed Tech, Pendyris St, Cardiff, UK',
-                    description='',
-                    start=EventDateTime(
-                        date_time=self.day + relativedelta(hours=12, minutes=30), time_zone=self.time_zone),
-                    end=EventDateTime(
-                        date_time=self.day + relativedelta(hours=13, minutes=30), time_zone=self.time_zone)
-                )
+                self.create_event(self.cal_id_food, 'Lunch', 'Tramshed', '', time(12, 30), time(13, 30))
 
-                afternoon = Event(
-                    summary='Amplyfi',
-                    location='Tramshed Tech, Pendyris St, Cardiff, UK',
-                    description=self.project,
-                    start=EventDateTime(
-                        date_time=self.day + relativedelta(hours=13, minutes=30), time_zone=self.time_zone),
-                    end=EventDateTime(
-                        date_time=self.day + relativedelta(hours=18), time_zone=self.time_zone)
-                )
-
-                self.google_cal.create_event(self.cal_id_sports, skating)
-                self.google_cal.create_event(self.cal_id_work, morning)
-                self.google_cal.create_event(self.cal_id_food, lunch)
-                self.google_cal.create_event(self.cal_id_work, afternoon)
-
-                morning.description = ''
-                afternoon.description = ''
-
-                self.google_cal.create_event(self.cal_id_work_larry, morning)
-                self.google_cal.create_event(self.cal_id_work_larry, afternoon)
+                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(13, 30), time(18))
+                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(13, 30), time(18))
 
             self.day += relativedelta(days=1)
 
         Output.make_bold('Added work days\n')
+
+    def create_event(self, cal_id: str, summary: str, location: str, description: str, start: time, end: time):
+        event = Event(
+            summary=summary,
+            location=self.addresses[location],
+            description=description,
+            start=EventDateTime(
+                date_time=self.day + relativedelta(hours=start.hour, minutes=start.minute),
+                time_zone=self.time_zone),
+            end=EventDateTime(
+                date_time=self.day + relativedelta(hours=end.hour, minutes=end.minute),
+                time_zone=self.time_zone)
+        )
+        self.google_cal.create_event(cal_id, event)
 
 
 class UpdateProject(Work):

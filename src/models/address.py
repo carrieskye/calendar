@@ -21,9 +21,9 @@ class Address:
     def serialise(self):
         return self.__dict__
 
-    @staticmethod
-    def deserialise(serialised: dict):
-        return Address(**serialised)
+    @classmethod
+    def deserialise(cls, serialised: dict):
+        return cls(**serialised)
 
 
 class UKAddress(Address):
@@ -42,11 +42,11 @@ class UKAddress(Address):
     def serialise(self):
         return self.__dict__
 
-    @staticmethod
-    def deserialise(serialised: dict):
+    @classmethod
+    def deserialise(cls, serialised: dict):
         serialised.pop('state')
         serialised.pop('country_code')
-        return UKAddress(**serialised)
+        return cls(**serialised)
 
     @staticmethod
     def parse_from_string(address_string):
@@ -122,12 +122,12 @@ class BEAddress(Address):
     def serialise(self):
         return self.__dict__
 
-    @staticmethod
-    def deserialise(serialised: dict):
+    @classmethod
+    def deserialise(cls, serialised: dict):
         serialised.pop('district')
         serialised.pop('state')
         serialised.pop('country_code')
-        return BEAddress(**serialised)
+        return cls(**serialised)
 
     @staticmethod
     def parse_from_string(address_string):

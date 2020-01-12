@@ -17,9 +17,9 @@ class TempEpisodeWatch:
         self.episode_no = episode_no
         self.slug = slug
 
-    @staticmethod
-    def from_result(result: dict):
-        return TempEpisodeWatch(
+    @classmethod
+    def from_result(cls, result: dict):
+        return cls(
             watched_at=parse(result.get('watched_at')),
             show_id=str(result.get('show').get('ids').get('trakt')),
             show_title=result.get('show').get('title'),
@@ -41,9 +41,9 @@ class TempMovieWatch:
         self.slug = slug
         self.year = year
 
-    @staticmethod
-    def from_result(result: dict):
-        return TempMovieWatch(
+    @classmethod
+    def from_result(cls, result: dict):
+        return cls(
             watched_at=parse(result.get('watched_at')),
             movie_id=result.get('movie').get('ids').get('trakt'),
             movie_title=result.get('movie').get('title'),

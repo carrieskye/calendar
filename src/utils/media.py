@@ -67,9 +67,9 @@ class MediaUtils:
 
     def get_episode_details(self, show_id: str, season_no: str, episode_no: int):
         try:
-            return self.runtime_cache['shows'][show_id][season_no][str(episode_no)]
+            return self.runtime_cache['shows'][str(show_id)][str(season_no)][str(episode_no)]
 
-        except KeyError:
+        except KeyError as e:
             results = self.trakt_api.get_season_details(show_id, season_no)
 
             if show_id not in self.runtime_cache['shows']:
@@ -77,7 +77,8 @@ class MediaUtils:
 
             cache_entry = {str(result.get('number')): {
                 'runtime': result.get('runtime'),
-                'trakt_id': result.get('ids').get('trakt')
+                'trakt_id': result.get('ids').get('trakt'),
+                'title': result.get('title')
             } for result in results}
             self.runtime_cache['shows'][show_id][season_no] = cache_entry
             Utils.write_json(self.runtime_cache, 'data/trakt/cache/runtime.json')

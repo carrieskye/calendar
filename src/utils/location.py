@@ -90,7 +90,7 @@ class LocationUtils:
         while index < len(events):
             event = events[index]
 
-            if (event.name == 'unknown' or len(event.events) < 3) and grouped_events:
+            if len(event.events) < 3 and grouped_events:
                 previous = grouped_events[-1]
                 same_name = previous.name == events[index + 1].name
                 short_event = previous.end + relativedelta(minutes=30) > events[index + 1].start
@@ -156,8 +156,8 @@ class LocationUtils:
                 event = events[index]
 
                 morning = event.start.time() < time(12)
-                noon = event.start.time() > time(12) and time(4) < event.end.time() < time(14)
-                afternoon = event.end.time() > time(14)
+                noon = event.start.time() > time(12) and time(4) < event.end.time() < time(14, 30)
+                afternoon = event.end.time() > time(14, 30)
 
                 short_event = event.start + relativedelta(minutes=30) > event.end
 
