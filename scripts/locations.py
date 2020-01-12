@@ -86,7 +86,7 @@ class UpdateEventTimes(Locations):
                 else:
                     current_location.events.append(closest_location)
 
-        LocationUtils.print_events('\n\nDetermining closest location', events)
+        LocationUtils.print_events('Determining closest location', events)
         group_events = LocationUtils.group_events(events)
 
         Output.make_title('Updating calendar')

@@ -99,7 +99,8 @@ class AddToHistory(Media):
                 show_title=self.show_title,
                 season_no=self.season,
                 episode_no=episode_index,
-                episode_id=details['trakt_id']
+                episode_id=details['trakt_id'],
+                episode_title=details['title']
             )
             watch = EpisodeWatch(temp_watch, details['runtime'])
             start += relativedelta(minutes=details['runtime'])
