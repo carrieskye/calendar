@@ -39,7 +39,7 @@ class Media(Script):
         self.google_cal = GoogleCalendarAPI()
         self.utils = MediaUtils()
 
-        self.calendar = 'tv_shared'
+        self.calendar = 'leisure_shared'
         self.location = 'bromsgrove'
         self.time_zone = 'Europe/London'
         self.gap = 30

@@ -38,8 +38,8 @@ class AddDays(Work):
 
                 self.create_event(self.cal_id_food, 'Lunch', 'Tramshed', '', time(12, 30), time(13, 30))
 
-                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(13, 30), time(18))
-                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(13, 30), time(18))
+                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(13, 30), time(17))
+                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(13, 30), time(17))
 
             self.day += relativedelta(days=1)
 
