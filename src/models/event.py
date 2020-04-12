@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from src.models.event_datetime import EventDateTime
 from src.utils.utils import Utils
 
@@ -15,7 +17,7 @@ class Event:
         self.calendar = calendar
         self.calendar_id = calendar_id
 
-    def to_dict(self):
+    def __dict__(self) -> dict:
         return {
             'summary': self.summary,
             'location': self.location,
@@ -26,7 +28,7 @@ class Event:
         }
 
     @staticmethod
-    def get_event(original: dict, calendar_id: str, calendar: str = ''):
+    def get_event(original: dict, calendar_id: str, calendar: str = '') -> Event:
         return Event(
             summary=original.get('summary'),
             location=original.get('location'),
@@ -39,7 +41,7 @@ class Event:
         )
 
     @staticmethod
-    def equals(event_1: dict, event_2: dict):
+    def equals(event_1: dict, event_2: dict) -> bool:
         keys = ['summary', 'location', 'description', 'start', 'end', 'event_id']
         return any(event_1.get(key) != event_2.get(key) for key in keys)
 

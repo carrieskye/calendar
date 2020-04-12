@@ -21,6 +21,8 @@ class Work(Script):
         self.google_cal = GoogleCalendarAPI()
 
         self.cal_id_food = self.google_cal.get_calendar_id('food_shared')
+        self.cal_id_food_carrie = self.google_cal.get_calendar_id('food')
+        self.cal_id_food_larry = self.google_cal.get_calendar_id('food_larry')
         self.cal_id_sports = self.google_cal.get_calendar_id('sports_shared')
         self.cal_id_work = self.google_cal.get_calendar_id('work')
         self.cal_id_work_larry = self.google_cal.get_calendar_id('work_larry')

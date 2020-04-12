@@ -21,6 +21,7 @@ class AddDays(Work):
         self.skating = Input.get_bool_input('Skating')
 
         self.addresses = {
+            'Bromsgrove': '25 Bromsgrove St, Cardiff CF11 7EZ, UK',
             'Viola': 'Viola Arena, Olympian Dr, Cardiff CF11 0JS, UK',
             'Tramshed': 'Tramshed Tech, Pendyris St, Cardiff, UK'
         }
@@ -33,13 +34,14 @@ class AddDays(Work):
                 if self.skating:
                     self.create_event(self.cal_id_sports, 'Ice skating', 'Viola', '', time(8), time(9))
 
-                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(10), time(12, 30))
-                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(10), time(12, 30))
+                self.create_event(self.cal_id_work, 'Amplyfi', 'Bromsgrove', self.project, time(10), time(12, 30))
+                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Bromsgrove', '', time(10), time(12, 30))
 
-                self.create_event(self.cal_id_food, 'Lunch', 'Tramshed', '', time(12, 30), time(13, 30))
+                self.create_event(self.cal_id_food_carrie, 'Lunch', 'Bromsgrove', '', time(12, 30), time(13, 30))
+                self.create_event(self.cal_id_food_larry, 'Lunch', 'Bromsgrove', '', time(12, 30), time(13, 30))
 
-                self.create_event(self.cal_id_work, 'Amplyfi', 'Tramshed', self.project, time(13, 30), time(17))
-                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Tramshed', '', time(13, 30), time(17))
+                self.create_event(self.cal_id_work, 'Amplyfi', 'Bromsgrove', self.project, time(13, 30), time(17))
+                self.create_event(self.cal_id_work_larry, 'Amplyfi', 'Bromsgrove', '', time(13, 30), time(17))
 
             self.day += relativedelta(days=1)
 
@@ -110,7 +112,7 @@ class CopyToLarry(Work):
         for result in results:
             event = Event.get_event(result, 'work')
             event.summary = 'Amplyfi'
-            event.location = 'Tramshed Tech, Pendyris St, Cardiff, UK'
+            event.location = '25 Bromsgrove St, Cardiff CF11 7EZ, UK'
             event.description = ''
             self.google_cal.create_event(self.cal_id_work_larry, event)
 

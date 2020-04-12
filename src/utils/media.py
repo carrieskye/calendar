@@ -69,7 +69,7 @@ class MediaUtils:
         try:
             return self.runtime_cache['shows'][str(show_id)][str(season_no)][str(episode_no)]
 
-        except KeyError as e:
+        except KeyError:
             results = self.trakt_api.get_season_details(show_id, season_no)
 
             if show_id not in self.runtime_cache['shows']:
@@ -102,7 +102,6 @@ class MediaUtils:
         groups = []
         for index, watch in enumerate(watches):
             if index == 0:
-                watch.end = watch.end - relativedelta(seconds=watch.end.second)
                 groups.append([watch])
             else:
                 within_gap = watches[index - 1].end + relativedelta(minutes=gap) > watch.get_start()

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from dateutil.parser import parse
@@ -16,5 +18,5 @@ class EventDateTime:
         }
 
     @classmethod
-    def get_event_date_time(cls, original: dict):
+    def get_event_date_time(cls, original: dict) -> EventDateTime:
         return EventDateTime(date_time=parse(original.get('dateTime')), time_zone=original.get('timeZone'))
