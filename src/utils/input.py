@@ -44,9 +44,9 @@ class Input:
         return parsed
 
     @staticmethod
-    def get_time_input(name: str, input_type: str = 'HH:MM', default: time = datetime.now().time(),
+    def get_time_input(name: str, input_type: str = 'HH:MM:SS', default: time = datetime.now().time(),
                        min_time: time = None, max_time: time = None):
-        value = Input.get_string_input(name, input_type, default.strftime('%H:%M'))
+        value = Input.get_string_input(name, input_type, default.strftime('%H:%M:%S'))
         parsed = parse(value).time() if value else default
 
         if min_time and parsed < min_time:

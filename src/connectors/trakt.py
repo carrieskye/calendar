@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from typing import List
 
+import pytz
 import requests
 
 from src.models.watch import EpisodeWatch, Watch, MovieWatch
@@ -74,11 +75,11 @@ class TraktAPI:
         url = f'{self.base_url}/sync/history'
         body = {
             'movies': [{
-                'watched_at': watch.end.isoformat() + 'Z',
+                'watched_at': watch.end.astimezone(pytz.timezone('UTC')).isoformat() + 'Z',
                 'ids': {'trakt': watch.trakt_id}
             } for watch in watches if isinstance(watch, MovieWatch)],
             'episodes': [{
-                'watched_at': watch.end.isoformat() + 'Z',
+                'watched_at': watch.end.astimezone(pytz.timezone('UTC')).isoformat() + 'Z',
                 'ids': {'trakt': watch.episode_id}
             } for watch in watches if isinstance(watch, EpisodeWatch)]
         }

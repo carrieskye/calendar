@@ -64,14 +64,14 @@ class GoogleCalendarAPI:
     def create_event(self, calendar_id: str, event: Event):
         return self.service.events().insert(
             calendarId=calendar_id,
-            body=event.to_dict()
+            body=event.__dict__()
         ).execute()
 
     def update_event(self, calendar_id: str, event_id: str, event: Event):
         return self.service.events().update(
             calendarId=calendar_id,
             eventId=event_id,
-            body=event.to_dict()
+            body=event.__dict__()
         ).execute()
 
     def move_event(self, calendar_id: str, event_id: str, destination: str):
