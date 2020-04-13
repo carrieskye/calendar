@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 
-from scripts.script import Script
+from src.scripts.script import Script
 from src.utils.takeout import TakeoutUtils
 from src.utils.utils import Utils
 

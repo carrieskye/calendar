@@ -6,64 +6,16 @@ import psycopg2
 import pytz
 from dateutil.relativedelta import relativedelta
 
-from src.connectors.google_calendar import GoogleCalendarAPI
-from src.models.address import UKAddress, BEAddress
-from src.models.bounding_box import BoundingBox
+from src.connectors.google_calendar import GoogleCalAPI
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
-from src.models.geo_location import GeoLocation
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
 from src.models.point import Point
-from src.utils.input import Input
-from src.utils.output import Output
 from src.utils.table_print import TablePrint
-from src.utils.utils import Utils
 
 
 class LocationUtils:
-
-    def __init__(self):
-        self.google_cal = GoogleCalendarAPI()
-        self.geo_locations = {geo_location.get('label'): GeoLocation.deserialise(geo_location)
-                              for geo_location in Utils.read_json('data/geo_locations.json')}
-        self.addresses = {
-            'gb': UKAddress,
-            'be': BEAddress
-        }
-
-    @staticmethod
-    def get_bounding_box():
-        Output.make_title('BOUNDING BOX')
-
-        bounding_box = []
-
-        points = ['Bottom left', 'Top left', 'Top right', 'Bottom right']
-
-        for point in points:
-            lat_lon = Input.get_string_input(f'{point} latitude, longitude')
-            latitude, longitude = lat_lon.split(', ')
-            bounding_box.append(Point(float(latitude), float(longitude)))
-
-        bounding_box.append(LocationUtils.get_intersection(*bounding_box))
-        return BoundingBox(*bounding_box)
-
-    @staticmethod
-    def get_intersection(bottom_left: Point, top_left: Point, top_right: Point, bottom_right: Point):
-        # m = (y_2 - y_1) / (x_2 - x_1)
-        # y = mx + b
-        # b = -mx + y
-        m_1 = (top_right.longitude - bottom_left.longitude) / (top_right.latitude - bottom_left.latitude)
-        b_1 = - (top_right.latitude * m_1) + top_right.longitude
-        m_2 = (bottom_right.longitude - top_left.longitude) / (bottom_right.latitude - top_left.latitude)
-        b_2 = - (bottom_right.latitude * m_2) + bottom_right.longitude
-
-        # m_1 * x + b_1 = m_2 * x + b_2
-        # m_1 * x - m_2 * x = b_2 - b_1
-        # (m_1 - m_2) * x = b_2 - b_1
-        x = (b_2 - b_1) / (m_1 - m_2)
-        y = x * m_1 + b_1
-        return Point(x, y)
 
     @staticmethod
     def get_records(start: datetime, end: datetime, user_id: int = 3, accuracy: int = 20):
@@ -147,6 +99,7 @@ class LocationUtils:
 
     @staticmethod
     def clean_work(events: List[LocationEventTemp]):
+        # TODO locations for comparison should not be strings
         cleaned_events = []
         index = 0
 
@@ -161,7 +114,7 @@ class LocationUtils:
 
                 short_event = event.start + relativedelta(minutes=30) > event.end
 
-                if event.name == 'Tramshed Tech' and (morning or afternoon):
+                if event.name == 'tramshed_tech' and (morning or afternoon):
                     name = event.name
                     start = event.start
                     end = event.end
@@ -182,7 +135,7 @@ class LocationUtils:
                     start = event.start
                     end = event.end
                     event_list = event.events
-                    if events[index + 1].name == 'Tramshed Tech':
+                    if events[index + 1].name == 'tramshed_tech':
                         name = events[index + 1].name
                         end = events[index + 1].end
                         event_list += events[index + 1].events
@@ -193,8 +146,8 @@ class LocationUtils:
                         start = previous.start
                         event_list = previous.events + event_list
                     cleaned_events.append(LocationEventTemp(name, event_list, start, end))
-                elif work_day and index < len(events) - 1 and event.name != 'Amplyfi' and noon and events[
-                    index + 1].name == 'Amplyfi':
+                elif work_day and index < len(events) - 1 and event.name != 'Amplyfi' and noon \
+                        and events[index + 1].name == 'Amplyfi':
                     first_index = len(cleaned_events)
                     while first_index > 1 and cleaned_events[first_index - 1].name != 'Amplyfi':
                         first_index -= 1
@@ -227,9 +180,10 @@ class LocationUtils:
         afternoon = any([event.name == 'Amplyfi' for event in events if event.end.time() > time(12)])
         return morning and afternoon
 
-    def get_closest_location(self, location: LocationEvent):
+    @classmethod
+    def get_closest_location(cls, location: LocationEvent):
         matches = []
-        geo_locations = self.filter_geo_locations(location)
+        geo_locations = cls.filter_geo_locations(location)
         for label, geo_location in geo_locations.items():
             if geo_location.within_bounding_box(location):
                 matches.append(label)
@@ -238,17 +192,19 @@ class LocationUtils:
         if len(matches) > 1:
             distances = {}
             for match in matches:
-                intersection = self.geo_locations[match].bounding_box.intersection
+                intersection = geo_locations_by_label[match].bounding_box.intersection
                 distances[match] = LocationUtils.get_distance(location.get_point(), intersection)
             match = min(distances.items(), key=lambda x: x[1])
             return match[0]
 
-    def process_events(self, start: date, history: List[LocationEventTemp], larry: bool):
-        events = self.get_day_events(start)
+    @classmethod
+    def process_events(cls, start: date, history: List[LocationEventTemp], larry: bool):
+        # TODO fix
+        events = GoogleCalAPI.get_all_events_for_day(start)
 
         table_print = TablePrint('Updated events', ['START', 'END', 'SUMMARY'], [10, 10, 30])
         for event in events:
-            popped_event = self.get_closest_event(event, history)
+            popped_event = cls.get_closest_event(event, history)
             if popped_event:
                 start = popped_event.start.strftime('%H:%M:%S')
                 end = popped_event.end.strftime('%H:%M:%S')
@@ -262,47 +218,41 @@ class LocationUtils:
         for remaining_entry in history:
             unknown = remaining_entry.name == 'unknown'
             too_short = remaining_entry.start + relativedelta(minutes=30) >= remaining_entry.end
-            category = self.geo_locations[remaining_entry.name].category if not unknown else 'unknown'
+            category = geo_locations_by_label[remaining_entry.name].category if not unknown else 'unknown'
             home = category == 'Home'
             if not (too_short or home):
                 start = remaining_entry.start.strftime('%H:%M:%S')
                 end = remaining_entry.end.strftime('%H:%M:%S')
                 table_print.print_line([start, end, remaining_entry.name])
                 if not unknown:
-                    event = self.create_default_event(remaining_entry)
-                    calendar_id = self.google_cal.get_calendar_id('various')
-                    self.google_cal.create_event(calendar_id, event)
+                    event = cls.create_default_event(remaining_entry)
+                    GoogleCalAPI.create_event(Calendars.various.carrie, event)
 
-    def create_default_event(self, history_entry: LocationEventTemp):
-        time_zone = self.geo_locations[history_entry.name].time_zone
+    @classmethod
+    def create_default_event(cls, history_entry: LocationEventTemp):
+        time_zone = geo_locations_by_label[history_entry.name].time_zone
         return Event(
             summary='New event',
-            location=self.geo_locations[history_entry.name].address.stringify(),
+            location=geo_locations_by_label[history_entry.name].address.stringify(),
             description=history_entry.name,
             start=EventDateTime(date_time=history_entry.start, time_zone=time_zone),
             end=EventDateTime(date_time=history_entry.end, time_zone=time_zone)
         )
 
-    def get_day_events(self, start: date):
-        start = datetime.combine(start, time(4, 0))
-        end = start + relativedelta(days=1)
-
-        return [Event.get_event(event, calendar_id) for calendar_id in self.google_cal.calendars.values()
-                for event in self.google_cal.get_events(calendar_id, 100, start, end)]
-
-    def get_closest_event(self, event: Event, history: List[LocationEventTemp]):
+    @classmethod
+    def get_closest_event(cls, event: Event, history: List[LocationEventTemp]):
         matches = []
         for history_entry in history:
             try:
-                address = self.geo_locations[history_entry.name].address.stringify()
-                time_zone = pytz.timezone(self.geo_locations[history_entry.name].time_zone)
+                address = geo_locations_by_label[history_entry.name].address.__str__()
+                time_zone = pytz.timezone(geo_locations_by_label[history_entry.name].time_zone)
                 history_entry.start = history_entry.start.astimezone(time_zone)
                 history_entry.end = history_entry.end.astimezone(time_zone)
-                category = self.geo_locations[history_entry.name].category
+                category = geo_locations_by_label[history_entry.name].category
                 if event.location == address and category != 'Home':
                     event.start.date_time = event.start.date_time.astimezone(time_zone)
                     event.end.date_time = event.end.date_time.astimezone(time_zone)
-                    offset = self.calculate_time_offset(history_entry, event)
+                    offset = cls.calculate_time_offset(history_entry, event)
                     matches.append({'history_entry': history_entry, 'offset': offset})
             except KeyError:
                 pass
@@ -311,7 +261,7 @@ class LocationUtils:
             match = min(matches, key=lambda x: x.get('offset')).get('history_entry')
             event.start.date_time = match.start
             event.end.date_time = match.end
-            self.google_cal.update_event(event.calendar_id, event.event_id, event)
+            GoogleCalAPI.update_event(event.calendar.__getattribute__(event.owner), event.event_id, event)
             return match
 
     @staticmethod
@@ -343,10 +293,11 @@ class LocationUtils:
             name = event.name if event.name != 'unknown' else ''
             table_print.print_line([event.start.strftime('%H:%M:%S'), event.end.strftime('%H:%M:%S'), name])
 
-    def filter_geo_locations(self, location: LocationEvent):
+    @classmethod
+    def filter_geo_locations(cls, location: LocationEvent):
         geo_locations = {}
-        for label, geo_location in self.geo_locations.items():
+        for label, geo_location in geo_locations_by_label.items():
             point_a = Point(location.latitude, location.longitude)
-            if self.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
+            if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
                 geo_locations[label] = geo_location
         return geo_locations

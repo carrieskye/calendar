@@ -1,11 +1,17 @@
-from scripts.locations import UpdateEventTimes, AddLocation, UpdateEventHistory
-from scripts.media import UpdatePeriod, UpdateToday, UpdateYesterday, AddToHistory, ExportFromCalendar, ExportFromTrakt
-from scripts.takeout import SplitByDay, SplitByDayFormatted
-from scripts.work import AddDays, UpdateProject, CopyToLarry
+from src.connectors.google_calendar import GoogleCalAPI
+from src.data.data import Calendars
+from src.scripts.locations.add_location import AddLocation
+from src.scripts.locations.update_event_times import UpdateEventTimes
+from src.scripts.media import UpdatePeriod, UpdateToday, UpdateYesterday, AddToHistory
+from src.scripts.takeout import SplitByDay, SplitByDayFormatted
+from src.scripts.work.add_days import AddDays
+from src.scripts.work.update_hours import UpdateHours
+from src.scripts.work.work import UpdateProject, CopyToLarry
 
 SCRIPTS = {
     'Work': {
         'Add work days': AddDays,
+        'Update work hours': UpdateHours,
         'Update work project': UpdateProject,
         'Copy work hours to Larry': CopyToLarry
     },
@@ -13,8 +19,6 @@ SCRIPTS = {
         'Update Trakt today': UpdateToday,
         'Update Trakt yesterday': UpdateYesterday,
         'Update Trakt period': UpdatePeriod,
-        'Export media from calendar': ExportFromCalendar,
-        'Export media from Trakt': ExportFromTrakt,
         'Add media to history': AddToHistory
     },
     'Takeout': {
@@ -23,7 +27,6 @@ SCRIPTS = {
     },
     'Locations': {
         'Update event times': UpdateEventTimes,
-        'Update event history': UpdateEventHistory,
         'Add new location': AddLocation
     }
 }

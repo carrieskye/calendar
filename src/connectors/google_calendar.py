@@ -1,52 +1,51 @@
 import os
-import pickle
-from datetime import datetime
+from datetime import datetime, time, date
+from typing import List, Dict
 
+from dateutil.relativedelta import relativedelta
+from google.auth.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
+# noinspection PyPackageRequirements
 from googleapiclient.discovery import build
 
 from src.models.event import Event
 from src.utils.utils import Utils
 
-SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+def load_credentials(scopes: List[str]) -> Credentials:
+    credentials = None
+    if os.path.exists('src/credentials/token.pickle'):
+        credentials = Utils.read_pickle('src/credentials/token.pickle')
+
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file('src/credentials/credentials.json', scopes)
+            credentials = flow.run_local_server(port=0)
+        Utils.write_pickle(credentials, 'src/credentials/token.pickle')
+
+    return credentials
 
 
-class GoogleCalendarAPI:
+class GoogleCalAPI:
+    scopes = ['https://www.googleapis.com/auth/calendar']
+    service = build('calendar', 'v3', credentials=load_credentials(scopes))
 
-    def __init__(self):
-        credentials = None
-        if os.path.exists('src/credentials/token.pickle'):
-            with open('src/credentials/token.pickle', 'rb') as token:
-                credentials = pickle.load(token)
-
-        if not credentials or not credentials.valid:
-            if credentials and credentials.expired and credentials.refresh_token:
-                credentials.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file('src/credentials/credentials.json', SCOPES)
-                credentials = flow.run_local_server(port=0)
-            with open('src/credentials/token.pickle', 'wb') as token:
-                pickle.dump(credentials, token)
-
-        self.service = build('calendar', 'v3', credentials=credentials)
-        self.calendars = Utils.read_json('data/google/calendars.json')
-
-    def update_calendar_dict(self):
+    @classmethod
+    def get_calendars(cls) -> Dict[str, str]:
         ignore = ['Trakt', 'Todoist', 'Contacts', 'peelmancarolyne@gmail.com', 'Larry']
-        calendar_list = self.service.calendarList().list().execute().get('items', [])
+        calendar_list = cls.service.calendarList().list().execute().get('items', [])
         calendar_list = {Utils.normalise(calendar.get('summaryOverride')) if calendar.get('summaryOverride')
                          else Utils.normalise(calendar.get('summary')): calendar.get('id')
                          for calendar in calendar_list if calendar.get('summary') not in ignore}
         sorted_calendars = sorted(calendar_list.items(), key=lambda x: x[0])
-        sorted_calendar_dict = {calendar[0]: calendar[1] for calendar in sorted_calendars}
-        Utils.write_json(sorted_calendar_dict, 'data/google/calendars.json')
+        return {calendar[0]: calendar[1] for calendar in sorted_calendars}
 
-    def get_calendar_id(self, calendar_name: str):
-        return self.calendars[calendar_name]
-
-    def get_events(self, calendar_id: str, max_results: int, time_min: datetime, time_max: datetime = datetime.now()):
-        return self.service.events().list(
+    @classmethod
+    def get_events(cls, calendar_id: str, max_results: int, time_min: datetime, time_max: datetime = datetime.now()):
+        return cls.service.events().list(
             calendarId=calendar_id,
             timeMin=time_min.isoformat() + 'Z',
             timeMax=time_max.isoformat() + 'Z',
@@ -55,43 +54,52 @@ class GoogleCalendarAPI:
             orderBy='startTime'
         ).execute().get('items', [])
 
-    def delete_event(self, calendar_id: str, event_id: str):
-        return self.service.events().delete(
+    @classmethod
+    def get_all_events_for_day(cls, start: date):
+        from src.data.data import Data
+
+        start = datetime.combine(start, time(4, 0))
+        end = start + relativedelta(days=1)
+
+        return [Event.from_dict(event, calendar, owner)
+                for calendar_name, calendar in Data.calendar_dict.items()
+                for owner, cal_id in calendar.__dict__.items() if cal_id
+                for event in cls.get_events(cal_id, 100, start, end)]
+
+    @classmethod
+    def delete_event(cls, calendar_id: str, event_id: str):
+        return cls.service.events().delete(
             calendarId=calendar_id,
             eventId=event_id
         ).execute()
 
-    def create_event(self, calendar_id: str, event: Event):
-        return self.service.events().insert(
+    @classmethod
+    def create_event(cls, calendar_id: str, event: Event):
+        return cls.service.events().insert(
             calendarId=calendar_id,
             body=event.__dict__()
         ).execute()
 
-    def update_event(self, calendar_id: str, event_id: str, event: Event):
-        return self.service.events().update(
+    @classmethod
+    def update_event(cls, calendar_id: str, event_id: str, event: Event):
+        return cls.service.events().update(
             calendarId=calendar_id,
             eventId=event_id,
             body=event.__dict__()
         ).execute()
 
-    def move_event(self, calendar_id: str, event_id: str, destination: str):
-        return self.service.events().move(
+    @classmethod
+    def move_event(cls, calendar_id: str, event_id: str, destination: str):
+        return cls.service.events().move(
             calendarId=calendar_id,
             eventId=event_id,
             destination=destination
         ).execute()
 
-    def get_event_instances(self, calendar_id: str, event_id: str):
-        response = self.service.events().instances(
+    @classmethod
+    def get_event_instances(cls, calendar_id: str, event_id: str):
+        response = cls.service.events().instances(
             calendarId=calendar_id,
             eventId=event_id
         ).execute()
         return response
-
-    def get_calendars_from_string(self, calendars: str):
-        if calendars == 'all':
-            return self.calendars
-        else:
-            return {calendar_name: calendar_id
-                    for calendar_name, calendar_id in self.calendars.items()
-                    if calendar_name in calendars.split(',')}
