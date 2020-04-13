@@ -3,7 +3,7 @@ from typing import List
 
 from dateutil.relativedelta import relativedelta
 
-from src.connectors.google_calendar import GoogleCalendarAPI
+from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
@@ -15,8 +15,6 @@ from src.utils.utils import Utils
 class MediaUtils:
 
     def __init__(self):
-        self.google_cal = GoogleCalendarAPI()
-        self.trakt_api = TraktAPI()
         self.runtime_cache = Utils.read_json('data/trakt/cache/runtime.json')
 
         self.locations = {
@@ -31,22 +29,22 @@ class MediaUtils:
 
         for group in groups:
             self.remove_watches_from_history(group)
-            self.trakt_api.add_episodes_to_history(group)
+            TraktAPI.add_episodes_to_history(group)
             group_event = MediaUtils.create_watch_event(group, self.locations[location])
-            self.google_cal.create_event(calendar_id, group_event)
+            GoogleCalAPI.create_event(calendar_id, group_event)
 
     def remove_watches_from_history(self, group: List[Watch]):
         add_again = []
         for watch in group:
             if isinstance(watch, EpisodeWatch):
-                watches = self.trakt_api.get_history_for_episode(watch.episode_id)
+                watches = TraktAPI.get_history_for_episode(watch.episode_id)
                 for result in watches:
                     old_watch = TempEpisodeWatch.from_result(result)
                     if abs(old_watch.watched_at - watch.end).days > 5:
                         runtime = self.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
                         add_again.append(EpisodeWatch(old_watch, runtime))
-        self.trakt_api.remove_episodes_from_history(group)
-        self.trakt_api.add_episodes_to_history(add_again)
+        TraktAPI.remove_episodes_from_history(group)
+        TraktAPI.add_episodes_to_history(add_again)
 
     def get_watches_from_history(self, history: List[dict]):
         watches = []
@@ -66,11 +64,12 @@ class MediaUtils:
         return self.get_episode_details(show_id, season_no, episode_no)['runtime']
 
     def get_episode_details(self, show_id: str, season_no: str, episode_no: int):
+        # TODO there's an issue if the season is already in the cache but the data has been updated
         try:
             return self.runtime_cache['shows'][str(show_id)][str(season_no)][str(episode_no)]
 
         except KeyError:
-            results = self.trakt_api.get_season_details(show_id, season_no)
+            results = TraktAPI.get_season_details(show_id, season_no)
 
             if show_id not in self.runtime_cache['shows']:
                 self.runtime_cache['shows'][show_id] = {}
@@ -90,7 +89,7 @@ class MediaUtils:
             return self.runtime_cache['movies'][movie_id]
 
         except KeyError:
-            result = self.trakt_api.get_movie(movie_id)
+            result = TraktAPI.get_movie(movie_id)
 
             self.runtime_cache['movies'][movie_id] = result.get('runtime')
             Utils.write_json(self.runtime_cache, 'data/trakt/cache/runtime.json')

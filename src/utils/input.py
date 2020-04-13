@@ -29,7 +29,7 @@ class Input:
 
     @staticmethod
     def get_date_input(name: str, input_type: str = 'YYYY-mm-dd', default: date = datetime.now().date(),
-                       min_date: date = None, max_date: date = None):
+                       min_date: date = None, max_date: date = None) -> date:
         value = Input.get_string_input(name, input_type, default.strftime('%Y-%m-%d'))
         parsed = parse(value).date() if value else default
 

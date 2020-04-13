@@ -3,7 +3,7 @@ from math import sqrt, radians, sin, cos, atan2, degrees
 from geopy import Point as GeoPoint
 from geopy.distance import geodesic
 
-from src.models.address import Address, UKAddress, BEAddress
+from src.models.address import Address
 from src.models.bounding_box import BoundingBox
 from src.models.location_event import LocationEvent
 from src.models.point import Point
@@ -11,14 +11,13 @@ from src.models.point import Point
 
 class GeoLocation:
 
-    def __init__(self, label: str, category: str, address: Address, time_zone: str, bounding_box: BoundingBox):
-        self.label = label
+    def __init__(self, category: str, address: Address, time_zone: str, bounding_box: BoundingBox):
         self.category = category
         self.address = address
         self.time_zone = time_zone
         self.bounding_box = bounding_box
 
-    def within_bounding_box(self, point: LocationEvent):
+    def within_bounding_box(self, point: LocationEvent) -> bool:
         bb = self.get_extended_bounding_box(point.accuracy)
         polygon = [bb.bottom_left, bb.top_left, bb.top_right, bb.bottom_right, bb.bottom_left]
 
@@ -49,20 +48,10 @@ class GeoLocation:
 
         return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right, bb.intersection)
 
-    def serialise(self):
-        serialised = self.__dict__
-        serialised['bounding_box'] = self.bounding_box.serialise()
-        serialised['address'] = self.address.serialise()
-        return serialised
-
     @staticmethod
     def deserialise(serialised: dict):
         serialised['bounding_box'] = BoundingBox.deserialise(serialised.get('bounding_box'))
-        addresses = {
-            'UK': UKAddress,
-            'BE': BEAddress
-        }
-        serialised['address'] = addresses[serialised['address']['country_code']].deserialise(serialised.get('address'))
+        serialised['address'] = Address.get_address_for_country(serialised.get('address'))
         return GeoLocation(**serialised)
 
     @staticmethod

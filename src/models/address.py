@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from typing import List
 
@@ -18,42 +20,40 @@ class Address:
         self.state = state
         self.country_code = country_code
 
-    def serialise(self):
-        return self.__dict__
-
     @classmethod
     def deserialise(cls, serialised: dict):
         return cls(**serialised)
 
+    @classmethod
+    def get_address_for_country(cls, serialised: dict) -> Address:
+        return COUNTRY_ADDRESSES[serialised['country_code']].deserialise(serialised)
+
 
 class UKAddress(Address):
 
-    def __init__(self, address_lines: List[str], house_no: str, street: str, district: str, postal_code: str,
-                 city: str):
-        Address.__init__(self, address_lines, house_no, street, district, postal_code, city, '', 'UK')
+    def __init__(self, address_lines: List[str] = list, house_no: str = '', street: str = '', district: str = '',
+                 postal_code: str = '', city: str = ''):
+        super().__init__(address_lines, house_no, street, district, postal_code, city, '', 'UK')
 
-    def stringify(self):
+    def __str__(self) -> str:
         address = ', '.join(line for line in self.address_lines if line)
         street = ' '.join(part for part in [self.house_no, self.street] if part)
         city = ' '.join(part for part in [self.city, self.postal_code] if part)
         address_string = [address, street, self.district, city, self.country_code]
         return ', '.join(part for part in address_string if part)
 
-    def serialise(self):
-        return self.__dict__
-
     @classmethod
-    def deserialise(cls, serialised: dict):
+    def deserialise(cls, serialised: dict) -> UKAddress:
         serialised.pop('state')
         serialised.pop('country_code')
         return cls(**serialised)
 
-    @staticmethod
-    def parse_from_string(address_string):
+    @classmethod
+    def parse_from_string(cls, address_string) -> UKAddress:
         address_split = address_string.split(', ')
         address_lines, house_no, street, district = UKAddress.parse_other_parts(address_split[:-2])
         city, postal_code = UKAddress.parse_postal_code(address_split[-2])
-        return UKAddress(
+        return cls(
             address_lines=address_lines,
             house_no=house_no,
             street=street,
@@ -119,9 +119,6 @@ class BEAddress(Address):
         address_string = [address, street, city, 'Belgium']
         return ', '.join(part for part in address_string if part)
 
-    def serialise(self):
-        return self.__dict__
-
     @classmethod
     def deserialise(cls, serialised: dict):
         serialised.pop('district')
@@ -164,3 +161,9 @@ class BEAddress(Address):
             street = ' '.join(street.split(' ')[:-1])
 
         return address_lines, house_no, street
+
+
+COUNTRY_ADDRESSES = {
+    'UK': UKAddress, 'GB': UKAddress,
+    'BE': BEAddress
+}
