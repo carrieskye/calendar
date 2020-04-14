@@ -17,6 +17,16 @@ class Script(ABC):
     def run(self):
         Output.make_title('Processing')
 
+    @staticmethod
+    def get_owner(default: Owner = Owner.shared) -> Owner:
+        owner = Input.get_string_input('Calendar owner', input_type='name', default=default.name)
+        return Owner.__members__[owner]
+
+    @staticmethod
+    def get_location(default: str = 'bromsgrove_st') -> GeoLocation:
+        location = Input.get_string_input('Location', input_type='name', default=default)
+        return Data.geo_location_dict[location]
+
 
 class Work(Script, ABC):
     pass
@@ -28,14 +38,4 @@ class Locations(Script, ABC):
 
 class Media(Script, ABC):
     calendar = Calendars.leisure
-    owner = Owner.shared
-    location = 'bromsgrove_st'
     gap = 30
-
-    def get_owner(self) -> Owner:
-        owner = Input.get_string_input('Calendar owner', input_type='name', default=self.owner.name)
-        return Owner.__members__[owner]
-
-    def get_location(self) -> GeoLocation:
-        location = Input.get_string_input('Location', input_type='name', default=self.location)
-        return Data.geo_location_dict[location]

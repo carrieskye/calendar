@@ -42,29 +42,15 @@ class Activities(List[Activity]):
         self.sort(key=lambda x: x.start.__str__())
 
     def merge_short_activities(self, max_time_diff: timedelta):
-        for index, activity in enumerate(self):
-            print(index, activity.__str__())
-
-        print()
-
         to_merge = []
         for index, activity in enumerate(self[:-1]):
             next_activity = self[index + 1]
             time_diff = next_activity.start.date_time - activity.end.date_time
-            print(time_diff, time_diff > max_time_diff)
             if time_diff <= max_time_diff:
                 to_merge.append(index)
 
         for index in sorted(to_merge, reverse=True):
             self.merge(index)
-
-        print()
-
-        for index, activity in enumerate(self):
-            print(index, activity.__str__())
-
-        print()
-        print()
 
     def merge(self, index: int):
         next_activity = self.pop(index + 1)
