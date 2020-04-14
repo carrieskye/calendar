@@ -23,6 +23,7 @@ class Calendars:
     leisure = Data.calendar_dict['leisure']
     medical = Data.calendar_dict['medical']
     meetings = Data.calendar_dict['meetings']
+    projects = Data.calendar_dict['projects']
     school = Data.calendar_dict['school']
     sports = Data.calendar_dict['sports']
     transport = Data.calendar_dict['transport']
