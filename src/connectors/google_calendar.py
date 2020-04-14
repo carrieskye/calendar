@@ -9,6 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # noinspection PyPackageRequirements
 from googleapiclient.discovery import build
 
+from src.models.calendar import Calendar, Owner
 from src.models.event import Event
 from src.utils.utils import Utils
 
@@ -44,15 +45,17 @@ class GoogleCalAPI:
         return {calendar[0]: calendar[1] for calendar in sorted_calendars}
 
     @classmethod
-    def get_events(cls, calendar_id: str, max_results: int, time_min: datetime, time_max: datetime = datetime.now()):
-        return cls.service.events().list(
-            calendarId=calendar_id,
+    def get_events(cls, calendar: Calendar, owner: Owner, max_results: int, time_min: datetime,
+                   time_max: datetime = datetime.now()) -> List[Event]:
+        events = cls.service.events().list(
+            calendarId=calendar.get_cal_id(owner),
             timeMin=time_min.isoformat() + 'Z',
             timeMax=time_max.isoformat() + 'Z',
             maxResults=max_results,
             singleEvents=True,
             orderBy='startTime'
         ).execute().get('items', [])
+        return [Event.from_dict(event, calendar, owner) for event in events]
 
     @classmethod
     def get_all_events_for_day(cls, start: date):
@@ -61,10 +64,9 @@ class GoogleCalAPI:
         start = datetime.combine(start, time(4, 0))
         end = start + relativedelta(days=1)
 
-        return [Event.from_dict(event, calendar, owner)
-                for calendar_name, calendar in Data.calendar_dict.items()
+        return [event for calendar_name, calendar in Data.calendar_dict.items()
                 for owner, cal_id in calendar.__dict__.items() if cal_id
-                for event in cls.get_events(cal_id, 100, start, end)]
+                for event in cls.get_events(calendar, owner, 100, start, end)]
 
     @classmethod
     def delete_event(cls, calendar_id: str, event_id: str):
@@ -77,7 +79,7 @@ class GoogleCalAPI:
     def create_event(cls, calendar_id: str, event: Event):
         return cls.service.events().insert(
             calendarId=calendar_id,
-            body=event.__dict__()
+            body=event.serialise_for_google()
         ).execute()
 
     @classmethod
@@ -85,7 +87,7 @@ class GoogleCalAPI:
         return cls.service.events().update(
             calendarId=calendar_id,
             eventId=event_id,
-            body=event.__dict__()
+            body=event.serialise_for_google()
         ).execute()
 
     @classmethod

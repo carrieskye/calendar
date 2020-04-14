@@ -11,15 +11,15 @@ class EventDateTime:
         self.date_time = date_time
         self.time_zone = time_zone if time_zone else ''
 
-    def __dict__(self) -> dict:
+    def __str__(self) -> str:
+        return f'{self.date_time} ({self.time_zone})'
+
+    def serialise_for_google(self) -> dict:
         return {
             'dateTime': self.date_time.isoformat(),
             'timeZone': self.time_zone
         }
 
-    def __str__(self) -> str:
-        return f'{self.date_time} ({self.time_zone})'
-
     @classmethod
-    def get_event_date_time(cls, original: dict) -> EventDateTime:
+    def from_dict(cls, original: dict) -> EventDateTime:
         return EventDateTime(date_time=parse(original.get('dateTime')), time_zone=original.get('timeZone'))

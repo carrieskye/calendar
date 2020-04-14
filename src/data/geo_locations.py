@@ -8,7 +8,7 @@ from src.utils.files import Files
 from src.utils.utils import Utils
 
 
-class LocationDict(Dict[str, GeoLocation]):
+class GeoLocationDict(Dict[str, GeoLocation]):
 
     def __init__(self):
         super().__init__()
