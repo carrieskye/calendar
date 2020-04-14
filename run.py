@@ -1,29 +1,24 @@
-from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars
 from src.scripts.locations.add_location import AddLocation
 from src.scripts.locations.update_event_times import UpdateEventTimes
-from src.scripts.media import UpdatePeriod, UpdateToday, UpdateYesterday, AddToHistory
-from src.scripts.takeout import SplitByDay, SplitByDayFormatted
+from src.scripts.media.add_to_history import AddToHistory
+from src.scripts.media.update_period import UpdatePeriod
+from src.scripts.media.update_today import UpdateToday
+from src.scripts.media.update_yesterday import UpdateYesterday
 from src.scripts.work.add_days import AddDays
 from src.scripts.work.update_hours import UpdateHours
-from src.scripts.work.work import UpdateProject, CopyToLarry
+from src.scripts.work.update_project import UpdateProject
 
 SCRIPTS = {
     'Work': {
         'Add work days': AddDays,
         'Update work hours': UpdateHours,
-        'Update work project': UpdateProject,
-        'Copy work hours to Larry': CopyToLarry
+        'Update work project': UpdateProject
     },
     'Media': {
         'Update Trakt today': UpdateToday,
         'Update Trakt yesterday': UpdateYesterday,
         'Update Trakt period': UpdatePeriod,
         'Add media to history': AddToHistory
-    },
-    'Takeout': {
-        'Split takeout': SplitByDay,
-        'Split takeout formatted': SplitByDayFormatted
     },
     'Locations': {
         'Update event times': UpdateEventTimes,

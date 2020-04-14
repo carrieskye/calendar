@@ -3,7 +3,7 @@ from datetime import time
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars, Locations
+from src.data.data import Calendars, GeoLocations
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
@@ -30,9 +30,9 @@ class AddDays(Work):
                 if self.skating:
                     self.create_event(
                         cal_id=Calendars.sports.shared, summary='Ice skating',
-                        location=Locations.viola_arena, start=time(8), end=time(9))
+                        location=GeoLocations.viola_arena, start=time(8), end=time(9))
 
-                location = Locations.bromsgrove_st
+                location = GeoLocations.bromsgrove_st
                 self.create_work_event(location=location, start=time(10), end=time(12, 30))
                 self.create_lunch_event(location=location, start=time(12, 30), end=time(13, 30))
                 self.create_work_event(location=location, start=time(13, 30), end=time(17))
@@ -58,9 +58,9 @@ class AddDays(Work):
             description=desc,
             start=EventDateTime(
                 date_time=self.day + relativedelta(hours=start.hour, minutes=start.minute),
-                time_zone=self.time_zone),
+                time_zone=location.time_zone),
             end=EventDateTime(
                 date_time=self.day + relativedelta(hours=end.hour, minutes=end.minute),
-                time_zone=self.time_zone)
+                time_zone=location.time_zone)
         )
         GoogleCalAPI.create_event(cal_id, event)

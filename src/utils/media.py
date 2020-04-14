@@ -7,33 +7,27 @@ from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
+from src.models.geo_location import GeoLocation
 from src.models.watch import Watch, EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch
 from src.utils.output import Output
 from src.utils.utils import Utils
 
 
 class MediaUtils:
+    runtime_cache = Utils.read_json('data/trakt/cache/runtime.json')
 
-    def __init__(self):
-        self.runtime_cache = Utils.read_json('data/trakt/cache/runtime.json')
-
-        self.locations = {
-            'bromsgrove': {'full': '25 Bromsgrove St, Cardiff CF11 7EZ, UK', 'name': 'Europe/London'},
-            'newport': {'full': '118 Newport Rd, Cardiff CF24 1DH, UK', 'name': 'Europe/London'},
-            'kleinbeeklei': {'full': 'Kleinbeeklei 30, 2820 Bonheiden, Belgium', 'name': 'Europe/Brussels'},
-            'kruisstraat': {'full': 'Kruisstraat 36, 3850 Nieuwerkerken, Belgium', 'name': 'Europe/Brussels'}
-        }
-
-    def process_watches(self, watches: List[Watch], calendar_id: str, location: str, gap: int):
+    @classmethod
+    def process_watches(cls, watches: List[Watch], calendar_id: str, location: GeoLocation, gap: int):
         groups = MediaUtils.group_watches(watches, gap)
 
         for group in groups:
-            self.remove_watches_from_history(group)
+            cls.remove_watches_from_history(group)
             TraktAPI.add_episodes_to_history(group)
-            group_event = MediaUtils.create_watch_event(group, self.locations[location])
+            group_event = MediaUtils.create_watch_event(group, location)
             GoogleCalAPI.create_event(calendar_id, group_event)
 
-    def remove_watches_from_history(self, group: List[Watch]):
+    @classmethod
+    def remove_watches_from_history(cls, group: List[Watch]):
         add_again = []
         for watch in group:
             if isinstance(watch, EpisodeWatch):
@@ -41,63 +35,67 @@ class MediaUtils:
                 for result in watches:
                     old_watch = TempEpisodeWatch.from_result(result)
                     if abs(old_watch.watched_at - watch.end).days > 5:
-                        runtime = self.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
+                        runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
                         add_again.append(EpisodeWatch(old_watch, runtime))
         TraktAPI.remove_episodes_from_history(group)
         TraktAPI.add_episodes_to_history(add_again)
 
-    def get_watches_from_history(self, history: List[dict]):
+    @classmethod
+    def get_watches_from_history(cls, history: List[dict]):
         watches = []
         for result in history:
             if result.get('type') == 'episode':
                 temp_watch = TempEpisodeWatch.from_result(result)
-                runtime = self.get_episode_runtime(temp_watch.show_id, temp_watch.season_no, temp_watch.episode_no)
+                runtime = cls.get_episode_runtime(temp_watch.show_id, temp_watch.season_no, temp_watch.episode_no)
                 watch = EpisodeWatch(temp_watch, runtime)
             else:
                 temp_watch = TempMovieWatch.from_result(result)
-                runtime = self.get_movie_runtime(temp_watch.movie_id)
+                runtime = cls.get_movie_runtime(temp_watch.movie_id)
                 watch = MovieWatch(temp_watch, runtime)
             watches.append(watch)
         return watches
 
-    def get_episode_runtime(self, show_id: str, season_no: str, episode_no: int):
-        return self.get_episode_details(show_id, season_no, episode_no)['runtime']
+    @classmethod
+    def get_episode_runtime(cls, show_id: str, season_no: str, episode_no: int):
+        return cls.get_episode_details(show_id, season_no, str(episode_no))['runtime']
 
-    def get_episode_details(self, show_id: str, season_no: str, episode_no: int):
+    @classmethod
+    def get_episode_details(cls, show_id: str, season_no: str, episode_no: str):
         # TODO there's an issue if the season is already in the cache but the data has been updated
         try:
-            return self.runtime_cache['shows'][str(show_id)][str(season_no)][str(episode_no)]
+            return cls.runtime_cache['shows'][str(show_id)][str(season_no)][str(episode_no)]
 
         except KeyError:
             results = TraktAPI.get_season_details(show_id, season_no)
 
-            if show_id not in self.runtime_cache['shows']:
-                self.runtime_cache['shows'][show_id] = {}
+            if show_id not in cls.runtime_cache['shows']:
+                cls.runtime_cache['shows'][show_id] = {}
 
             cache_entry = {str(result.get('number')): {
                 'runtime': result.get('runtime'),
                 'trakt_id': result.get('ids').get('trakt'),
                 'title': result.get('title')
             } for result in results}
-            self.runtime_cache['shows'][show_id][season_no] = cache_entry
-            Utils.write_json(self.runtime_cache, 'data/trakt/cache/runtime.json')
+            cls.runtime_cache['shows'][show_id][season_no] = cache_entry
+            Utils.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
 
             return cache_entry[str(episode_no)]
 
-    def get_movie_runtime(self, movie_id: str):
+    @classmethod
+    def get_movie_runtime(cls, movie_id: str):
         try:
-            return self.runtime_cache['movies'][movie_id]
+            return cls.runtime_cache['movies'][movie_id]
 
         except KeyError:
             result = TraktAPI.get_movie(movie_id)
 
-            self.runtime_cache['movies'][movie_id] = result.get('runtime')
-            Utils.write_json(self.runtime_cache, 'data/trakt/cache/runtime.json')
+            cls.runtime_cache['movies'][movie_id] = result.get('runtime')
+            Utils.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
 
             return result.get('runtime')
 
-    @staticmethod
-    def group_watches(watches: List[Watch], gap: int):
+    @classmethod
+    def group_watches(cls, watches: List[Watch], gap: int):
         groups = []
         for index, watch in enumerate(watches):
             if index == 0:
@@ -119,13 +117,13 @@ class MediaUtils:
         return groups
 
     @staticmethod
-    def create_watch_event(watches: List[Watch], location: dict):
+    def create_watch_event(watches: List[Watch], location: GeoLocation):
         return Event(
             summary=watches[0].title,
-            location=location.get('full'),
+            location=location.address.__str__(),
             description='\n'.join([watch.get_description() for watch in watches]),
-            start=EventDateTime(watches[0].get_start(), location.get('name')),
-            end=EventDateTime(watches[-1].end, location.get('name'))
+            start=EventDateTime(watches[0].get_start(), location.time_zone),
+            end=EventDateTime(watches[-1].end, location.time_zone)
         )
 
     @staticmethod
@@ -146,8 +144,9 @@ class MediaUtils:
                 print(event.summary, name)
             print()
 
-    def export_history(self, history: List[dict]):
-        watches = self.get_watches_from_history(history)
+    @classmethod
+    def export_history(cls, history: List[dict]):
+        watches = cls.get_watches_from_history(history)
         movies = []
         episodes = []
 
@@ -157,8 +156,8 @@ class MediaUtils:
             if isinstance(watch, MovieWatch):
                 movies.append(watch)
 
-        self.export_movies(movies)
-        self.export_episodes(episodes)
+        cls.export_movies(movies)
+        cls.export_episodes(episodes)
 
     @staticmethod
     def export_movies(movies: List[MovieWatch]):

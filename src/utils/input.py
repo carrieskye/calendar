@@ -61,8 +61,7 @@ class Input:
 
     @staticmethod
     def get_date_time_input(name: str, input_type: str = 'YYYY-mm-dd HH:MM', default: datetime = datetime.now(),
-                            min_date_time: datetime = None,
-                            max_date_time: datetime = None):
+                            min_date_time: datetime = None, max_date_time: datetime = None):
         date_part = Input.get_date_input(name + 'date', default=default.date())
         time_part = Input.get_time_input(name + 'time', default=default.time())
         parsed = datetime.combine(date_part, time_part)
