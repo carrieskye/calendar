@@ -19,7 +19,7 @@ class AddDays(Work):
 
         self.day = Input.get_date_input('Start')
         self.end = self.day + relativedelta(days=Input.get_int_input('Days', '#days') - 1)
-        self.project = Input.get_string_input('Project', default='CSET')
+        self.project = Input.get_string_input('Project', default='Analyze')
         self.skating = Input.get_bool_input('Skating')
 
     def run(self):
