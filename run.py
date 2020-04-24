@@ -1,3 +1,5 @@
+import sys
+
 from src.scripts.locations.add_location import AddLocation
 from src.scripts.locations.update_event_times import UpdateEventTimes
 from src.scripts.media.add_to_history import AddToHistory
@@ -29,7 +31,10 @@ SCRIPTS = {
 if __name__ == '__main__':
     categories = list(SCRIPTS.keys())
     options = '\n'.join(f'{str(index + 1).rjust(4)}) {x}' for index, x in enumerate(categories))
-    category_no = int(input(f'\nWhich category do you want to run?\n{options}\n\nCategory no. ')) - 1
+    if len(sys.argv) > 1:
+        category_no = int(sys.argv[1]) - 1
+    else:
+        category_no = int(input(f'\nWhich category do you want to run?\n{options}\n\nCategory no. ')) - 1
 
     assert category_no in range(0, len(SCRIPTS))
     category = categories[category_no]
@@ -37,7 +42,10 @@ if __name__ == '__main__':
 
     scripts = list(SCRIPTS[category].keys())
     options = '\n'.join(f'{str(index + 1).rjust(4)}) {x}' for index, x in enumerate(scripts))
-    script_no = int(input(f'\nWhich script do you want to run?\n{options}\n\nScript no. ')) - 1
+    if len(sys.argv) > 2:
+        script_no = int(sys.argv[2]) - 1
+    else:
+        script_no = int(input(f'\nWhich script do you want to run?\n{options}\n\nScript no. ')) - 1
 
     assert script_no in range(0, len(scripts))
     script_name = scripts[script_no]
