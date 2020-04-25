@@ -36,7 +36,8 @@ class GoogleCalAPI:
 
     @classmethod
     def get_calendars(cls) -> Dict[str, str]:
-        ignore = ['Trakt', 'Todoist', 'Contacts', 'peelmancarolyne@gmail.com', 'Larry']
+        ignore = ['Baby', 'Trakt', 'Todoist', 'Contacts', 'peelmancarolyne@gmail.com', 'Larry',
+                  'Holidays in United Kingdom', 'Wina']
         calendar_list = cls.service.calendarList().list().execute().get('items', [])
         calendar_list = {Utils.normalise(calendar.get('summaryOverride')) if calendar.get('summaryOverride')
                          else Utils.normalise(calendar.get('summary')): calendar.get('id')
