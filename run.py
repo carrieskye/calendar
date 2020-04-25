@@ -9,6 +9,7 @@ from src.scripts.media.update_yesterday import UpdateYesterday
 from src.scripts.work.add_days import AddDays
 from src.scripts.work.update_hours import UpdateHours
 from src.scripts.work.update_project import UpdateProject
+from src.utils.output import Output
 
 SCRIPTS = {
     'Work': {
@@ -53,3 +54,5 @@ if __name__ == '__main__':
 
     script = SCRIPTS[category][script_name]()
     script.run()
+
+    Output.make_bold('\nDONE\n')
