@@ -5,53 +5,72 @@ from typing import List
 
 from dateutil.parser import parse
 
-from src.data.data import Data
-from src.models.calendar import Calendar
+from src.data.data import Data, Calendars
+from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
 
 
-class Activity:
+class SubActivity:
 
-    def __init__(self, original: dict, time_zone: str):
-        self.activity_id = original['ID']
-        self.calendar: Calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
-        self.title = original['Title']
-        self.start = EventDateTime(parse(original['Start Date']), time_zone)
-        self.end = EventDateTime(parse(original['End Date']), time_zone)
+    def __init__(self, activity_id: int, title: str, project:str, start: EventDateTime, end: EventDateTime):
+        self.activity_id = activity_id
+        self.title = title
+        self.project = project
+        self.start = start
+        self.end = end
 
     def __str__(self) -> str:
-        return f'{self.title} ({self.calendar.name}): %s - %s' \
+        return f'%s - %s: {self.project} ▸ {self.title}' \
                % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
+
+
+class Activity(SubActivity):
+
+    def __init__(self, activity_id: int, title: str, start: EventDateTime, end: EventDateTime, calendar: Calendar,
+                 owner: Owner, project: str = '', sub_title: str = ''):
+        super().__init__(activity_id, title, project, start, end)
+        self.calendar = calendar
+        self.owner = owner
+        self.sub_activities = [] if not sub_title else [SubActivity(activity_id, sub_title, project, start, end)]
+
+    def __str__(self) -> str:
+        result = f'{self.title} ({self.calendar.name}): %s - %s' \
+                 % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
+        for sub_activity in self.sub_activities:
+            result += f'\n  - {sub_activity.__str__()}'
+        return result
+
+    def flatten(self) -> dict:
+        return {
+            'start': self.start.date_time.__str__(),
+            'end': self.end.date_time.__str__(),
+            'title': self.title,
+            'calendar': self.calendar.name,
+            'owner': self.owner.name,
+            'details': [x.__str__() for x in self.sub_activities]
+        }
 
     def get_duration(self) -> timedelta:
         return self.end.date_time - self.start.date_time
 
-
-class WorkActivity(Activity):
-
-    def __init__(self, original: dict, time_zone: str):
-        self.company, self.project = original['Project'].split(' ▸ ')[1:]
-        self.priority = 1 if self.project not in ['General', 'ML'] else 0
-        super().__init__(original, time_zone)
-
-    def __str__(self) -> str:
-        return f'{self.title} ({self.calendar.name} ▸ {self.company} ▸ {self.project}): %s - %s' \
-               % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
+    @classmethod
+    def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
+        calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
+        title = original['Title'] if calendar != Calendars.work else original['Project'].split(' ▸ ')[1]
+        sub_title = '' if calendar != Calendars.work else original['Title']
+        return cls(
+            activity_id=original['ID'],
+            title=title,
+            start=EventDateTime(parse(original['Start Date']), time_zone),
+            end=EventDateTime(parse(original['End Date']), time_zone),
+            calendar=calendar,
+            owner=Owner.shared if original['Notes'] == 'SHARED' else owner,
+            project=original['Project'].split(' ▸ ')[-1],
+            sub_title=sub_title
+        )
 
 
 class Activities(List[Activity]):
-
-    @classmethod
-    def from_dict(cls, export: List[dict], time_zone: str) -> Activities:
-        activities = cls()
-        for original in export:
-            calendar = original['Project'].split(' ▸ ')[0]
-            if calendar == 'Work':
-                activities.append(WorkActivity(original, time_zone))
-            elif calendar != 'Streaming':
-                activities.append(Activity(original, time_zone))
-
-        return activities
 
     def sort_chronically(self):
         self.sort(key=lambda x: x.start.__str__())
@@ -59,7 +78,7 @@ class Activities(List[Activity]):
     def merge_short_work_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
         self.sort_chronically()
 
-        work_activities = Activities([x for x in self if isinstance(x, WorkActivity)])
+        work_activities = Activities([x for x in self if x.calendar == Calendars.work])
         for activity in work_activities:
             self.remove(activity)
 
@@ -81,8 +100,11 @@ class Activities(List[Activity]):
     def merge(self, index: int):
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
-        longest_activity = max([activity, next_activity], key=lambda x: (x.priority, x.get_duration()))
 
+        longest_activity = max([activity, next_activity],
+                               key=lambda x: (x.project not in ['General', 'ML'], x.get_duration()))
+
+        longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start
         longest_activity.end = next_activity.end
         self.insert(index, longest_activity)

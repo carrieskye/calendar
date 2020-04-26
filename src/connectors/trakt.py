@@ -69,6 +69,12 @@ class TraktAPI:
         return cls.get_request(url, {'extended': 'full'})
 
     @classmethod
+    def search_movie(cls, title):
+        url = f'{cls.base_url}/search/movie'
+        response = cls.get_request(url, {'query': title})
+        return response[0]['movie']
+
+    @classmethod
     def get_history(cls, start: datetime, end: datetime):
         url = f'{cls.base_url}/sync/history'
         params = {'start_at': start.isoformat() + 'Z', 'end_at': end.isoformat() + 'Z'}

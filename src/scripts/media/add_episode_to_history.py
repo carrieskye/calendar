@@ -9,7 +9,7 @@ from src.utils.media import MediaUtils
 from src.utils.output import Output
 
 
-class AddToHistory(Media):
+class AddEpisodesToHistory(Media):
 
     def __init__(self):
         super().__init__()
