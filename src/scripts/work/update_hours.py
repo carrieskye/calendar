@@ -44,13 +44,19 @@ class UpdateHours(Work):
 
         day = self.start
         while day < self.end:
-            file_name = f'data/activity/{self.owner.name}/json/%s.json' % day.strftime('%Y-%m-%d')
-            activities = jsonpickle.decode(json.dumps(Utils.read_json(file_name)))
+            try:
+                file_name = f'data/activity/{self.owner.name}/json/%s.json' % day.strftime('%Y-%m-%d')
+                Output.make_bold(day.strftime('%Y-%m-%d'))
+                activities = jsonpickle.decode(json.dumps(Utils.read_json(file_name)))
 
-            self.remove_events(day)
-            self.create_events(activities)
+                self.remove_events(day)
+                self.create_events(activities)
+
+            except FileNotFoundError:
+                pass
 
             day += relativedelta(days=1)
+            Utils.log('')
 
     def remove_events(self, day: datetime):
         for calendar in Data.calendar_dict.values():
@@ -69,7 +75,7 @@ class UpdateHours(Work):
         for activity in activities:
             Utils.log(activity.__str__())
             cal_id = activity.calendar.get_cal_id(activity.owner)
-            if activity.calendar.name == 'work':
+            if activity.sub_activities:
                 sub_activities = '\n'.join([x.__str__() for x in activity.sub_activities])
                 self.create_event(cal_id, activity, activity.title, sub_activities)
             else:

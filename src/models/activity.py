@@ -5,14 +5,14 @@ from typing import List
 
 from dateutil.parser import parse
 
-from src.data.data import Data, Calendars
+from src.data.data import Data
 from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
 
 
 class SubActivity:
 
-    def __init__(self, activity_id: int, title: str, project:str, start: EventDateTime, end: EventDateTime):
+    def __init__(self, activity_id: int, title: str, project: str, start: EventDateTime, end: EventDateTime):
         self.activity_id = activity_id
         self.title = title
         self.project = project
@@ -20,8 +20,9 @@ class SubActivity:
         self.end = end
 
     def __str__(self) -> str:
-        return f'%s - %s: {self.project} ▸ {self.title}' \
-               % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
+        period = f'%s - %s' % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
+        title = f'{self.project} ▸ {self.title}' if self.project else self.title
+        return f'{period}: {title}'
 
 
 class Activity(SubActivity):
@@ -56,8 +57,16 @@ class Activity(SubActivity):
     @classmethod
     def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
         calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
-        title = original['Title'] if calendar != Calendars.work else original['Project'].split(' ▸ ')[1]
-        sub_title = '' if calendar != Calendars.work else original['Title']
+
+        title, sub_title, project = original['Title'], '', ''
+
+        if calendar.name in ['projects', 'work']:
+            title = original['Project'].split(' ▸ ')[1]
+            sub_title = original['Title']
+
+            if calendar.name == 'work':
+                project = original['Project'].split(' ▸ ')[-1]
+
         return cls(
             activity_id=original['ID'],
             title=title,
@@ -65,7 +74,7 @@ class Activity(SubActivity):
             end=EventDateTime(parse(original['End Date']), time_zone),
             calendar=calendar,
             owner=Owner.shared if original['Notes'] == 'SHARED' else owner,
-            project=original['Project'].split(' ▸ ')[-1],
+            project=project,
             sub_title=sub_title
         )
 
@@ -75,25 +84,27 @@ class Activities(List[Activity]):
     def sort_chronically(self):
         self.sort(key=lambda x: x.start.__str__())
 
-    def merge_short_work_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
+    def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
         self.sort_chronically()
 
-        work_activities = Activities([x for x in self if x.calendar == Calendars.work])
-        for activity in work_activities:
+        work_activities = Activities([x for x in self if x.calendar.name == 'work'])
+        project_activities = Activities([x for x in self if x.calendar.name == 'projects'])
+        for activity in work_activities + project_activities:
             self.remove(activity)
 
-        to_merge = []
-        for index, activity in enumerate(work_activities[:-1]):
-            next_activity = work_activities[index + 1]
-            time_diff = next_activity.start.date_time - activity.end.date_time
-            if time_diff <= max_time_diff:
-                to_merge.append(index)
+        for activities_to_merge in [work_activities, project_activities]:
+            to_merge = []
+            for index, activity in enumerate(activities_to_merge[:-1]):
+                next_activity = activities_to_merge[index + 1]
+                time_diff = next_activity.start.date_time - activity.end.date_time
+                if time_diff <= max_time_diff:
+                    to_merge.append(index)
 
-        for index in sorted(to_merge, reverse=True):
-            work_activities.merge(index)
+            for index in sorted(to_merge, reverse=True):
+                activities_to_merge.merge(index)
 
-        for work_activity in work_activities:
-            self.append(work_activity)
+            for activity in activities_to_merge:
+                self.append(activity)
 
         self.sort_chronically()
 
@@ -134,4 +145,4 @@ class Activities(List[Activity]):
                     activity.end.date_time = activity.start.date_time + timedelta(minutes=30)
                     self[index + 1].start.date_time = activity.end.date_time
 
-        self.merge_short_work_activities()
+        self.merge_short_activities()
