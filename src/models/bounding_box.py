@@ -13,7 +13,6 @@ class BoundingBox:
         self.top_right = top_right
         self.bottom_right = bottom_right
         self.intersection = self.get_intersection()
-        print(self.intersection.__str__())
 
     def get_intersection(self):
         """

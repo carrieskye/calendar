@@ -86,7 +86,7 @@ class UKAddress(Address):
                     district = other_parts[index + 1:]
                 break
 
-        if not street:
+        if other_parts and not street:
             district[0] = other_parts[-1]
             address_lines = other_parts[:-1]
 
