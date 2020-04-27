@@ -18,7 +18,7 @@ class GeoLocations:
 
 
 class Calendars:
-    events_and_meetups = Data.calendar_dict['events_and_meetups']
+    events = Data.calendar_dict['events']
     food = Data.calendar_dict['food']
     leisure = Data.calendar_dict['leisure']
     medical = Data.calendar_dict['medical']
