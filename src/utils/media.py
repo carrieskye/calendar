@@ -1,6 +1,6 @@
 import csv
 from typing import List
-
+import json
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
@@ -118,7 +118,7 @@ class MediaUtils:
         event = Event(
             summary=watch.title,
             location=location.address.__str__(),
-            description=str({'url': watch.url, 'shared': owner == Owner.shared}),
+            description=json.dumps(dict(**{'shared': owner == Owner.shared}, **watch.details)),
             start=EventDateTime(watch.get_start(), location.time_zone),
             end=EventDateTime(watch.end, location.time_zone)
         )

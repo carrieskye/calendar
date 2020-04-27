@@ -54,10 +54,10 @@ class TempMovieWatch:
 
 class Watch:
 
-    def __init__(self, trakt_id: str, title: str, url: str, watched_at: datetime, runtime: int):
+    def __init__(self, trakt_id: str, title: str, details: dict, watched_at: datetime, runtime: int):
         self.trakt_id = trakt_id
         self.title = title
-        self.url = url
+        self.details = details
         self.end = watched_at
         self.runtime = runtime
 
@@ -78,9 +78,11 @@ class EpisodeWatch(Watch):
         show_id = temp_watch.show_id
         show_title = self.show_title.replace('Marvel\'s ', '').split(' (')[0]
         watched_at = temp_watch.watched_at
-        title = f'{show_title} (S{str(self.season_no).rjust(2, "0")}E{str(self.episode_no).rjust(2, "0")})'
-        url = f'https://trakt.tv/shows/{self.slug}/seasons/{self.season_no}/episodes/{self.episode_no}'
-        super().__init__(show_id, title, url, watched_at, runtime)
+        details = {
+            'url': f'https://trakt.tv/shows/{self.slug}/seasons/{self.season_no}/episodes/{self.episode_no}',
+            'episode': f'S{str(self.season_no).rjust(2, "0")}E{str(self.episode_no).rjust(2, "0")}'
+        }
+        super().__init__(show_id, show_title, details, watched_at, runtime)
 
     def get_export_dict(self) -> dict:
         return {
@@ -102,9 +104,11 @@ class MovieWatch(Watch):
         movie_id = temp_watch.movie_id
         movie_title = self.movie_title.split(':')[0]
         watched_at = temp_watch.watched_at
-        title = f'{movie_title} ({self.year})'
-        url = f'https://trakt.tv/movies/{self.slug}'
-        Watch.__init__(self, movie_id, title, url, watched_at, runtime)
+        details = {
+            'url': f'https://trakt.tv/movies/{self.slug}',
+            'year': self.year
+        }
+        Watch.__init__(self, movie_id, movie_title, details, watched_at, runtime)
 
     def get_export_dict(self):
         return {

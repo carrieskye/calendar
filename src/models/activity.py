@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import ast
+import json
 from datetime import timedelta
 from typing import List
 
@@ -51,7 +51,7 @@ class Activity(SubActivity):
             'title': self.title,
             'calendar': self.calendar.name,
             'owner': self.owner.name,
-            'location': self.location.address,
+            'location': self.location.address if self.location else '',
             'details': [x.__str__() for x in self.sub_activities]
         }
 
@@ -59,14 +59,14 @@ class Activity(SubActivity):
         return self.end.date_time - self.start.date_time
 
     @classmethod
-    def from_dict(cls, original: dict, time_zone: str, owner: Owner, location: GeoLocation) -> Activity:
+    def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
         activity_id = original['ID']
         start = EventDateTime(parse(original['Start Date']), time_zone)
         end = EventDateTime(parse(original['End Date']), time_zone)
         calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
-        notes = ast.literal_eval(original['Notes'].replace('‘', '\'').replace('’', '\'')) if original['Notes'] else {}
+        notes = json.loads(original['Notes']) if original['Notes'] else {}
         owner = Owner.shared if notes.get('shared', False) else owner
-        location = location if 'location' not in notes else Data.geo_location_dict[notes['location']]
+        location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
         title, sub_activities, project = original['Title'], [], ''
 
@@ -76,9 +76,10 @@ class Activity(SubActivity):
 
             if calendar.name == 'leisure':
                 title = 'TV'
-                project = original['Title']
                 url = notes['url']
-                sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project}</a>', '', start, end)]
+                project = original['Title']
+                detail = notes['episode'] if 'episode' in notes else notes['year']
+                sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project} {detail}</a>', '', start, end)]
                 owner = Owner.shared
 
             else:
