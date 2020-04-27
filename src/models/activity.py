@@ -79,7 +79,7 @@ class Activity(SubActivity):
                 url = notes['url']
                 project = original['Title']
                 detail = notes['episode'] if 'episode' in notes else notes['year']
-                sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project} {detail}</a>', '', start, end)]
+                sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project} ({detail})</a>', '', start, end)]
                 owner = Owner.shared
 
             else:

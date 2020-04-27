@@ -20,7 +20,7 @@ class UpdateProject(Work):
 
         self.start = datetime.combine(start, time(4, 0))
         self.end = self.start + relativedelta(days=days)
-        self.project = Input.get_string_input(name='Project', default='Analyze')
+        self.project = Input.get_string_input(name='Project', default='Analyse')
 
     def run(self):
         Output.make_title('Processing')
