@@ -66,7 +66,7 @@ class GoogleCalAPI:
         end = start + relativedelta(days=1)
 
         return [event for calendar_name, calendar in Data.calendar_dict.items()
-                for owner, cal_id in calendar.__dict__.items() if cal_id
+                for owner, cal_id in calendar.get_calendars().items()
                 for event in cls.get_events(calendar, owner, 100, start, end)]
 
     @classmethod

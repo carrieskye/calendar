@@ -56,5 +56,3 @@ class UpdateEventTimes(Locations):
 
         Output.make_title('Updating calendar')
         LocationUtils.process_events(self.start.date(), group_events, self.larry)
-
-        Output.make_bold('\nUpdated events\n')

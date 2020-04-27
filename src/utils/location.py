@@ -7,6 +7,7 @@ import pytz
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
+from src.data.data import Data, Calendars
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.location_event import LocationEvent
@@ -192,7 +193,7 @@ class LocationUtils:
         if len(matches) > 1:
             distances = {}
             for match in matches:
-                intersection = geo_locations_by_label[match].bounding_box.intersection
+                intersection = Data.geo_location_dict[match].bounding_box.intersection
                 distances[match] = LocationUtils.get_distance(location.get_point(), intersection)
             match = min(distances.items(), key=lambda x: x[1])
             return match[0]
@@ -218,7 +219,7 @@ class LocationUtils:
         for remaining_entry in history:
             unknown = remaining_entry.name == 'unknown'
             too_short = remaining_entry.start + relativedelta(minutes=30) >= remaining_entry.end
-            category = geo_locations_by_label[remaining_entry.name].category if not unknown else 'unknown'
+            category = Data.geo_location_dict[remaining_entry.name].category if not unknown else 'unknown'
             home = category == 'Home'
             if not (too_short or home):
                 start = remaining_entry.start.strftime('%H:%M:%S')
@@ -230,10 +231,10 @@ class LocationUtils:
 
     @classmethod
     def create_default_event(cls, history_entry: LocationEventTemp):
-        time_zone = geo_locations_by_label[history_entry.name].time_zone
+        time_zone = Data.geo_location_dict[history_entry.name].time_zone
         return Event(
             summary='New event',
-            location=geo_locations_by_label[history_entry.name].address.stringify(),
+            location=Data.geo_location_dict[history_entry.name].address.stringify(),
             description=history_entry.name,
             start=EventDateTime(date_time=history_entry.start, time_zone=time_zone),
             end=EventDateTime(date_time=history_entry.end, time_zone=time_zone)
@@ -244,11 +245,11 @@ class LocationUtils:
         matches = []
         for history_entry in history:
             try:
-                address = geo_locations_by_label[history_entry.name].address.__str__()
-                time_zone = pytz.timezone(geo_locations_by_label[history_entry.name].time_zone)
+                address = Data.geo_location_dict[history_entry.name].address.__str__()
+                time_zone = pytz.timezone(Data.geo_location_dict[history_entry.name].time_zone)
                 history_entry.start = history_entry.start.astimezone(time_zone)
                 history_entry.end = history_entry.end.astimezone(time_zone)
-                category = geo_locations_by_label[history_entry.name].category
+                category = Data.geo_location_dict[history_entry.name].category
                 if event.location == address and category != 'Home':
                     event.start.date_time = event.start.date_time.astimezone(time_zone)
                     event.end.date_time = event.end.date_time.astimezone(time_zone)
@@ -261,7 +262,7 @@ class LocationUtils:
             match = min(matches, key=lambda x: x.get('offset')).get('history_entry')
             event.start.date_time = match.start
             event.end.date_time = match.end
-            GoogleCalAPI.update_event(event.calendar.__getattribute__(event.owner), event.event_id, event)
+            GoogleCalAPI.update_event(event.calendar.get_cal_id(event.owner), event.event_id, event)
             return match
 
     @staticmethod
@@ -296,7 +297,7 @@ class LocationUtils:
     @classmethod
     def filter_geo_locations(cls, location: LocationEvent):
         geo_locations = {}
-        for label, geo_location in geo_locations_by_label.items():
+        for label, geo_location in Data.geo_location_dict.items():
             point_a = Point(location.latitude, location.longitude)
             if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
                 geo_locations[label] = geo_location

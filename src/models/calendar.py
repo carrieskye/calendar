@@ -21,3 +21,7 @@ class Calendar:
 
     def get_cal_id(self, owner: Owner):
         return self.__getattribute__(owner.name)
+
+    def get_calendars(self):
+        return {k: v for k, v in {
+            Owner.carrie: self.carrie, Owner.larry: self.larry, Owner.shared: self.shared}.items() if v}
