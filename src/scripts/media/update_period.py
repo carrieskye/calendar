@@ -30,6 +30,6 @@ class UpdatePeriod(Media):
 
         history = sorted(TraktAPI.get_history(self.start, self.end), key=lambda x: x.get('watched_at'))
         watches = MediaUtils.get_watches_from_history(history)
-        MediaUtils.process_watches(watches, self.calendar.get_cal_id(self.owner), self.location, self.gap)
+        MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
 
         Output.make_bold('Updated trakt history\n')

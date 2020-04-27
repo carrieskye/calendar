@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
+from src.models.calendar import Owner, Calendar
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
@@ -17,27 +18,23 @@ class MediaUtils:
     runtime_cache = Utils.read_json('data/trakt/cache/runtime.json')
 
     @classmethod
-    def process_watches(cls, watches: List[Watch], calendar_id: str, location: GeoLocation, gap: int):
-        groups = MediaUtils.group_watches(watches, gap)
-
-        for group in groups:
-            cls.remove_watches_from_history(group)
-            TraktAPI.add_episodes_to_history(group)
-            group_event = MediaUtils.create_watch_event(group, location)
-            GoogleCalAPI.create_event(calendar_id, group_event)
+    def process_watches(cls, watches: List[Watch], calendar: Calendar, owner: Owner, location: GeoLocation):
+        for watch in watches:
+            cls.remove_watch_from_history(watch)
+            TraktAPI.add_episodes_to_history([watch])
+            MediaUtils.create_watch_event(calendar, owner, watch, location)
 
     @classmethod
-    def remove_watches_from_history(cls, group: List[Watch]):
+    def remove_watch_from_history(cls, watch: Watch):
         add_again = []
-        for watch in group:
-            if isinstance(watch, EpisodeWatch):
-                watches = TraktAPI.get_history_for_episode(watch.episode_id)
-                for result in watches:
-                    old_watch = TempEpisodeWatch.from_result(result)
-                    if abs(old_watch.watched_at - watch.end).days > 5:
-                        runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
-                        add_again.append(EpisodeWatch(old_watch, runtime))
-        TraktAPI.remove_episodes_from_history(group)
+        if isinstance(watch, EpisodeWatch):
+            watches = TraktAPI.get_history_for_episode(watch.episode_id)
+            for result in watches:
+                old_watch = TempEpisodeWatch.from_result(result)
+                if abs(old_watch.watched_at - watch.end).days > 5:
+                    runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
+                    add_again.append(EpisodeWatch(old_watch, runtime))
+        TraktAPI.remove_episodes_from_history([watch])
         TraktAPI.add_episodes_to_history(add_again)
 
     @classmethod
@@ -95,7 +92,7 @@ class MediaUtils:
             return result.get('runtime')
 
     @classmethod
-    def group_watches(cls, watches: List[Watch], gap: int):
+    def group_watches(cls, watches: List[Watch], gap: int) -> List[List[Watch]]:
         groups = []
         for index, watch in enumerate(watches):
             if index == 0:
@@ -117,14 +114,16 @@ class MediaUtils:
         return groups
 
     @staticmethod
-    def create_watch_event(watches: List[Watch], location: GeoLocation):
-        return Event(
-            summary=watches[0].title,
+    def create_watch_event(calendar: Calendar, owner: Owner, watch: Watch, location: GeoLocation):
+        event = Event(
+            summary=watch.title,
             location=location.address.__str__(),
-            description='\n'.join([watch.get_description() for watch in watches]),
-            start=EventDateTime(watches[0].get_start(), location.time_zone),
-            end=EventDateTime(watches[-1].end, location.time_zone)
+            description=str({'url': watch.url, 'shared': owner == Owner.shared}),
+            start=EventDateTime(watch.get_start(), location.time_zone),
+            end=EventDateTime(watch.end, location.time_zone)
         )
+
+        GoogleCalAPI.create_event(calendar.get_cal_id(owner), event)
 
     @staticmethod
     def process_calendar_event(event: Event):

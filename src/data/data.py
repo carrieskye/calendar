@@ -12,6 +12,7 @@ class Data:
 
 class GeoLocations:
     bromsgrove_st = Data.geo_location_dict['bromsgrove_st']
+    talygarn_st = Data.geo_location_dict['talygarn_st']
     tramshed_tech = Data.geo_location_dict['tramshed_tech']
     viola_arena = Data.geo_location_dict['viola_arena']
 

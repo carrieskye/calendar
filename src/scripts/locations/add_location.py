@@ -31,6 +31,7 @@ class AddLocation(Locations):
 
     def run(self):
         location = self.bounding_box.get_address()
+        print(location)
         country_code = location.raw.get('address').get('country_code')
 
         if country_code in ['gb', 'be']:
@@ -38,7 +39,8 @@ class AddLocation(Locations):
             time_zone = country_timezones(country_code)[0]
             time_zone = Input.get_string_input('Time zone', 'country/city', time_zone)
 
-            Data.geo_locations.__add__(self.label, GeoLocation(self.category, address, time_zone, self.bounding_box))
+            Data.geo_location_dict.__add__(self.label,
+                                           GeoLocation(self.category, address, time_zone, self.bounding_box))
 
             Output.make_bold('\n\nAdded\n')
             return

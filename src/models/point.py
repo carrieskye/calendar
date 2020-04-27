@@ -7,6 +7,9 @@ class Point:
         self.latitude = latitude
         self.longitude = longitude
 
+    def __str__(self) -> str:
+        return f'{self.latitude}, {self.longitude}'
+
     @staticmethod
     def get_line_through_points(point_a: Point, point_b: Point) -> (float, float):
         """

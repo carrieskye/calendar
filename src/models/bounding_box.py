@@ -6,7 +6,6 @@ from src.models.point import Point
 
 
 class BoundingBox:
-    geo_locator = Nominatim(user_agent='specify_your_app_name_here')
 
     def __init__(self, bottom_left: Point, top_left: Point, top_right: Point, bottom_right: Point):
         self.bottom_left = bottom_left
@@ -14,6 +13,7 @@ class BoundingBox:
         self.top_right = top_right
         self.bottom_right = bottom_right
         self.intersection = self.get_intersection()
+        print(self.intersection.__str__())
 
     def get_intersection(self):
         """
@@ -29,7 +29,8 @@ class BoundingBox:
         return Point(x, y)
 
     def get_address(self):
-        return self.geo_locator.reverse(f'{self.bottom_left.latitude}, {self.bottom_left.longitude}')
+        geo_locator = Nominatim(user_agent='specify_your_app_name_here')
+        return geo_locator.reverse(f'{self.bottom_left.latitude}, {self.bottom_left.longitude}')
 
     @classmethod
     def deserialise(cls, serialised: dict) -> BoundingBox:

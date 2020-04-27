@@ -25,7 +25,7 @@ class ParseTimingExportScript(Work):
 
         activities_per_day = defaultdict(Activities)
         for item in export:
-            activity = Activity.from_dict(item, self.location.time_zone, self.owner)
+            activity = Activity.from_dict(item, self.location.time_zone, self.owner, self.location)
             day = (activity.start.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
             activities_per_day[day].append(activity)
 
@@ -34,8 +34,6 @@ class ParseTimingExportScript(Work):
             activities.merge_short_activities()
             activities.remove_double_activities()
             activities.standardise_short_activities()
-
-            activities = Activities([x for x in activities if x.calendar.name != 'leisure'])
 
             Utils.write_csv([x.flatten() for x in activities], f'data/activity/carrie/csv/{day}.csv')
             Utils.write_json(json.loads(jsonpickle.encode(activities)), f'data/activity/carrie/json/{day}.json')
