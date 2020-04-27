@@ -54,17 +54,15 @@ class TempMovieWatch:
 
 class Watch:
 
-    def __init__(self, trakt_id: str, title: str, watched_at: datetime, runtime: int):
+    def __init__(self, trakt_id: str, title: str, url: str, watched_at: datetime, runtime: int):
         self.trakt_id = trakt_id
         self.title = title
+        self.url = url
         self.end = watched_at
         self.runtime = runtime
 
     def get_start(self):
         return self.end - relativedelta(minutes=self.runtime)
-
-    def get_description(self):
-        return ''
 
 
 class EpisodeWatch(Watch):
@@ -80,14 +78,11 @@ class EpisodeWatch(Watch):
         show_id = temp_watch.show_id
         show_title = self.show_title.replace('Marvel\'s ', '').split(' (')[0]
         watched_at = temp_watch.watched_at
-        Watch.__init__(self, show_id, show_title, watched_at, runtime)
-
-    def get_description(self):
-        text = f'S{str(self.season_no).rjust(2, "0")}E{str(self.episode_no).rjust(2, "0")} {self.episode_title}'
+        title = f'{show_title} (S{str(self.season_no).rjust(2, "0")}E{str(self.episode_no).rjust(2, "0")})'
         url = f'https://trakt.tv/shows/{self.slug}/seasons/{self.season_no}/episodes/{self.episode_no}'
-        return f'<a href="{url}">{text}</a>'
+        super().__init__(show_id, title, url, watched_at, runtime)
 
-    def get_export_dict(self):
+    def get_export_dict(self) -> dict:
         return {
             'season': self.season_no,
             'episode': self.episode_no,
@@ -107,12 +102,9 @@ class MovieWatch(Watch):
         movie_id = temp_watch.movie_id
         movie_title = self.movie_title.split(':')[0]
         watched_at = temp_watch.watched_at
-        Watch.__init__(self, movie_id, movie_title, watched_at, runtime)
-
-    def get_description(self):
-        text = f'{self.movie_title} ({self.year})'
+        title = f'{movie_title} ({self.year})'
         url = f'https://trakt.tv/movies/{self.slug}'
-        return f'<a href="{url}">{text}</a>'
+        Watch.__init__(self, movie_id, title, url, watched_at, runtime)
 
     def get_export_dict(self):
         return {

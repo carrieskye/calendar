@@ -46,7 +46,7 @@ class GeoLocation:
         new_top_right = GeoLocation.extend_point(bb.top_right, bb.bottom_right, bb.top_left, d)
         new_bottom_right = GeoLocation.extend_point(bb.bottom_right, bb.bottom_left, bb.top_right, d)
 
-        return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right, bb.intersection)
+        return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right)
 
     @staticmethod
     def deserialise(serialised: dict):

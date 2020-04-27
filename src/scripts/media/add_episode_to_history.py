@@ -59,6 +59,6 @@ class AddEpisodesToHistory(Media):
                 start += relativedelta(minutes=details['runtime'])
                 watches.append(watch)
 
-        MediaUtils.process_watches(watches, self.calendar.get_cal_id(self.owner), self.location, self.gap)
+        MediaUtils.process_watches(watches, self.calendar.get_cal_id(self.owner), self.location)
 
         Output.make_bold('Added to history\n')

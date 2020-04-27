@@ -35,5 +35,5 @@ class AddMovieToHistory(Media):
             year=details['year']
         )
         watches = [MovieWatch(temp_watch, details['runtime'])]
-        MediaUtils.process_watches(watches, self.calendar.get_cal_id(self.owner), self.location, self.gap)
+        MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
         Output.make_bold('Added to history\n')

@@ -60,9 +60,6 @@ class UpdateHours(Work):
 
     def remove_events(self, day: datetime):
         for calendar in Data.calendar_dict.values():
-            if calendar == Calendars.leisure:
-                continue
-
             for owner in [self.owner, Owner.shared]:
                 if not calendar.get_cal_id(owner):
                     continue
@@ -81,10 +78,11 @@ class UpdateHours(Work):
             else:
                 self.create_event(cal_id, activity, activity.title)
 
-    def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = ''):
+    @staticmethod
+    def create_event(cal_id: str, activity: Activity, summary: str, description: str = ''):
         event = Event(
             summary=summary,
-            location=self.location.address.__str__(),
+            location=activity.location.address.__str__(),
             description=description,
             start=activity.start,
             end=activity.end
