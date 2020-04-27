@@ -5,7 +5,7 @@ import jsonpickle
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars, Data
+from src.data.data import Calendars, Data, GeoLocations
 from src.models.activity import Activity, Activities
 from src.models.calendar import Owner
 from src.models.event import Event
@@ -38,6 +38,7 @@ class UpdateHours(Work):
         self.end = self.start + relativedelta(days=days)
         self.location = self.get_location()
         self.owner = self.get_owner(default=Owner.carrie)
+        self.work_from_home = Input.get_bool_input('Work from home', default='y')
 
     def run(self):
         Output.make_title('Processing')
@@ -78,11 +79,14 @@ class UpdateHours(Work):
             else:
                 self.create_event(cal_id, activity, activity.title)
 
-    @staticmethod
-    def create_event(cal_id: str, activity: Activity, summary: str, description: str = ''):
+    def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = ''):
+        if summary in ['Amplyfi', 'Lunch'] and not self.work_from_home:
+            location = GeoLocations.tramshed_tech
+        else:
+            location = activity.location if activity.location else self.location
         event = Event(
             summary=summary,
-            location=activity.location.address.__str__(),
+            location=location.address.__str__(),
             description=description,
             start=activity.start,
             end=activity.end
