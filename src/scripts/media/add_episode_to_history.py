@@ -1,3 +1,5 @@
+from random import randint
+
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
 
@@ -20,9 +22,11 @@ class AddEpisodesToHistory(Media):
         self.last_season = Input.get_int_input('Last season', 'no', self.first_season)
         self.last_episode = Input.get_int_input('Last episode', 'no', self.first_episode)
         self.start = Input.get_date_time_input('Start')
+        spread = Input.get_bool_input('Spread')
+        if spread:
+            self.end = Input.get_date_time_input('End', default=self.start)
         self.owner = self.get_owner()
         self.location = self.get_location()
-        self.gap = Input.get_int_input('Gap', '#min', self.gap)
 
     def run(self):
         Output.make_title('Processing')
@@ -58,6 +62,16 @@ class AddEpisodesToHistory(Media):
                 watch = EpisodeWatch(temp_watch, details['runtime'])
                 start += relativedelta(minutes=details['runtime'])
                 watches.append(watch)
+
+        total_runtime = sum([x.runtime for x in watches])
+        total_breaks = (self.end - self.start).seconds - (total_runtime * 60)
+        for index, watch in enumerate(watches[1:-1]):
+            if index > 0:
+                watch_break = randint(0, total_breaks)
+                total_breaks -= watch_break
+                for other_watch in watches[index:]:
+                    other_watch.end = other_watch.end + relativedelta(seconds=watch_break)
+        watches[-1].end = self.end.replace(tzinfo=tz.gettz(self.location.time_zone))
 
         MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
 

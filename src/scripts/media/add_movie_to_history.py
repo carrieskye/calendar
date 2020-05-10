@@ -18,7 +18,6 @@ class AddMovieToHistory(Media):
         self.start = Input.get_date_time_input('Start')
         self.owner = self.get_owner()
         self.location = self.get_location()
-        self.gap = Input.get_int_input('Gap', '#min', self.gap)
 
     def run(self):
         Output.make_title('Processing')
