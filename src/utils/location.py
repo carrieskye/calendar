@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Data, Calendars
+from src.models.calendar import Owner
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.location_event import LocationEvent
@@ -19,7 +20,8 @@ from src.utils.table_print import TablePrint
 class LocationUtils:
 
     @staticmethod
-    def get_records(start: datetime, end: datetime, user_id: int = 3, accuracy: int = 20):
+    def get_records(start: datetime, end: datetime, owner: Owner, accuracy: int = 20):
+        user_id = 3 if owner == Owner.carrie else 2
         conditions = 'WHERE ' + ' AND '.join([
             f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',
             f'time < \'{end.strftime("%Y-%m-%d %H:%M:%S")}\'',

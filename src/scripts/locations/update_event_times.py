@@ -3,12 +3,13 @@ from datetime import datetime, time
 
 from dateutil.relativedelta import relativedelta
 
+from src.models.calendar import Owner
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
 from src.scripts.script import Locations
 from src.utils.input import Input
 from src.utils.location import LocationUtils
-from src.utils.output import Output
+# from src.utils.output import Output
 from src.utils.table_print import TablePrint
 
 
@@ -21,12 +22,12 @@ class UpdateEventTimes(Locations):
                                      default=(datetime.now() - relativedelta(days=1)).date())
         self.start = datetime.combine(start, time(4, 0))
         self.end = self.start + relativedelta(days=1)
-        self.larry = Input.get_bool_input('Larry')
+        self.owner = self.get_owner(default=Owner.carrie)
 
     def run(self):
         headers = ['TIME', 'LAT - LON', 'ACCURACY', 'LOCATION']
         table_print = TablePrint('Processing events', headers, [10, 25, 5, 30])
-        results = LocationUtils.get_records(self.start, self.end)
+        results = LocationUtils.get_records(self.start, self.end, self.owner)
         locations = [LocationEvent.from_database(result) for result in results]
         locations = sorted(locations, key=operator.attrgetter('date_time'))
 
@@ -52,7 +53,10 @@ class UpdateEventTimes(Locations):
                     current_location.events.append(closest_location)
 
         LocationUtils.print_events('Determining closest location', events)
-        group_events = LocationUtils.group_events(events)
+        LocationUtils.group_events(events)
 
-        Output.make_title('Updating calendar')
-        LocationUtils.process_events(self.start.date(), group_events, self.larry)
+        # if self.owner == Owner.larry:
+        #     group_events = LocationUtils.group_events(events)
+        #
+        #     Output.make_title('Updating calendar')
+        #     LocationUtils.process_events(self.start.date(), group_events, self.larry)

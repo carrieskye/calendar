@@ -5,7 +5,7 @@ import jsonpickle
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars, Data, GeoLocations
+from src.data.data import Data, GeoLocations
 from src.models.activity import Activity, Activities
 from src.models.calendar import Owner
 from src.models.event import Event
@@ -13,17 +13,6 @@ from src.scripts.script import Work
 from src.utils.input import Input
 from src.utils.output import Output
 from src.utils.utils import Utils
-
-CALENDAR_LOOKUP = {
-    'Projects': Calendars.projects,
-    'Social': Calendars.social,
-    'Food': Calendars.food,
-    'Sports': Calendars.sports,
-    'Medical': Calendars.medical,
-    'Work': Calendars.work
-}
-
-SHARED_ACTIVITIES = [Calendars.medical, Calendars.sports]
 
 
 class UpdateHours(Work):

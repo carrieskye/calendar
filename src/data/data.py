@@ -19,6 +19,7 @@ class GeoLocations:
 
 class Calendars:
     events = Data.calendar_dict['events']
+    family = Data.calendar_dict['family']
     food = Data.calendar_dict['food']
     leisure = Data.calendar_dict['leisure']
     medical = Data.calendar_dict['medical']

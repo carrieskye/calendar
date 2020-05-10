@@ -8,6 +8,7 @@ from src.scripts.media.update_period import UpdatePeriod
 from src.scripts.media.update_today import UpdateToday
 from src.scripts.media.update_yesterday import UpdateYesterday
 from src.scripts.work.add_days import AddDays
+from src.scripts.work.copy_to_larry import CopyToLarry
 from src.scripts.work.parse_timing_export import ParseTimingExportScript
 from src.scripts.work.update_hours import UpdateHours
 from src.scripts.work.update_project import UpdateProject
@@ -18,7 +19,8 @@ SCRIPTS = {
         'Add work days': AddDays,
         'Parse timing export': ParseTimingExportScript,
         'Update work hours': UpdateHours,
-        'Update work project': UpdateProject
+        'Update work project': UpdateProject,
+        'Copy to Larry': CopyToLarry
     },
     'Media': {
         'Update Trakt today': UpdateToday,
