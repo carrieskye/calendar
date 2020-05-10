@@ -38,4 +38,3 @@ class Locations(Script, ABC):
 
 class Media(Script, ABC):
     calendar = Calendars.leisure
-    gap = 30

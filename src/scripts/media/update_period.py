@@ -23,7 +23,6 @@ class UpdatePeriod(Media):
         self.end = self.start + relativedelta(days=int(days))
         self.owner = self.get_owner()
         self.location = self.get_location()
-        self.gap = Input.get_int_input('Maximum gap', input_type='#min', default=self.gap)
 
     def run(self):
         Output.make_title('Processing')
