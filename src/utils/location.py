@@ -1,4 +1,4 @@
-from datetime import datetime, time, date
+from datetime import datetime, time, date, timedelta
 from math import radians, sin, atan2, sqrt, cos
 from typing import List
 
@@ -294,7 +294,19 @@ class LocationUtils:
 
         for event in events:
             name = event.name if event.name != 'unknown' else ''
-            table_print.print_line([event.start.strftime('%H:%M:%S'), event.end.strftime('%H:%M:%S'), name])
+            start = event.start
+            end = event.end
+            if name:
+                time_zone = Data.geo_location_dict[name].time_zone
+                start = LocationUtils.ignore_dst(start, time_zone)
+                end = LocationUtils.ignore_dst(end, time_zone)
+            table_print.print_line([start.strftime('%H:%M:%S'), end.strftime('%H:%M:%S'), name])
+
+    @staticmethod
+    def ignore_dst(event_time: datetime, time_zone: str):
+        if pytz.timezone(time_zone).dst(event_time) != timedelta(0):
+            return event_time + pytz.timezone(time_zone).dst(event_time)
+        return event_time
 
     @classmethod
     def filter_geo_locations(cls, location: LocationEvent):
