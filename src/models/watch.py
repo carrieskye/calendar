@@ -102,13 +102,12 @@ class MovieWatch(Watch):
         self.year = temp_watch.year
 
         movie_id = temp_watch.movie_id
-        movie_title = self.movie_title.split(':')[0]
         watched_at = temp_watch.watched_at
         details = {
             'url': f'https://trakt.tv/movies/{self.slug}',
             'year': self.year
         }
-        Watch.__init__(self, movie_id, movie_title, details, watched_at, runtime)
+        Watch.__init__(self, movie_id, self.movie_title, details, watched_at, runtime)
 
     def get_export_dict(self):
         return {
