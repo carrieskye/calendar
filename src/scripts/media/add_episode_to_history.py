@@ -1,5 +1,3 @@
-from random import randint
-
 from dateutil import tz
 from dateutil.relativedelta import relativedelta
 
@@ -63,15 +61,8 @@ class AddEpisodesToHistory(Media):
                 start += relativedelta(minutes=details['runtime'])
                 watches.append(watch)
 
-        total_runtime = sum([x.runtime for x in watches])
-        total_breaks = (self.end - self.start).seconds - (total_runtime * 60)
-        for index, watch in enumerate(watches[1:-1]):
-            if index > 0:
-                watch_break = randint(0, total_breaks)
-                total_breaks -= watch_break
-                for other_watch in watches[index:]:
-                    other_watch.end = other_watch.end + relativedelta(seconds=watch_break)
-        watches[-1].end = self.end.replace(tzinfo=tz.gettz(self.location.time_zone))
+        if self.end:
+            watches = MediaUtils.spread_watches(watches, self.end - self.start)
 
         MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
 

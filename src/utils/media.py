@@ -1,6 +1,9 @@
 import csv
-from typing import List
 import json
+from datetime import timedelta
+from random import randint, shuffle
+from typing import List
+
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
@@ -112,6 +115,24 @@ class MediaUtils:
 
                     groups.append([watch])
         return groups
+
+    @classmethod
+    def spread_watches(cls, watches: List[Watch], duration: timedelta) -> List[Watch]:
+        total_runtime = sum([x.runtime for x in watches])
+        total_breaks = duration.seconds - (total_runtime * 60)
+
+        breaks = [0]
+        for _ in range(0, len(watches) - 2):
+            breaks.append(randint(0, total_breaks - sum(breaks)))
+        breaks.pop(0)
+        breaks.append(total_breaks - sum(breaks))
+        shuffle(breaks)
+
+        for index, watch in enumerate(watches[1:]):
+            extra_break = sum(breaks[:index + 1])
+            watch.end = watch.end + relativedelta(seconds=extra_break)
+
+        return watches
 
     @staticmethod
     def create_watch_event(calendar: Calendar, owner: Owner, watch: Watch, location: GeoLocation):
