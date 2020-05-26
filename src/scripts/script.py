@@ -23,7 +23,7 @@ class Script(ABC):
         return Owner.__members__[owner]
 
     @staticmethod
-    def get_location(default: str = 'home_uk') -> GeoLocation:
+    def get_location(default: str = 'home_uk_2') -> GeoLocation:
         location = Input.get_string_input('Location', input_type='name', default=default)
         return Data.geo_location_dict[location]
 
