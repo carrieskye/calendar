@@ -21,8 +21,7 @@ class AddEpisodesToHistory(Media):
         self.last_episode = Input.get_int_input('Last episode', 'no', self.first_episode)
         self.start = Input.get_date_time_input('Start')
         spread = Input.get_bool_input('Spread')
-        if spread:
-            self.end = Input.get_date_time_input('End', default=self.start)
+        self.end = Input.get_date_time_input('End', default=self.start) if spread else self.start
         self.owner = self.get_owner()
         self.location = self.get_location()
 
@@ -55,7 +54,8 @@ class AddEpisodesToHistory(Media):
                     season_no=season_no,
                     episode_no=episode_no,
                     episode_id=details['trakt_id'],
-                    episode_title=details['title']
+                    episode_title=details['title'],
+                    slug=show['ids']['slug']
                 )
                 watch = EpisodeWatch(temp_watch, details['runtime'])
                 start += relativedelta(minutes=details['runtime'])

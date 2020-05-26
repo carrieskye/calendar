@@ -21,7 +21,7 @@ class ParseTimingExportScript(Work):
     def run(self):
         super().run()
 
-        export = Utils.read_csv('data/activity/carrie.csv')
+        export = Utils.read_csv('data/activity/All Activities.csv')
 
         activities_per_day = defaultdict(Activities)
         for item in export:
@@ -35,5 +35,6 @@ class ParseTimingExportScript(Work):
             activities.remove_double_activities()
             activities.standardise_short_activities()
 
-            Utils.write_csv([x.flatten() for x in activities], f'data/activity/carrie/csv/{day}.csv')
-            Utils.write_json(json.loads(jsonpickle.encode(activities)), f'data/activity/carrie/json/{day}.json')
+            Utils.write_csv([x.flatten() for x in activities], f'data/activity/{self.owner.name}/csv/{day}.csv')
+            Utils.write_json(json.loads(jsonpickle.encode(activities)),
+                             f'data/activity/{self.owner.name}/json/{day}.json')
