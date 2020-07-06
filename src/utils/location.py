@@ -312,7 +312,8 @@ class LocationUtils:
     def filter_geo_locations(cls, location: LocationEvent):
         geo_locations = {}
         for label, geo_location in Data.geo_location_dict.items():
-            point_a = Point(location.latitude, location.longitude)
-            if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
-                geo_locations[label] = geo_location
+            if geo_location.bounding_box:
+                point_a = Point(location.latitude, location.longitude)
+                if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
+                    geo_locations[label] = geo_location
         return geo_locations
