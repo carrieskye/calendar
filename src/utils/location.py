@@ -300,7 +300,7 @@ class LocationUtils:
                 time_zone = Data.geo_location_dict[name].time_zone
                 start = LocationUtils.ignore_dst(start, time_zone)
                 end = LocationUtils.ignore_dst(end, time_zone)
-            table_print.print_line([start.strftime('%H:%M:%S'), end.strftime('%H:%M:%S'), name])
+                table_print.print_line([start.strftime('%H:%M:%S'), end.strftime('%H:%M:%S'), name])
 
     @staticmethod
     def ignore_dst(event_time: datetime, time_zone: str):

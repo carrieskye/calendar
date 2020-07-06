@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import timedelta
 from typing import List
 
@@ -64,7 +65,7 @@ class Activity(SubActivity):
         start = EventDateTime(parse(original['Start Date']), time_zone)
         end = EventDateTime(parse(original['End Date']), time_zone)
         calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
-        notes = json.loads(original['Notes']) if original['Notes'] else {}
+        notes = json.loads(re.sub(r'[“”]', '"', original['Notes'])) if original['Notes'] else {}
         owner = Owner.shared if notes.get('shared', False) else owner
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
@@ -74,15 +75,14 @@ class Activity(SubActivity):
             if calendar.name == 'work':
                 project = original['Project'].split(' ▸ ')[-1]
 
-            if calendar.name == 'leisure':
+            if calendar.name == 'leisure' and original['Project'].split(' ▸ ')[1] == 'TV':
                 title = 'TV'
                 url = notes['url']
                 project = original['Title']
                 detail = notes['episode'] if 'episode' in notes else notes['year']
                 sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project} ({detail})</a>', '', start, end)]
-                owner = Owner.shared
 
-            else:
+            elif calendar.name != 'leisure':
                 title = original['Project'].split(' ▸ ')[1]
                 sub_activities = [SubActivity(activity_id, original['Title'], project, start, end)]
 
@@ -108,7 +108,7 @@ class Activities(List[Activity]):
             for index, activity in enumerate(activities_to_merge[:-1]):
                 next_activity = activities_to_merge[index + 1]
                 time_diff = next_activity.start.date_time - activity.end.date_time
-                if time_diff <= max_time_diff:
+                if time_diff <= max_time_diff and activity.owner == next_activity.owner:
                     to_merge.append(index)
 
             for index in sorted(to_merge, reverse=True):
