@@ -20,7 +20,9 @@ class GeoLocationDict(Dict[str, GeoLocation]):
 
     def load_from_file(self):
         for label, geo_location in Utils.read_json(Files.geo_locations).items():
-            self[label] = jsonpickle.decode(json.dumps(geo_location))
+            location_obj = jsonpickle.decode(json.dumps(geo_location))
+            if location_obj.bounding_box:
+                self[label] = location_obj
 
     def export_to_file(self):
         Utils.write_json(

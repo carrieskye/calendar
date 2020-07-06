@@ -112,3 +112,8 @@ class TraktAPI:
             } for watch in watches if isinstance(watch, EpisodeWatch)]
         }
         return cls.post_request(url, body)
+
+    @classmethod
+    def get_playback(cls, media_type: str = 'movie'):
+        url = f'{cls.base_url}/sync/playback/{media_type}'
+        return cls.get_request(url, {})

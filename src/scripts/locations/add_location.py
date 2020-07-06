@@ -16,14 +16,15 @@ class AddLocation(Locations):
     def __init__(self):
         super().__init__()
 
-        Output.make_title('BOUNDING BOX')
-        bounding_box = []
-        for point in ['Bottom left', 'Top left', 'Top right', 'Bottom right']:
-            lat_lon = Input.get_string_input(f'{point} latitude, longitude')
-            latitude, longitude = lat_lon.split(', ')
-            bounding_box.append(Point(float(latitude), float(longitude)))
-
-        self.bounding_box = BoundingBox(*bounding_box)
+        self.bounding_box = None
+        if Input.get_bool_input('Bounding box'):
+            Output.make_title('BOUNDING BOX')
+            bounding_box = []
+            for point in ['Bottom left', 'Top left', 'Top right', 'Bottom right']:
+                lat_lon = Input.get_string_input(f'{point} latitude, longitude')
+                latitude, longitude = lat_lon.split(', ')
+                bounding_box.append(Point(float(latitude), float(longitude)))
+            self.bounding_box = BoundingBox(*bounding_box)
 
         Output.make_title('DETAILS')
         self.label = Input.get_string_input('Label')
