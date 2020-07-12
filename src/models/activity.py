@@ -15,24 +15,24 @@ from src.models.geo_location import GeoLocation
 
 class SubActivity:
 
-    def __init__(self, activity_id: int, title: str, project: str, start: EventDateTime, end: EventDateTime):
+    def __init__(self, activity_id: int, title: str, projects: List[str], start: EventDateTime, end: EventDateTime):
         self.activity_id = activity_id
         self.title = title
-        self.project = project
+        self.projects = projects
         self.start = start
         self.end = end
 
     def __str__(self) -> str:
         period = f'%s - %s' % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
-        title = f'{self.project} ▸ {self.title}' if self.project else self.title
+        title = ' ▸ '.join(self.projects + [self.title])
         return f'{period}: {title}'
 
 
 class Activity(SubActivity):
 
     def __init__(self, activity_id: int, title: str, start: EventDateTime, end: EventDateTime, calendar: Calendar,
-                 owner: Owner, location: GeoLocation, project: str = '', sub_activities: List[SubActivity] = []):
-        super().__init__(activity_id, title, project, start, end)
+                 owner: Owner, location: GeoLocation, projects: List[str] = [], sub_activities: List[SubActivity] = []):
+        super().__init__(activity_id, title, projects, start, end)
         self.calendar = calendar
         self.owner = owner
         self.location = location
@@ -69,24 +69,23 @@ class Activity(SubActivity):
         owner = Owner.shared if notes.get('shared', False) else owner
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
-        title, sub_activities, project = original['Title'], [], ''
+        title, sub_activities, projects = original['Title'], [], []
 
-        if calendar.name in ['projects', 'work', 'leisure']:
-            if calendar.name == 'work':
-                project = original['Project'].split(' ▸ ')[-1]
+        if calendar.name == 'leisure' and original['Project'].split(' ▸ ')[1] == 'TV':
+            title = 'TV'
+            url = notes['url']
+            name = original['Title']
+            detail = notes['episode'] if 'episode' in notes else notes['year']
+            sub_activities = [SubActivity(activity_id, f'<a href="{url}">{name} ({detail})</a>', [], start, end)]
 
-            if calendar.name == 'leisure' and original['Project'].split(' ▸ ')[1] == 'TV':
-                title = 'TV'
-                url = notes['url']
-                project = original['Title']
-                detail = notes['episode'] if 'episode' in notes else notes['year']
-                sub_activities = [SubActivity(activity_id, f'<a href="{url}">{project} ({detail})</a>', '', start, end)]
+        elif calendar.name in ['projects', 'work', 'leisure']:
+            title = original['Project'].split(' ▸ ')[1]
+            if len(original['Project'].split(' ▸ ')) > 2:
+                projects = original['Project'].split(' ▸ ')[2:]
 
-            elif calendar.name != 'leisure':
-                title = original['Project'].split(' ▸ ')[1]
-                sub_activities = [SubActivity(activity_id, original['Title'], project, start, end)]
+            sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
 
-        return cls(activity_id, title, start, end, calendar, owner, location, project, sub_activities)
+        return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
 
 
 class Activities(List[Activity]):
@@ -124,7 +123,7 @@ class Activities(List[Activity]):
         activity = self.pop(index)
 
         longest_activity = max([activity, next_activity],
-                               key=lambda x: (x.project not in ['General', 'ML'], x.get_duration()))
+                               key=lambda x: (x.projects and x.projects[-1] not in ['General', 'ML'], x.get_duration()))
 
         longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start

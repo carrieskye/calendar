@@ -28,28 +28,23 @@ class AddDays(Work):
         while self.day <= self.end:
             if self.day.weekday() == 7 or self.day.weekday() < 5:
                 if self.skating:
-                    self.create_event(
-                        cal_id=Calendars.sports.shared, summary='Ice skating',
-                        location=GeoLocations.viola_arena, start=time(8), end=time(9))
+                    viola = GeoLocations.viola_arena
+                    self.create_event(Calendars.sports.shared, 'Ice skating', viola, time(8), time(9))
 
-                self.create_work_event(location=self.location, start=time(9), end=time(12, 30))
-                self.create_lunch_event(location=self.location, start=time(12, 30), end=time(13, 30))
-                self.create_work_event(location=self.location, start=time(13, 30), end=time(17))
+                # self.create_event(Calendars.work.carrie, 'Amplyfi', self.location, start=time(10), end=time(12))
+                self.create_event(Calendars.work.larry, 'Delio', self.location, start=time(9), end=time(12))
+                # self.create_event(Calendars.food.carrie, 'Lunch', self.location, time(12), time(13))
+                self.create_event(Calendars.food.larry, 'Lunch', self.location, time(12), time(12, 30))
+                # self.create_event(Calendars.work.carrie, 'Amplyfi', self.location, start=time(13), end=time(17))
+                self.create_event(Calendars.work.larry, 'Delio', self.location, start=time(12, 30), end=time(17, 30))
+                self.create_event(Calendars.food.larry, 'Dinner', self.location, time(17, 30), time(18, 30))
+                self.create_event(Calendars.projects.larry, 'YouTube', self.location, start=time(18, 30), end=time(20))
 
             self.day += relativedelta(days=1)
 
         Output.make_bold('Added work days\n')
 
-    def create_work_event(self, location: GeoLocation, start: time, end: time):
-        self.create_event(cal_id=Calendars.work.carrie, summary='Amplyfi', location=location, start=start, end=end)
-        self.create_event(cal_id=Calendars.work.larry, summary='Delio', location=location, start=start, end=end)
-
-    def create_lunch_event(self, location: GeoLocation, start: time, end: time):
-        self.create_event(cal_id=Calendars.food.carrie, summary='Lunch', location=location, start=start, end=end)
-        self.create_event(cal_id=Calendars.food.larry, summary='Lunch', location=location, start=start, end=end)
-
-    def create_event(self, cal_id: str, summary: str, location: GeoLocation, start: time, end: time,
-                     desc: str = ''):
+    def create_event(self, cal_id: str, summary: str, location: GeoLocation, start: time, end: time, desc: str = ''):
         event = Event(
             summary=summary,
             location=location.address.__str__(),
