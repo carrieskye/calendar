@@ -8,7 +8,7 @@ from src.models.geo_location import GeoLocation
 from src.models.point import Point
 from src.scripts.script import Locations
 from src.utils.input import Input
-from src.utils.output import Output
+from src.utils.logger import Logger
 
 
 class AddLocation(Locations):
@@ -18,7 +18,7 @@ class AddLocation(Locations):
 
         self.bounding_box = None
         if Input.get_bool_input('Bounding box'):
-            Output.make_title('BOUNDING BOX')
+            Logger.title('BOUNDING BOX')
             bounding_box = []
             for point in ['Bottom left', 'Top left', 'Top right', 'Bottom right']:
                 lat_lon = Input.get_string_input(f'{point} latitude, longitude')
@@ -26,7 +26,7 @@ class AddLocation(Locations):
                 bounding_box.append(Point(float(latitude), float(longitude)))
             self.bounding_box = BoundingBox(*bounding_box)
 
-        Output.make_title('DETAILS')
+        Logger.title('DETAILS')
         self.label = Input.get_string_input('Label')
         self.category = Input.get_string_input('Category')
         self.address = Input.get_string_input('Address')
@@ -43,7 +43,8 @@ class AddLocation(Locations):
             Data.geo_location_dict.__add__(self.label,
                                            GeoLocation(self.category, address, time_zone, self.bounding_box))
 
-            Output.make_bold('\n\nAdded\n')
+            Logger.empty_line()
+            Logger.bold('Added')
             return
 
         raise Exception('Invalid country')

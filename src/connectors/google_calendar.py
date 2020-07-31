@@ -11,13 +11,17 @@ from googleapiclient.discovery import build
 
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
-from src.utils.utils import Utils
+from src.utils.file import File
+from src.utils.formatter import Formatter
+from src.utils.logger import Logger
+
+Logger.title('Loading connectors')
 
 
 def load_credentials(scopes: List[str]) -> Credentials:
     credentials = None
     if os.path.exists('src/credentials/token.pickle'):
-        credentials = Utils.read_pickle('src/credentials/token.pickle')
+        credentials = File.read_pickle('src/credentials/token.pickle')
 
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
@@ -25,22 +29,23 @@ def load_credentials(scopes: List[str]) -> Credentials:
         else:
             flow = InstalledAppFlow.from_client_secrets_file('src/credentials/credentials.json', scopes)
             credentials = flow.run_local_server(port=0)
-        Utils.write_pickle(credentials, 'src/credentials/token.pickle')
+        File.write_pickle(credentials, 'src/credentials/token.pickle')
 
     return credentials
 
 
 class GoogleCalAPI:
+    Logger.sub_sub_title('Loading Google Calendar')
     scopes = ['https://www.googleapis.com/auth/calendar']
     service = build('calendar', 'v3', credentials=load_credentials(scopes))
 
     @classmethod
     def get_calendars(cls) -> Dict[str, str]:
         ignore = ['Hayley', 'Trakt', 'Todoist', 'Contacts', 'peelmancarolyne@gmail.com', 'Larry',
-                  'Holidays in United Kingdom', 'Wina']
+                  'Holidays in United Kingdom', 'Wina', 'lb@deliowealth.com']
         calendar_list = cls.service.calendarList().list().execute().get('items', [])
-        calendar_list = {Utils.normalise(calendar.get('summaryOverride')) if calendar.get('summaryOverride')
-                         else Utils.normalise(calendar.get('summary')): calendar.get('id')
+        calendar_list = {Formatter.normalise(calendar.get('summaryOverride')) if calendar.get('summaryOverride')
+                         else Formatter.normalise(calendar.get('summary')): calendar.get('id')
                          for calendar in calendar_list if calendar.get('summary') not in ignore}
         sorted_calendars = sorted(calendar_list.items(), key=lambda x: x[0])
         return {calendar[0]: calendar[1] for calendar in sorted_calendars}

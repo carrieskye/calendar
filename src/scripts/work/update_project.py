@@ -7,7 +7,7 @@ from src.data.data import Calendars
 from src.models.calendar import Owner
 from src.scripts.script import Work
 from src.utils.input import Input
-from src.utils.output import Output
+from src.utils.logger import Logger
 
 
 class UpdateProject(Work):
@@ -23,12 +23,10 @@ class UpdateProject(Work):
         self.project = Input.get_string_input(name='Project', default='Analyse')
 
     def run(self):
-        Output.make_title('Processing')
+        Logger.sub_title('Processing')
 
         events = GoogleCalAPI.get_events(Calendars.work, Owner.carrie, 1000, self.start, self.end)
         for event in events:
             event.summary = 'Amplyfi'
             event.description = self.project
             GoogleCalAPI.update_event(Calendars.work.carrie, event.event_id, event)
-
-        Output.make_bold('Updated work project\n')

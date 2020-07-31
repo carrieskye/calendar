@@ -102,7 +102,7 @@ class LocationUtils:
 
     @staticmethod
     def clean_work(events: List[LocationEventTemp]):
-        # TODO locations for comparison should not be strings
+        # TODO location for comparison should not be strings
         cleaned_events = []
         index = 0
 

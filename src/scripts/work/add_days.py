@@ -9,7 +9,6 @@ from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
 from src.scripts.script import Work
 from src.utils.input import Input
-from src.utils.output import Output
 
 
 class AddDays(Work):
@@ -41,8 +40,6 @@ class AddDays(Work):
                 self.create_event(Calendars.projects.larry, 'YouTube', self.location, start=time(18, 30), end=time(20))
 
             self.day += relativedelta(days=1)
-
-        Output.make_bold('Added work days\n')
 
     def create_event(self, cal_id: str, summary: str, location: GeoLocation, start: time, end: time, desc: str = ''):
         event = Event(

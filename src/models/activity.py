@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import defaultdict
 from datetime import timedelta
 from typing import List
 
@@ -78,12 +79,16 @@ class Activity(SubActivity):
             detail = notes['episode'] if 'episode' in notes else notes['year']
             sub_activities = [SubActivity(activity_id, f'<a href="{url}">{name} ({detail})</a>', [], start, end)]
 
-        elif calendar.name in ['projects', 'work', 'leisure']:
+        elif calendar.name in ['projects', 'work', 'leisure', 'household']:
             title = original['Project'].split(' ▸ ')[1]
-            if len(original['Project'].split(' ▸ ')) > 2:
-                projects = original['Project'].split(' ▸ ')[2:]
 
-            sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
+            if title == 'Other':
+                title = original['Title']
+            else:
+                if len(original['Project'].split(' ▸ ')) > 2:
+                    projects = original['Project'].split(' ▸ ')[2:]
+
+                sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
 
         return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
 
@@ -96,13 +101,16 @@ class Activities(List[Activity]):
     def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
         self.sort_chronically()
 
-        work_activities = Activities([x for x in self if x.calendar.name == 'work'])
-        project_activities = Activities([x for x in self if x.calendar.name == 'projects'])
-        leisure_activities = Activities([x for x in self if x.calendar.name == 'leisure'])
-        for activity in work_activities + project_activities + leisure_activities:
-            self.remove(activity)
+        activity_groups = defaultdict(Activities)
+        for x in self:
+            if x.sub_activities:
+                activity_groups[x.title].append(x)
 
-        for activities_to_merge in [work_activities, project_activities, leisure_activities]:
+        for group in activity_groups.values():
+            for activity in group:
+                self.remove(activity)
+
+        for activities_to_merge in activity_groups.values():
             to_merge = []
             for index, activity in enumerate(activities_to_merge[:-1]):
                 next_activity = activities_to_merge[index + 1]

@@ -6,10 +6,9 @@ from dateutil.relativedelta import relativedelta
 from src.models.calendar import Owner
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
+from src.scripts.location.utils import LocationUtils
 from src.scripts.script import Locations
 from src.utils.input import Input
-from src.utils.location import LocationUtils
-# from src.utils.output import Output
 from src.utils.table_print import TablePrint
 
 
@@ -26,7 +25,7 @@ class UpdateEventTimes(Locations):
 
     def run(self):
         headers = ['TIME', 'LAT - LON', 'ACCURACY', 'LOCATION']
-        table_print = TablePrint('Processing events', headers, [10, 25, 5, 30])
+        table_print = TablePrint('Processing events', headers, [8, 25, 10, 30])
         results = LocationUtils.get_records(self.start, self.end, self.owner)
         locations = [LocationEvent.from_database(result) for result in results]
         locations = sorted(locations, key=operator.attrgetter('date_time'))
@@ -54,9 +53,3 @@ class UpdateEventTimes(Locations):
 
         LocationUtils.print_events('Determining closest location', events)
         LocationUtils.group_events(events)
-
-        # if self.owner == Owner.larry:
-        #     group_events = LocationUtils.group_events(events)
-        #
-        #     Output.make_title('Updating calendar')
-        #     LocationUtils.process_events(self.start.date(), group_events, self.larry)

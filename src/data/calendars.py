@@ -5,8 +5,8 @@ import jsonpickle
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.models.calendar import Calendar
+from src.utils.file import File
 from src.utils.files import Files
-from src.utils.utils import Utils
 
 
 class CalendarDict(Dict[str, Calendar]):
@@ -16,7 +16,7 @@ class CalendarDict(Dict[str, Calendar]):
         self.load_from_file()
 
     def load_from_file(self):
-        for name, calendar in Utils.read_json(Files.calendars).items():
+        for name, calendar in File.read_json(Files.calendars).items():
             self[name] = jsonpickle.decode(json.dumps(calendar))
 
     def load_from_google(self):
@@ -27,7 +27,7 @@ class CalendarDict(Dict[str, Calendar]):
         self.export_to_file()
 
     def export_to_file(self):
-        Utils.write_json(
+        File.write_json(
             contents={name: json.loads(jsonpickle.encode(calendar)) for name, calendar in self.items()},
             path=Files.calendars
         )

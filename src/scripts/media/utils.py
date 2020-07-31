@@ -13,12 +13,12 @@ from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
 from src.models.watch import Watch, EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch
+from src.utils.file import File
 from src.utils.output import Output
-from src.utils.utils import Utils
 
 
 class MediaUtils:
-    runtime_cache = Utils.read_json('data/trakt/cache/runtime.json')
+    runtime_cache = File.read_json('data/trakt/cache/runtime.json')
 
     @classmethod
     def process_watches(cls, watches: List[Watch], calendar: Calendar, owner: Owner, location: GeoLocation):
@@ -41,7 +41,7 @@ class MediaUtils:
         TraktAPI.add_episodes_to_history(add_again)
 
     @classmethod
-    def get_watches_from_history(cls, history: List[dict]):
+    def get_watches_from_history(cls, history: List[dict]) -> List[Watch]:
         watches = []
         for result in history:
             if result.get('type') == 'episode':
@@ -56,7 +56,7 @@ class MediaUtils:
         return watches
 
     @classmethod
-    def get_episode_runtime(cls, show_id: str, season_no: str, episode_no: int):
+    def get_episode_runtime(cls, show_id: str, season_no: str, episode_no: int) -> int:
         return cls.get_episode_details(show_id, season_no, str(episode_no))['runtime']
 
     @classmethod
@@ -77,7 +77,7 @@ class MediaUtils:
                 'title': result.get('title')
             } for result in results}
             cls.runtime_cache['shows'][show_id][season_no] = cache_entry
-            Utils.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
+            File.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
 
             return cache_entry[str(episode_no)]
 
@@ -90,7 +90,7 @@ class MediaUtils:
             result = TraktAPI.get_movie(movie_id)
 
             cls.runtime_cache['movies'][movie_id] = result.get('runtime')
-            Utils.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
+            File.write_json(cls.runtime_cache, 'data/trakt/cache/runtime.json')
 
             return result.get('runtime')
 
