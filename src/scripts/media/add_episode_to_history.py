@@ -5,7 +5,7 @@ from src.connectors.trakt import TraktAPI
 from src.models.watch import EpisodeWatch, TempEpisodeWatch
 from src.scripts.script import Media
 from src.utils.input import Input
-from src.utils.media import MediaUtils
+from src.scripts.media.utils import MediaUtils
 from src.utils.output import Output
 
 

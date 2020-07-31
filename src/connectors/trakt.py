@@ -6,13 +6,16 @@ import pytz
 import requests
 
 from src.models.watch import EpisodeWatch, Watch, MovieWatch
-from src.utils.utils import Utils
+from src.utils.file import File
+from src.utils.logger import Logger
 
 
 class TraktAPI:
+    Logger.sub_sub_title('Loading Trakt')
+
     base_url = 'https://api.trakt.tv'
     client_id = os.environ.get('TRAKT_CLIENT_ID')
-    token = Utils.read_json('src/credentials/trakt_token.json')['access_token']
+    token = File.read_json('src/credentials/trakt_token.json')['access_token']
 
     @classmethod
     def get_headers(cls):

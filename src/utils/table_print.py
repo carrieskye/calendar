@@ -1,6 +1,6 @@
 import re
 
-from src.utils.output import Output
+from src.utils.logger import Logger
 
 
 class TablePrint:
@@ -9,16 +9,16 @@ class TablePrint:
         self.lengths = lengths
 
         # Print title
-        Output.make_title(title)
+        Logger.title(title)
 
         # Print header
         lines = [header.ljust(lengths[index]) for index, header in enumerate(headers)]
-        print(' | '.join(lines))
+        Logger.log(' | '.join(lines), log_location=False)
 
         dashes = []
         for line in lines:
             dashes.append(re.sub(r'[a-zA-Z]|\s', '-', line))
-        print(' | '.join(dashes))
+        Logger.log(' | '.join(dashes), log_location=False)
 
     def print_line(self, values):
         assert len(values) == len(self.lengths)
@@ -29,9 +29,9 @@ class TablePrint:
                   for index, value in enumerate(values)]
 
         line = [value.ljust(self.lengths[index]) for index, value in enumerate(values)]
-        print(' | '.join(line))
+        Logger.log(' | '.join(line), log_location=False)
 
     @staticmethod
     def end(lines):
         for i in range(0, lines):
-            print()
+            Logger.empty_line()

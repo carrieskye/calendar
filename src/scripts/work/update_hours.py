@@ -10,9 +10,9 @@ from src.models.activity import Activity, Activities
 from src.models.calendar import Owner
 from src.models.event import Event
 from src.scripts.script import Work
+from src.utils.file import File
 from src.utils.input import Input
-from src.utils.output import Output
-from src.utils.utils import Utils
+from src.utils.logger import Logger
 
 
 class UpdateHours(Work):
@@ -30,14 +30,14 @@ class UpdateHours(Work):
         self.work_from_home = Input.get_bool_input('Work from home', default='y')
 
     def run(self):
-        Output.make_title('Processing')
+        Logger.sub_title('Processing')
 
         day = self.start
         while day < self.end:
             try:
                 file_name = f'data/activity/{self.owner.name}/json/%s.json' % day.strftime('%Y-%m-%d')
-                Output.make_bold(day.strftime('%Y-%m-%d'))
-                activities = jsonpickle.decode(json.dumps(Utils.read_json(file_name)))
+                Logger.bold(day.strftime('%Y-%m-%d'))
+                activities = jsonpickle.decode(json.dumps(File.read_json(file_name, log=False)))
 
                 self.remove_events(day)
                 self.create_events(activities)
@@ -46,7 +46,7 @@ class UpdateHours(Work):
                 pass
 
             day += relativedelta(days=1)
-            Utils.log('')
+            Logger.empty_line()
 
     def remove_events(self, day: datetime):
         for calendar in Data.calendar_dict.values():
@@ -60,7 +60,7 @@ class UpdateHours(Work):
 
     def create_events(self, activities: Activities):
         for activity in activities:
-            Utils.log(activity.__str__())
+            Logger.log(activity.__str__())
             cal_id = activity.calendar.get_cal_id(activity.owner)
             if activity.sub_activities:
                 sub_activities = '\n'.join([x.__str__() for x in activity.sub_activities])

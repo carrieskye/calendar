@@ -27,13 +27,13 @@
 #         date_part = f'{self.start.year}/{self.start.month:02d}/{self.start.day:02d}'
 #         results = Utils.read_json(f'data/location_history/{date_part}.json')
 #
-#         locations = [LocationEvent.from_google(result) for result in results]
-#         locations = sorted(locations, key=operator.attrgetter('date_time'))
+#         location = [LocationEvent.from_google(result) for result in results]
+#         location = sorted(location, key=operator.attrgetter('date_time'))
 #
-#         event_start = locations[0].date_time
+#         event_start = location[0].date_time
 #         current_location = None
 #         events = []
-#         for location in locations:
+#         for location in location:
 #             closest_location = LocationUtils.get_closest_location(location)
 #             date_time = location.date_time.strftime('%H:%M:%S')
 #             values = [date_time, f'{location.latitude}, {location.longitude}', location.accuracy, closest_location]
@@ -43,7 +43,7 @@
 #                 current_location = LocationEventTemp(closest_location, [closest_location], event_start)
 #             elif current_location:
 #                 label = closest_location if closest_location else 'unknown'
-#                 if current_location.name != label or location == locations[-1]:
+#                 if current_location.name != label or location == location[-1]:
 #                     current_location.end = location.date_time
 #                     events.append(current_location)
 #                     event_start = location.date_time
