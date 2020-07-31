@@ -3,10 +3,10 @@ from dateutil.relativedelta import relativedelta
 
 from src.connectors.trakt import TraktAPI
 from src.models.watch import EpisodeWatch, TempEpisodeWatch
+from src.scripts.media.utils import MediaUtils
 from src.scripts.script import Media
 from src.utils.input import Input
-from src.scripts.media.utils import MediaUtils
-from src.utils.output import Output
+from src.utils.logger import Logger
 
 
 class AddEpisodesToHistory(Media):
@@ -26,7 +26,7 @@ class AddEpisodesToHistory(Media):
         self.location = self.get_location()
 
     def run(self):
-        Output.make_title('Processing')
+        Logger.sub_title('Processing')
 
         start = self.start.replace(tzinfo=tz.gettz(self.location.time_zone))
         show = TraktAPI.get_show_details(self.show_title)
@@ -64,6 +64,7 @@ class AddEpisodesToHistory(Media):
         if self.end:
             watches = MediaUtils.spread_watches(watches, self.end - self.start)
 
-        MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
+        for x in watches:
+            Logger.log(x.title + ' ' + x.details['episode'])
 
-        Output.make_bold('Added to history\n')
+        MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
