@@ -7,7 +7,7 @@ from src.data.data import Calendars, GeoLocations
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
-from src.scripts.script import Work
+from src.scripts.work.work import Work
 from src.utils.input import Input
 
 

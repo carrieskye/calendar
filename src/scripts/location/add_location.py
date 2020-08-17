@@ -6,27 +6,27 @@ from src.models.address import COUNTRY_ADDRESSES
 from src.models.bounding_box import BoundingBox
 from src.models.geo_location import GeoLocation
 from src.models.point import Point
-from src.scripts.script import Locations
+from src.scripts.location.location import Location
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class AddLocation(Locations):
+class AddLocation(Location):
 
     def __init__(self):
         super().__init__()
 
         self.bounding_box = None
         if Input.get_bool_input('Bounding box'):
-            Logger.title('BOUNDING BOX')
+            Logger.sub_sub_title('BOUNDING BOX')
             bounding_box = []
             for point in ['Bottom left', 'Top left', 'Top right', 'Bottom right']:
-                lat_lon = Input.get_string_input(f'{point} latitude, longitude')
+                lat_lon = Input.get_string_input(f'{point}', input_type='<lat>, <lon>')
                 latitude, longitude = lat_lon.split(', ')
                 bounding_box.append(Point(float(latitude), float(longitude)))
             self.bounding_box = BoundingBox(*bounding_box)
 
-        Logger.title('DETAILS')
+        Logger.sub_sub_title('DETAILS')
         self.label = Input.get_string_input('Label')
         self.category = Input.get_string_input('Category')
         self.address = Input.get_string_input('Address')

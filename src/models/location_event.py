@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from datetime import datetime
 from math import radians, atan2, sin, cos, sqrt
+from typing import Tuple
 
 from src.models.point import Point
 
@@ -13,9 +16,9 @@ class LocationEvent:
         self.accuracy = accuracy
         self.location_id = location_id
 
-    @staticmethod
-    def from_database(db_record):
-        return LocationEvent(
+    @classmethod
+    def from_database(cls, db_record: Tuple) -> LocationEvent:
+        return cls(
             location_id=db_record[0],
             date_time=db_record[1],
             latitude=db_record[4],
@@ -23,9 +26,9 @@ class LocationEvent:
             accuracy=db_record[9]
         )
 
-    @staticmethod
-    def from_google(takeout):
-        return LocationEvent(
+    @classmethod
+    def from_google(cls, takeout: dict) -> LocationEvent:
+        return cls(
             date_time=datetime.fromtimestamp(int(takeout.get('timestampMs')) / 1000),
             latitude=int(takeout.get('latitudeE7')) / 10000000,
             longitude=int(takeout.get('longitudeE7')) / 10000000,

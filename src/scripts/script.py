@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import getframeinfo, stack
 
-from src.data.data import Calendars, Data
+from src.data.data import Data
 from src.models.calendar import Owner
 from src.models.geo_location import GeoLocation
 from src.utils.input import Input
@@ -37,15 +37,3 @@ class Script(ABC):
             caller=getframeinfo(stack()[1][0])
         )
         return Data.geo_location_dict[location]
-
-
-class Work(Script, ABC):
-    pass
-
-
-class Locations(Script, ABC):
-    pass
-
-
-class Media(Script, ABC):
-    calendar = Calendars.leisure

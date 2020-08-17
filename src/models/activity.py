@@ -8,7 +8,7 @@ from typing import List
 
 from dateutil.parser import parse
 
-from src.data.data import Data
+from src.data.data import Data, Calendars
 from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
@@ -63,31 +63,38 @@ class Activity(SubActivity):
     @classmethod
     def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
         activity_id = original['ID']
+        projects = original['Project'].split(' ▸ ')
         start = EventDateTime(parse(original['Start Date']), time_zone)
         end = EventDateTime(parse(original['End Date']), time_zone)
-        calendar = Data.calendar_dict[original['Project'].split(' ▸ ')[0].lower()]
+        calendar = Data.calendar_dict[projects.pop(0).lower()]
         notes = json.loads(re.sub(r'[“”]', '"', original['Notes'])) if original['Notes'] else {}
         owner = Owner.shared if notes.get('shared', False) else owner
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
-        title, sub_activities, projects = original['Title'], [], []
+        title, sub_activities = original['Title'], []
 
-        if calendar.name == 'leisure' and original['Project'].split(' ▸ ')[1] == 'TV':
+        if calendar.name == 'leisure' and projects and projects[0] == 'TV':
             title = 'TV'
             url = notes['url']
             name = original['Title']
             detail = notes['episode'] if 'episode' in notes else notes['year']
             sub_activities = [SubActivity(activity_id, f'<a href="{url}">{name} ({detail})</a>', [], start, end)]
 
+        elif calendar.name == 'work' and original['Duration'] > '0:20:00' and title == 'Lunch':
+            title = 'Lunch'
+            calendar = Calendars.leisure
+
         elif calendar.name in ['projects', 'work', 'leisure', 'household']:
-            title = original['Project'].split(' ▸ ')[1]
+            if calendar.name == 'household':
+                projects.pop(0)
 
-            if title == 'Other':
+            if projects and projects[0] == 'Home studio' and len(projects) > 2:
+                projects.pop(0)
+
+            title = projects.pop(0) if projects else title
+            if title in ['Food', 'Other']:
                 title = original['Title']
-            else:
-                if len(original['Project'].split(' ▸ ')) > 2:
-                    projects = original['Project'].split(' ▸ ')[2:]
-
+            elif title != original['Title']:
                 sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
 
         return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
@@ -98,13 +105,13 @@ class Activities(List[Activity]):
     def sort_chronically(self):
         self.sort(key=lambda x: x.start.__str__())
 
-    def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
+    def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=30)):
         self.sort_chronically()
 
         activity_groups = defaultdict(Activities)
         for x in self:
-            if x.sub_activities:
-                activity_groups[x.title].append(x)
+            # if x.sub_activities:
+            activity_groups[x.title].append(x)
 
         for group in activity_groups.values():
             for activity in group:
@@ -145,27 +152,27 @@ class Activities(List[Activity]):
             if activity.end.date_time < self[index].end.date_time:
                 self.remove(activity)
 
-    def standardise_short_activities(self):
-        for index, activity in enumerate(self):
-            if activity == self[-1]:
-                break
-            if activity.get_duration() < timedelta(minutes=30):
-                # If the next activity starts more than 30 minutes after this activity, continue
-                if self[index + 1].start.date_time >= activity.start.date_time + timedelta(minutes=30):
-                    continue
-                # If there is no previous activity or the previous activity is more than 30 minutes before this one,
-                # move the start of the activity up to make the length of the activity 30 minutes
-                elif index == 0 or self[index - 1].end.date_time <= activity.end.date_time - timedelta(minutes=30):
-                    activity.start.date_time = activity.end.date_time - timedelta(minutes=30)
-                # If the next activity is also shorter than 30 minutes and the activity after that is the same as this
-                # activity, merge the same activities
-                elif self[index + 1].get_duration() < timedelta(minutes=30) and len(
-                        self) > index + 2 and activity.calendar == self[index + 2].calendar:
-                    self.remove(activity)
-                    self[index].start = self[index - 1].end
-                else:
-                    activity.start.date_time = self[index - 1].end.date_time
-                    activity.end.date_time = activity.start.date_time + timedelta(minutes=30)
-                    self[index + 1].start.date_time = activity.end.date_time
-
-        self.merge_short_activities()
+    # def standardise_short_activities(self):
+    #     for index, activity in enumerate(self):
+    #         if activity == self[-1]:
+    #             break
+    #         if activity.get_duration() < timedelta(minutes=30):
+    #             # If the next activity starts more than 30 minutes after this activity, continue
+    #             if self[index + 1].start.date_time >= activity.start.date_time + timedelta(minutes=30):
+    #                 continue
+    #             # If there is no previous activity or the previous activity is more than 30 minutes before this one,
+    #             # move the start of the activity up to make the length of the activity 30 minutes
+    #             elif index == 0 or self[index - 1].end.date_time <= activity.end.date_time - timedelta(minutes=30):
+    #                 activity.start.date_time = activity.end.date_time - timedelta(minutes=30)
+    #             # If the next activity is also shorter than 30 minutes and the activity after that is the same as this
+    #             # activity, merge the same activities
+    #             elif self[index + 1].get_duration() < timedelta(minutes=30) and len(
+    #                     self) > index + 2 and activity.calendar == self[index + 2].calendar:
+    #                 self.remove(activity)
+    #                 self[index].start = self[index - 1].end
+    #             else:
+    #                 activity.start.date_time = self[index - 1].end.date_time
+    #                 activity.end.date_time = activity.start.date_time + timedelta(minutes=30)
+    #                 self[index + 1].start.date_time = activity.end.date_time
+    #
+    #     self.merge_short_activities()

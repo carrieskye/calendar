@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 
 from src.models.activity import Activities, Activity
 from src.models.calendar import Owner
-from src.scripts.script import Work
+from src.scripts.work.work import Work
 from src.utils.file import File
 from src.utils.logger import Logger
 
@@ -37,9 +37,9 @@ class ParseTimingExportScript(Work):
             for day, activities in activities_per_day.items():
                 activities.merge_short_activities()
                 activities.remove_double_activities()
-                activities.standardise_short_activities()
+                # activities.standardise_short_activities()
 
-                file_name = f'data/activity/{owner.name}/csv/{day}'
-                File.write_csv([x.flatten() for x in activities], f'{file_name}.csv', log=False)
-                File.write_json(json.loads(jsonpickle.encode(activities)), f'{file_name}.json', log=False)
+                dir_name = f'data/activity/{owner.name}/'
+                File.write_csv([x.flatten() for x in activities], f'{dir_name}/csv/{day}.csv', log=False)
+                File.write_json(json.loads(jsonpickle.encode(activities)), f'{dir_name}/json/{day}.json', log=False)
                 Logger.log(f'Processed {day}')
