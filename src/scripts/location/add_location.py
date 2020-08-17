@@ -6,12 +6,12 @@ from src.models.address import COUNTRY_ADDRESSES
 from src.models.bounding_box import BoundingBox
 from src.models.geo_location import GeoLocation
 from src.models.point import Point
-from src.scripts.location.location import Location
+from src.scripts.location.location import LocationScript
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class AddLocation(Location):
+class AddLocation(LocationScript):
 
     def __init__(self):
         super().__init__()

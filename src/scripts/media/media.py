@@ -19,7 +19,7 @@ from src.utils.file import File
 from src.utils.logger import Logger
 
 
-class Media(Script, ABC):
+class MediaScript(Script, ABC):
     calendar = Calendars.leisure
     runtime_cache = File.read_json('data/trakt/cache/runtime.json')
 

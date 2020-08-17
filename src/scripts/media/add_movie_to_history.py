@@ -3,12 +3,12 @@ from dateutil.relativedelta import relativedelta
 
 from src.connectors.trakt import TraktAPI
 from src.models.watch import TempMovieWatch, MovieWatch
-from src.scripts.media.media import Media
+from src.scripts.media.media import MediaScript
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class AddMovieToHistory(Media):
+class AddMovieToHistory(MediaScript):
 
     def __init__(self):
         super().__init__()

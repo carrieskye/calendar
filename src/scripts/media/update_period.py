@@ -3,12 +3,12 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.trakt import TraktAPI
-from src.scripts.media.media import Media
+from src.scripts.media.media import MediaScript
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class UpdatePeriod(Media):
+class UpdatePeriod(MediaScript):
 
     def __init__(self, start: datetime = None, days: int = None):
         super().__init__()

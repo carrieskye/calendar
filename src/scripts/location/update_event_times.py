@@ -6,12 +6,12 @@ from dateutil.relativedelta import relativedelta
 from src.models.calendar import Owner
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
-from src.scripts.location.location import Location
+from src.scripts.location.location import LocationScript
 from src.utils.input import Input
 from src.utils.table_print import TablePrint
 
 
-class UpdateEventTimes(Location):
+class UpdateEventTimes(LocationScript):
 
     def __init__(self):
         super(UpdateEventTimes, self).__init__()

@@ -7,11 +7,11 @@ from src.data.data import Calendars, GeoLocations
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
-from src.scripts.work.work import Work
+from src.scripts.work.work import WorkScript
 from src.utils.input import Input
 
 
-class AddDays(Work):
+class AddDays(WorkScript):
 
     def __init__(self):
         super().__init__()

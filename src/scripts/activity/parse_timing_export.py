@@ -6,12 +6,12 @@ from dateutil.relativedelta import relativedelta
 
 from src.models.activity import Activities, Activity
 from src.models.calendar import Owner
-from src.scripts.work.work import Work
+from src.scripts.activity.activity import ActivityScript
 from src.utils.file import File
 from src.utils.logger import Logger
 
 
-class ParseTimingExportScript(Work):
+class ParseTimingExportScript(ActivityScript):
 
     def __init__(self):
         super().__init__()
