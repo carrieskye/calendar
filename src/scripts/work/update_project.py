@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Calendars
 from src.models.calendar import Owner
-from src.scripts.script import Work
+from src.scripts.work.work import Work
 from src.utils.input import Input
 from src.utils.logger import Logger
 

@@ -1,3 +1,4 @@
+from abc import ABC
 from datetime import datetime, time, date, timedelta
 from math import radians, sin, atan2, sqrt, cos
 from typing import List
@@ -14,13 +15,14 @@ from src.models.event_datetime import EventDateTime
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
 from src.models.point import Point
+from src.scripts.script import Script
 from src.utils.table_print import TablePrint
 
 
-class LocationUtils:
+class Location(Script, ABC):
 
-    @staticmethod
-    def get_records(start: datetime, end: datetime, owner: Owner, accuracy: int = 20):
+    @classmethod
+    def get_records(cls, start: datetime, end: datetime, owner: Owner, accuracy: int = 20) -> List[tuple]:
         user_id = 3 if owner == Owner.carrie else 2
         conditions = 'WHERE ' + ' AND '.join([
             f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',
@@ -37,8 +39,8 @@ class LocationUtils:
         conn.close()
         return records
 
-    @staticmethod
-    def group_events(events: List[LocationEventTemp]):
+    @classmethod
+    def group_events(cls, events: List[LocationEventTemp]) -> List[LocationEventTemp]:
         grouped_events = []
         index = 0
 
@@ -64,17 +66,17 @@ class LocationUtils:
                 grouped_events.append(event)
             index += 1
 
-        LocationUtils.print_events('Grouped events', grouped_events)
-        return LocationUtils.merge_events(grouped_events)
+        cls.print_events('Grouped events', grouped_events)
+        return cls.merge_events(grouped_events)
 
-    @staticmethod
-    def merge_events(events: List[LocationEventTemp]):
+    @classmethod
+    def merge_events(cls, events: List[LocationEventTemp]) -> List[LocationEventTemp]:
         merged_events = []
         index = 0
 
         merge_start = 0
 
-        work_day = LocationUtils.is_work_day(events)
+        work_day = cls.is_work_day(events)
         if not work_day:
             while index < len(events):
                 event = events[index]
@@ -97,16 +99,16 @@ class LocationUtils:
         else:
             merged_events = events
 
-        LocationUtils.print_events('Merged events', merged_events)
-        return LocationUtils.clean_work(merged_events)
+        cls.print_events('Merged events', merged_events)
+        return cls.clean_work(merged_events)
 
-    @staticmethod
-    def clean_work(events: List[LocationEventTemp]):
+    @classmethod
+    def clean_work(cls, events: List[LocationEventTemp]) -> List[LocationEventTemp]:
         # TODO location for comparison should not be strings
         cleaned_events = []
         index = 0
 
-        work_day = LocationUtils.is_work_day(events)
+        work_day = cls.is_work_day(events)
         if work_day:
             while index < len(events):
                 event = events[index]
@@ -171,20 +173,14 @@ class LocationUtils:
                     cleaned_events.append(event)
                 index += 1
 
-            LocationUtils.print_events('Cleaned work events', cleaned_events)
+            cls.print_events('Cleaned work events', cleaned_events)
         else:
             cleaned_events = events
 
         return cleaned_events
 
-    @staticmethod
-    def is_work_day(events: List[LocationEventTemp]):
-        morning = any([event.name == 'Amplyfi' for event in events if event.start.time() < time(14)])
-        afternoon = any([event.name == 'Amplyfi' for event in events if event.end.time() > time(12)])
-        return morning and afternoon
-
     @classmethod
-    def get_closest_location(cls, location: LocationEvent):
+    def get_closest_location(cls, location: LocationEvent) -> str:
         matches = []
         geo_locations = cls.filter_geo_locations(location)
         for label, geo_location in geo_locations.items():
@@ -196,7 +192,7 @@ class LocationUtils:
             distances = {}
             for match in matches:
                 intersection = Data.geo_location_dict[match].bounding_box.intersection
-                distances[match] = LocationUtils.get_distance(location.get_point(), intersection)
+                distances[match] = cls.get_distance(location.get_point(), intersection)
             match = min(distances.items(), key=lambda x: x[1])
             return match[0]
 
@@ -232,17 +228,6 @@ class LocationUtils:
                     GoogleCalAPI.create_event(Calendars.various.carrie, event)
 
     @classmethod
-    def create_default_event(cls, history_entry: LocationEventTemp):
-        time_zone = Data.geo_location_dict[history_entry.name].time_zone
-        return Event(
-            summary='New event',
-            location=Data.geo_location_dict[history_entry.name].address.stringify(),
-            description=history_entry.name,
-            start=EventDateTime(date_time=history_entry.start, time_zone=time_zone),
-            end=EventDateTime(date_time=history_entry.end, time_zone=time_zone)
-        )
-
-    @classmethod
     def get_closest_event(cls, event: Event, history: List[LocationEventTemp]):
         matches = []
         for history_entry in history:
@@ -267,6 +252,49 @@ class LocationUtils:
             GoogleCalAPI.update_event(event.calendar.get_cal_id(event.owner), event.event_id, event)
             return match
 
+    @classmethod
+    def print_events(cls, title: str, events: List[LocationEventTemp]):
+        headers = ['START', 'END', 'LOCATION']
+        width = [10, 10, 30]
+        table_print = TablePrint(title, headers, width)
+
+        for event in events:
+            name = event.name if event.name != 'unknown' else ''
+            start = event.start
+            end = event.end
+            if name:
+                time_zone = Data.geo_location_dict[name].time_zone
+                start = cls.ignore_dst(start, time_zone)
+                end = cls.ignore_dst(end, time_zone)
+                table_print.print_line([start.strftime('%H:%M:%S'), end.strftime('%H:%M:%S'), name])
+
+    @classmethod
+    def filter_geo_locations(cls, location: LocationEvent):
+        geo_locations = {}
+        for label, geo_location in Data.geo_location_dict.items():
+            if geo_location.bounding_box:
+                point_a = Point(location.latitude, location.longitude)
+                if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
+                    geo_locations[label] = geo_location
+        return geo_locations
+
+    @staticmethod
+    def is_work_day(events: List[LocationEventTemp]) -> bool:
+        morning = any([event.name == 'Amplyfi' for event in events if event.start.time() < time(14)])
+        afternoon = any([event.name == 'Amplyfi' for event in events if event.end.time() > time(12)])
+        return morning and afternoon
+
+    @staticmethod
+    def create_default_event(history_entry: LocationEventTemp):
+        time_zone = Data.geo_location_dict[history_entry.name].time_zone
+        return Event(
+            summary='New event',
+            location=Data.geo_location_dict[history_entry.name].address.stringify(),
+            description=history_entry.name,
+            start=EventDateTime(date_time=history_entry.start, time_zone=time_zone),
+            end=EventDateTime(date_time=history_entry.end, time_zone=time_zone)
+        )
+
     @staticmethod
     def calculate_time_offset(event: LocationEventTemp, day_event: Event):
         start_diff = abs((event.start - day_event.start.date_time).total_seconds())
@@ -287,33 +315,7 @@ class LocationUtils:
         return earth_radius * c
 
     @staticmethod
-    def print_events(title: str, events: List[LocationEventTemp]):
-        headers = ['START', 'END', 'LOCATION']
-        width = [10, 10, 30]
-        table_print = TablePrint(title, headers, width)
-
-        for event in events:
-            name = event.name if event.name != 'unknown' else ''
-            start = event.start
-            end = event.end
-            if name:
-                time_zone = Data.geo_location_dict[name].time_zone
-                start = LocationUtils.ignore_dst(start, time_zone)
-                end = LocationUtils.ignore_dst(end, time_zone)
-                table_print.print_line([start.strftime('%H:%M:%S'), end.strftime('%H:%M:%S'), name])
-
-    @staticmethod
     def ignore_dst(event_time: datetime, time_zone: str):
         if pytz.timezone(time_zone).dst(event_time) != timedelta(0):
             return event_time + pytz.timezone(time_zone).dst(event_time)
         return event_time
-
-    @classmethod
-    def filter_geo_locations(cls, location: LocationEvent):
-        geo_locations = {}
-        for label, geo_location in Data.geo_location_dict.items():
-            if geo_location.bounding_box:
-                point_a = Point(location.latitude, location.longitude)
-                if cls.get_distance(geo_location.bounding_box.intersection, point_a) < 2 * location.latitude:
-                    geo_locations[label] = geo_location
-        return geo_locations

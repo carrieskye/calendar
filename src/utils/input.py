@@ -39,10 +39,11 @@ class Input:
                 prompt += Formatter.make_bold(input_type)
 
             if default:
-                prompt += f' {default}?'
+                prompt += f' {default}?' if input_type else f'{default}?'
 
-            prompt += Formatter.make_bold(') ')
+            prompt += Formatter.make_bold(')')
 
+        prompt += ' '
         return prompt
 
     @staticmethod
@@ -58,8 +59,7 @@ class Input:
     @classmethod
     def get_date_input(cls, name: str, input_type: str = 'YYYY-mm-dd', default: date = datetime.now().date(),
                        min_date: date = None, max_date: date = None, caller: Traceback = None) -> date:
-        if not caller:
-            caller = getframeinfo(stack()[1][0])
+        caller = caller if caller else getframeinfo(stack()[1][0])
         value = cls.get_string_input(name, input_type, default.strftime('%Y-%m-%d'), caller)
         parsed = parse(value).date() if value else default
 
@@ -75,33 +75,35 @@ class Input:
 
     @staticmethod
     def get_time_input(name: str, input_type: str = 'HH:MM:SS', default: time = datetime.now().time(),
-                       min_time: time = None, max_time: time = None):
-        value = Input.get_string_input(name, input_type, default.strftime('%H:%M:%S'))
+                       min_time: time = None, max_time: time = None, caller: Traceback = None):
+        caller = caller if caller else getframeinfo(stack()[1][0])
+        value = Input.get_string_input(name, input_type, default.strftime('%H:%M:%S'), caller)
         parsed = parse(value).time() if value else default
 
         if min_time and parsed < min_time:
             Logger.bold(f'Minimum time is {min_time}')
-            return Input.get_time_input(name, input_type, default, min_time, max_time)
+            return Input.get_time_input(name, input_type, default, min_time, max_time, caller)
 
         if max_time and parsed > max_time:
             Logger.bold(f'Maximum time is {max_time}')
-            return Input.get_time_input(name, input_type, default, min_time, max_time)
+            return Input.get_time_input(name, input_type, default, min_time, max_time, caller)
 
         return parsed
 
     @staticmethod
     def get_date_time_input(name: str, input_type: str = 'YYYY-mm-dd HH:MM', default: datetime = datetime.now(),
-                            min_date_time: datetime = None, max_date_time: datetime = None):
-        date_part = Input.get_date_input(name + 'date', default=default.date())
-        time_part = Input.get_time_input(name + 'time', default=default.time())
+                            min_date_time: datetime = None, max_date_time: datetime = None, caller: Traceback = None):
+        caller = caller if caller else getframeinfo(stack()[1][0])
+        date_part = Input.get_date_input(name + 'date', default=default.date(), caller=caller)
+        time_part = Input.get_time_input(name + 'time', default=default.time(), caller=caller)
         parsed = datetime.combine(date_part, time_part)
 
         if min_date_time and parsed < min_date_time:
             Logger.bold(f'Minimum datetime is {min_date_time}')
-            return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time)
+            return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time, caller)
 
         if max_date_time and parsed > max_date_time:
             Logger.bold(f'Maximum datetime is {max_date_time}')
-            return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time)
+            return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time, caller)
 
         return parsed

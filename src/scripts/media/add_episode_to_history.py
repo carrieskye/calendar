@@ -3,8 +3,7 @@ from dateutil.relativedelta import relativedelta
 
 from src.connectors.trakt import TraktAPI
 from src.models.watch import EpisodeWatch, TempEpisodeWatch
-from src.scripts.media.utils import MediaUtils
-from src.scripts.script import Media
+from src.scripts.media.media import Media
 from src.utils.input import Input
 from src.utils.logger import Logger
 
@@ -46,7 +45,7 @@ class AddEpisodesToHistory(Media):
 
         for season_no, episode_range in episodes.items():
             for episode_no in episode_range:
-                details = MediaUtils.get_episode_details(show_id, str(season_no), str(episode_no))
+                details = self.get_episode_details(show_id, str(season_no), str(episode_no))
                 temp_watch = TempEpisodeWatch(
                     watched_at=start + relativedelta(minutes=details['runtime']),
                     show_id=show_id,
@@ -62,9 +61,6 @@ class AddEpisodesToHistory(Media):
                 watches.append(watch)
 
         if self.end:
-            watches = MediaUtils.spread_watches(watches, self.end - self.start)
+            watches = self.spread_watches(watches, self.end - self.start)
 
-        for x in watches:
-            Logger.log(x.title + ' ' + x.details['episode'])
-
-        MediaUtils.process_watches(watches, self.calendar, self.owner, self.location)
+        self.process_watches(watches, self.calendar, self.owner, self.location)

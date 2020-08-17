@@ -6,27 +6,26 @@ from dateutil.relativedelta import relativedelta
 from src.models.calendar import Owner
 from src.models.location_event import LocationEvent
 from src.models.location_event_temp import LocationEventTemp
-from src.scripts.location.utils import LocationUtils
-from src.scripts.script import Locations
+from src.scripts.location.location import Location
 from src.utils.input import Input
 from src.utils.table_print import TablePrint
 
 
-class UpdateEventTimes(Locations):
+class UpdateEventTimes(Location):
 
     def __init__(self):
         super(UpdateEventTimes, self).__init__()
 
-        start = Input.get_date_input('Date', min_date=datetime(2019, 11, 20).date(),
-                                     default=(datetime.now() - relativedelta(days=1)).date())
+        self.owner = self.get_owner(default=Owner.carrie)
+        yesterday = (datetime.now() - relativedelta(days=1)).date()
+        start = Input.get_date_input('Date', min_date=datetime(2019, 11, 20).date(), default=yesterday)
         self.start = datetime.combine(start, time(4, 0))
         self.end = self.start + relativedelta(days=1)
-        self.owner = self.get_owner(default=Owner.carrie)
 
     def run(self):
         headers = ['TIME', 'LAT - LON', 'ACCURACY', 'LOCATION']
         table_print = TablePrint('Processing events', headers, [8, 25, 10, 30])
-        results = LocationUtils.get_records(self.start, self.end, self.owner)
+        results = self.get_records(self.start, self.end, self.owner)
         locations = [LocationEvent.from_database(result) for result in results]
         locations = sorted(locations, key=operator.attrgetter('date_time'))
 
@@ -34,7 +33,7 @@ class UpdateEventTimes(Locations):
         current_location = None
         events = []
         for location in locations:
-            closest_location = LocationUtils.get_closest_location(location)
+            closest_location = self.get_closest_location(location)
             date_time = location.date_time.strftime('%H:%M:%S')
             values = [date_time, f'{location.latitude}, {location.longitude}', location.accuracy, closest_location]
             table_print.print_line(values)
@@ -51,5 +50,5 @@ class UpdateEventTimes(Locations):
                 else:
                     current_location.events.append(closest_location)
 
-        LocationUtils.print_events('Determining closest location', events)
-        LocationUtils.group_events(events)
+        self.print_events('Determining closest location', events)
+        self.group_events(events)

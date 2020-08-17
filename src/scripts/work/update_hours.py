@@ -9,7 +9,7 @@ from src.data.data import Data, GeoLocations
 from src.models.activity import Activity, Activities
 from src.models.calendar import Owner
 from src.models.event import Event
-from src.scripts.script import Work
+from src.scripts.work.work import Work
 from src.utils.file import File
 from src.utils.input import Input
 from src.utils.logger import Logger
@@ -20,13 +20,12 @@ class UpdateHours(Work):
     def __init__(self):
         super().__init__()
 
+        self.owner = self.get_owner(default=Owner.carrie)
         start = Input.get_date_input('Start')
-        days = Input.get_int_input('Days', '#days')
-
         self.start = datetime.combine(start, time(4, 0))
+        days = Input.get_int_input('Days', '#days')
         self.end = self.start + relativedelta(days=days)
         self.location = self.get_location()
-        self.owner = self.get_owner(default=Owner.carrie)
         self.work_from_home = Input.get_bool_input('Work from home', default='y')
 
     def run(self):
