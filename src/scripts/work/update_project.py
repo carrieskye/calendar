@@ -5,12 +5,12 @@ from dateutil.relativedelta import relativedelta
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Calendars
 from src.models.calendar import Owner
-from src.scripts.work.work import Work
+from src.scripts.work.work import WorkScript
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class UpdateProject(Work):
+class UpdateProject(WorkScript):
 
     def __init__(self):
         super().__init__()

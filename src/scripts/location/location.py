@@ -19,7 +19,7 @@ from src.scripts.script import Script
 from src.utils.table_print import TablePrint
 
 
-class Location(Script, ABC):
+class LocationScript(Script, ABC):
 
     @classmethod
     def get_records(cls, start: datetime, end: datetime, owner: Owner, accuracy: int = 20) -> List[tuple]:

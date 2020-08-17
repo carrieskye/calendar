@@ -9,13 +9,13 @@ from src.data.data import Data, GeoLocations
 from src.models.activity import Activity, Activities
 from src.models.calendar import Owner
 from src.models.event import Event
-from src.scripts.work.work import Work
+from src.scripts.activity.activity import ActivityScript
 from src.utils.file import File
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 
-class UpdateHours(Work):
+class UpdateCalendar(ActivityScript):
 
     def __init__(self):
         super().__init__()

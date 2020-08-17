@@ -1,5 +1,7 @@
 import sys
 
+from src.scripts.activity.parse_timing_export import ParseTimingExportScript
+from src.scripts.activity.update_calendar import UpdateCalendar
 from src.scripts.location.add_location import AddLocation
 from src.scripts.location.update_event_times import UpdateEventTimes
 from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
@@ -8,19 +10,15 @@ from src.scripts.media.update_period import UpdatePeriod
 from src.scripts.media.update_today import UpdateToday
 from src.scripts.media.update_yesterday import UpdateYesterday
 from src.scripts.work.add_days import AddDays
-from src.scripts.work.parse_timing_export import ParseTimingExportScript
-from src.scripts.work.update_hours import UpdateHours
 from src.scripts.work.update_project import UpdateProject
 from src.utils.formatter import Formatter
 from src.utils.input import Input
 from src.utils.logger import Logger
 
 SCRIPTS = {
-    'Work': {
-        'Add work days': AddDays,
+    'Activity': {
         'Parse timing export': ParseTimingExportScript,
-        'Update work hours': UpdateHours,
-        'Update work project': UpdateProject,
+        'Update calendar': UpdateCalendar,
     },
     'Media': {
         'Update Trakt today': UpdateToday,
@@ -32,6 +30,10 @@ SCRIPTS = {
     'Locations': {
         'Update event times': UpdateEventTimes,
         'Add new location': AddLocation
+    },
+    'Work': {
+        'Add work days': AddDays,
+        'Update work project': UpdateProject,
     }
 }
 
