@@ -1,13 +1,14 @@
+import operator
 from abc import ABC
 from datetime import datetime, time, date, timedelta
 from math import radians, sin, atan2, sqrt, cos
 from typing import List
 
-import psycopg2
 import pytz
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
+from src.connectors.own_tracks import OwnTracks
 from src.data.data import Data, Calendars
 from src.models.calendar import Owner
 from src.models.event import Event
@@ -22,22 +23,20 @@ from src.utils.table_print import TablePrint
 class LocationScript(Script, ABC):
 
     @classmethod
-    def get_records(cls, start: datetime, end: datetime, owner: Owner, accuracy: int = 20) -> List[tuple]:
-        user_id = 3 if owner == Owner.carrie else 2
-        conditions = 'WHERE ' + ' AND '.join([
-            f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',
-            f'time < \'{end.strftime("%Y-%m-%d %H:%M:%S")}\'',
-            f'user_id = {user_id}',
-            f'accuracy < {accuracy}'
-        ])
-        query = f'SELECT * FROM public.positions {conditions}'
+    def get_locations(cls, start: datetime, end: datetime, owner: Owner) -> List[LocationEvent]:
+        headers = ['TIME', 'LAT - LON', 'ACCURACY', 'LOCATION']
+        table_print = TablePrint('Processing events', headers, [8, 25, 10, 30])
+        results = OwnTracks.get_records(start, end, owner)
+        locations = [LocationEvent.from_database(result) for result in results]
+        locations = sorted(locations, key=operator.attrgetter('date_time'))
 
-        conn = psycopg2.connect(host='nuc', database='ulogger', user='postgres', password='catsies')
-        cur = conn.cursor()
-        cur.execute(query)
-        records = cur.fetchall()
-        conn.close()
-        return records
+        for location in locations:
+            location.location_id = cls.get_closest_location(location)
+            date_time = location.date_time.strftime('%H:%M:%S')
+            values = [date_time, f'{location.latitude}, {location.longitude}', location.accuracy, location.location_id]
+            table_print.print_line(values)
+
+        return locations
 
     @classmethod
     def group_events(cls, events: List[LocationEventTemp]) -> List[LocationEventTemp]:
