@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import re
 from collections import defaultdict
 from datetime import timedelta
 from typing import List
@@ -12,6 +10,7 @@ from src.data.data import Data, Calendars
 from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
+from src.utils.formatter import Formatter
 
 
 class SubActivity:
@@ -67,11 +66,12 @@ class Activity(SubActivity):
         start = EventDateTime(parse(original['Start Date']), time_zone)
         end = EventDateTime(parse(original['End Date']), time_zone)
         calendar = Data.calendar_dict[projects.pop(0).lower()]
-        notes = json.loads(re.sub(r'[“”]', '"', original['Notes'])) if original['Notes'] else {}
+        notes = Formatter.deserialise_details(original['Notes'])
         owner = Owner.shared if notes.get('shared', False) else owner
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
         title, sub_activities = original['Title'], []
+        projects = list(filter(lambda x: x not in ['Other', 'Various'], projects))
 
         if calendar.name == 'leisure' and projects and projects[0] == 'TV':
             title = 'TV'
@@ -85,16 +85,18 @@ class Activity(SubActivity):
             calendar = Calendars.leisure
 
         elif calendar.name in ['projects', 'work', 'leisure', 'household']:
-            if calendar.name == 'household':
+            if calendar.name == 'household' and projects:
                 projects.pop(0)
 
             if projects and projects[0] == 'Home studio' and len(projects) > 2:
                 projects.pop(0)
 
             title = projects.pop(0) if projects else title
-            if title in ['Food', 'Other']:
+            if title in ['Food', 'Other', 'Various']:
                 title = original['Title']
             elif title != original['Title']:
+                if projects and projects[-1] == original['Title']:
+                    projects.pop(-1)
                 sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
 
         return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
@@ -137,8 +139,7 @@ class Activities(List[Activity]):
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
-        longest_activity = max([activity, next_activity],
-                               key=lambda x: (x.projects and x.projects[-1] not in ['General', 'ML'], x.get_duration()))
+        longest_activity = max([activity, next_activity], key=lambda x: x.get_duration())
 
         longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start

@@ -1,4 +1,3 @@
-import json
 from abc import ABC
 from datetime import timedelta
 from random import randint, shuffle
@@ -16,6 +15,7 @@ from src.models.geo_location import GeoLocation
 from src.models.watch import Watch, EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch
 from src.scripts.script import Script
 from src.utils.file import File
+from src.utils.formatter import Formatter
 from src.utils.logger import Logger
 
 
@@ -121,7 +121,7 @@ class MediaScript(Script, ABC):
         event = Event(
             summary=watch.title,
             location=location.address.__str__(),
-            description=json.dumps(dict(**{'shared': owner == Owner.shared}, **watch.details)),
+            description=Formatter.serialise_details(watch.details),
             start=EventDateTime(watch.get_start(), location.time_zone),
             end=EventDateTime(watch.end, location.time_zone)
         )

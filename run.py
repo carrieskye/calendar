@@ -6,9 +6,7 @@ from src.scripts.location.add_location import AddLocation
 from src.scripts.location.update_event_times import UpdateEventTimes
 from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
-from src.scripts.media.update_period import UpdatePeriod
-from src.scripts.media.update_today import UpdateToday
-from src.scripts.media.update_yesterday import UpdateYesterday
+from src.scripts.media.add_to_calendar import AddToCalendar
 from src.scripts.work.add_days import AddDays
 from src.scripts.work.update_project import UpdateProject
 from src.utils.formatter import Formatter
@@ -21,9 +19,7 @@ SCRIPTS = {
         'Update calendar': UpdateCalendar,
     },
     'Media': {
-        'Update Trakt today': UpdateToday,
-        'Update Trakt yesterday': UpdateYesterday,
-        'Update Trakt period': UpdatePeriod,
+        'Add Trakt watches to calendar': AddToCalendar,
         'Add episodes to history': AddEpisodesToHistory,
         'Add movie to history': AddMovieToHistory
     },
