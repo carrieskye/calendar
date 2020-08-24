@@ -9,7 +9,7 @@ from src.models.point import Point
 
 class LocationEvent:
 
-    def __init__(self, date_time, latitude, longitude, accuracy, location_id=''):
+    def __init__(self, date_time: datetime, latitude: float, longitude: float, accuracy: int, location_id: str = None):
         self.date_time = date_time
         self.latitude = latitude
         self.longitude = longitude
@@ -36,7 +36,7 @@ class LocationEvent:
         )
 
     @staticmethod
-    def get_distance(lat_1, lon_1, lat_2, lon_2):
+    def get_distance(lat_1: float, lon_1: float, lat_2: float, lon_2: float) -> float:
         earth_radius = 6371e3
         phi_1 = radians(lat_1)
         phi_2 = radians(lat_2)
@@ -48,5 +48,5 @@ class LocationEvent:
 
         return earth_radius * c
 
-    def get_point(self):
+    def get_point(self) -> Point:
         return Point(self.latitude, self.longitude)
