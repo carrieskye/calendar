@@ -31,8 +31,11 @@ class ParseTimingExportScript(ActivityScript):
                 if item['Project'].split(' ▸ ')[0].lower() == 'todo':
                     continue
                 activity = Activity.from_dict(item, self.location.time_zone, owner)
-                day = (activity.start.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
-                activities_per_day[day].append(activity)
+                start_day = (activity.start.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
+                end_day = (activity.end.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
+                activities_per_day[start_day].append(activity)
+                if start_day != end_day:
+                    activities_per_day[end_day].append(activity)
 
             for day, activities in activities_per_day.items():
                 activities.merge_short_activities()

@@ -27,3 +27,17 @@ class Formatter:
         text = text.replace('&', 'and')
         text = re.sub(r'[^\w @.]', '', text)
         return text.replace(' ', '_')
+
+    @classmethod
+    def serialise_details(cls, details: dict) -> str:
+        return '\n'.join([f'- {k}: {v}' for k, v in details.items()])
+
+    @classmethod
+    def deserialise_details(cls, details: str) -> dict:
+        de_serialised = {}
+        for row in details.split('\n'):
+            match = re.fullmatch(r'- (.*): (.*)', row)
+            if match:
+                k, v = match.groups()
+                de_serialised[k] = v
+        return de_serialised
