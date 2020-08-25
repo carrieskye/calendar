@@ -5,7 +5,7 @@ from geopy.distance import geodesic
 
 from src.models.address import Address
 from src.models.bounding_box import BoundingBox
-from src.models.location_event import LocationEvent
+from src.models.location_timestamp import LocationTimestamp
 from src.models.point import Point
 
 
@@ -17,12 +17,12 @@ class GeoLocation:
         self.time_zone = time_zone
         self.bounding_box = bounding_box
 
-    def within_bounding_box(self, point: LocationEvent) -> bool:
-        bb = self.get_extended_bounding_box(point.accuracy)
+    def within_bounding_box(self, location_timestamp: LocationTimestamp) -> bool:
+        bb = self.get_extended_bounding_box(location_timestamp.accuracy)
         polygon = [bb.bottom_left, bb.top_left, bb.top_right, bb.bottom_right, bb.bottom_left]
 
         odd_nodes = False
-        lat_point, lon_point = [point.latitude, point.longitude]
+        lat_point, lon_point = [location_timestamp.latitude, location_timestamp.longitude]
 
         j = 0
         for i in range(0, len(polygon)):

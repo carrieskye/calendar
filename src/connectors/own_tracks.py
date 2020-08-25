@@ -13,13 +13,12 @@ class OwnTracks:
     credentials = File.read_json('src/credentials/own_tracks.json')
 
     @classmethod
-    def get_records(cls, start: datetime, end: datetime, owner: Owner, accuracy: int = 20) -> List[tuple]:
-        user_id = 3 if owner == Owner.user else 2
+    def get_records(cls, start: datetime, end: datetime, owner: Owner) -> List[tuple]:
+        user_id = {Owner.user: 3, Owner.partner: 2}[owner]
         conditions = 'WHERE ' + ' AND '.join([
             f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',
             f'time < \'{end.strftime("%Y-%m-%d %H:%M:%S")}\'',
-            f'user_id = {user_id}',
-            f'accuracy < {accuracy}'
+            f'user_id = {user_id}'
         ])
         query = f'SELECT * FROM public.positions {conditions}'
 
