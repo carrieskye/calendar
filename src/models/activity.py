@@ -15,24 +15,25 @@ from src.utils.formatter import Formatter
 
 class SubActivity:
 
-    def __init__(self, activity_id: int, title: str, projects: List[str], start: EventDateTime, end: EventDateTime):
+    def __init__(self, activity_id: int, projects: List[str], start: EventDateTime, end: EventDateTime):
         self.activity_id = activity_id
-        self.title = title
         self.projects = projects
         self.start = start
         self.end = end
 
     def __str__(self) -> str:
         period = f'%s - %s' % (self.start.date_time.strftime('%H:%M:%S'), self.end.date_time.strftime('%H:%M:%S'))
-        title = ' ▸ '.join(self.projects + [self.title])
+        title = ' ▸ '.join(self.projects)
         return f'{period}: {title}'
 
 
 class Activity(SubActivity):
+    projects_to_ignore = ['Dental', 'Doctor', 'Pregnancy', 'Help people', 'Food', 'Family', 'Friends', 'Home studio']
 
     def __init__(self, activity_id: int, title: str, start: EventDateTime, end: EventDateTime, calendar: Calendar,
                  owner: Owner, location: GeoLocation, projects: List[str] = [], sub_activities: List[SubActivity] = []):
-        super().__init__(activity_id, title, projects, start, end)
+        super().__init__(activity_id, projects, start, end)
+        self.title = title
         self.calendar = calendar
         self.owner = owner
         self.location = location
@@ -62,7 +63,7 @@ class Activity(SubActivity):
     @classmethod
     def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
         activity_id = original['ID']
-        projects = original['Project'].split(' ▸ ')
+        projects = original['Project'].split(' ▸ ') + [original['Title']]
         start = EventDateTime(parse(original['Start Date']), time_zone)
         end = EventDateTime(parse(original['End Date']), time_zone)
         calendar = Data.calendar_dict[projects.pop(0).lower()]
@@ -71,29 +72,26 @@ class Activity(SubActivity):
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
 
         title, sub_activities = original['Title'], []
-        projects = list(filter(lambda x: x not in ['Other', 'Various'], projects))
+        projects = list(filter(lambda x: x != 'Various', projects))
 
         if calendar.name == 'leisure' and projects and projects[0] == 'TV':
             title = 'TV'
             url = notes['url']
             name = original['Title']
             detail = notes['episode'] if 'episode' in notes else notes['year']
-            sub_activities = [SubActivity(activity_id, f'<a href="{url}">{name} ({detail})</a>', [], start, end)]
+            sub_activities = [SubActivity(activity_id, [f'<a href="{url}">{name} ({detail})</a>'], start, end)]
 
-        elif calendar.name in ['projects', 'work', 'leisure', 'household']:
-            if calendar.name == 'household' and projects:
+        else:
+            if projects[0] in cls.projects_to_ignore:
                 projects.pop(0)
 
-            if projects and projects[0] == 'Home studio' and len(projects) > 2:
-                projects.pop(0)
-
-            title = projects.pop(0) if projects else title
-            if title in ['Food', 'Other', 'Various']:
-                title = original['Title']
-            elif title != original['Title']:
-                if projects and projects[-1] == original['Title']:
-                    projects.pop(-1)
-                sub_activities = [SubActivity(activity_id, original['Title'], projects, start, end)]
+            title = projects.pop(0)
+            if projects:
+                sub_activities = [SubActivity(activity_id, projects, start, end)]
+            elif notes.get('location'):
+                sub_activities = [SubActivity(activity_id, [title], start, end)]
+            elif notes.get('transport'):
+                sub_activities = [SubActivity(activity_id, [notes.get('transport').capitalize()], start, end)]
 
         return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
 
@@ -108,7 +106,6 @@ class Activities(List[Activity]):
 
         activity_groups = defaultdict(Activities)
         for x in self:
-            # if x.sub_activities:
             activity_groups[x.title].append(x)
 
         for group in activity_groups.values():
@@ -132,6 +129,7 @@ class Activities(List[Activity]):
         self.sort_chronically()
 
     def merge(self, index: int):
+        # TODO: if there are multiple locations, keep the most frequent one when merging
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
