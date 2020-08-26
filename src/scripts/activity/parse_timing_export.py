@@ -40,7 +40,6 @@ class ParseTimingExportScript(ActivityScript):
             for day, activities in activities_per_day.items():
                 activities.merge_short_activities()
                 activities.remove_double_activities()
-                # activities.standardise_short_activities()
 
                 dir_name = f'data/activity/{owner.name}/'
                 File.write_csv([x.flatten() for x in activities], f'{dir_name}/csv/{day}.csv', log=False)
