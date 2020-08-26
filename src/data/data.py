@@ -18,11 +18,11 @@ class GeoLocations:
 
 
 class Calendars:
+    chores = Data.calendar_dict['chores']
     events = Data.calendar_dict['events']
     family = Data.calendar_dict['family']
     food = Data.calendar_dict['food']
     health = Data.calendar_dict['health']
-    household = Data.calendar_dict['household']
     leisure = Data.calendar_dict['leisure']
     meetings = Data.calendar_dict['meetings']
     music = Data.calendar_dict['music']
