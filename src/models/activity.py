@@ -86,12 +86,12 @@ class Activity(SubActivity):
                 projects.pop(0)
 
             title = projects.pop(0)
-            if projects:
+            if notes.get('transport'):
+                sub_activities = [SubActivity(activity_id, [notes.get('transport').capitalize()], start, end)]
+            elif projects:
                 sub_activities = [SubActivity(activity_id, projects, start, end)]
             elif notes.get('location'):
                 sub_activities = [SubActivity(activity_id, [title], start, end)]
-            elif notes.get('transport'):
-                sub_activities = [SubActivity(activity_id, [notes.get('transport').capitalize()], start, end)]
 
         return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
 
@@ -143,6 +143,8 @@ class Activities(List[Activity]):
     def remove_double_activities(self):
         self.sort_chronically()
 
-        for index, activity in enumerate(self[1:]):
-            if activity.end.date_time < self[index].end.date_time:
+        for index, activity in enumerate(self):
+            if index == 0:
+                continue
+            if activity.end.date_time < self[index - 1].end.date_time:
                 self.remove(activity)
