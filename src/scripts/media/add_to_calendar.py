@@ -3,7 +3,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.trakt import TraktAPI
-from src.models.watch import EpisodeWatch
 from src.scripts.media.media import MediaScript
 from src.utils.input import Input
 from src.utils.logger import Logger
@@ -29,5 +28,5 @@ class AddToCalendar(MediaScript):
 
         history = sorted(TraktAPI.get_history(self.start, self.end), key=lambda x: x.get('watched_at'))
         for watch in self.get_watches_from_history(history):
-            Logger.log(watch.title + ' ' + watch.details['episode'] if isinstance(watch, EpisodeWatch) else '')
+            Logger.log(watch.__str__())
             self.create_watch_event(self.calendar, self.owner, watch, self.location)

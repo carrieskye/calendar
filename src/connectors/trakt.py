@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from json import JSONDecodeError
 from typing import List
 
 import pytz
@@ -43,7 +44,13 @@ class TraktAPI:
     @classmethod
     def post_request(cls, url, body):
         response = requests.post(url, headers=cls.get_headers(), json=body)
-        return response.json()
+        try:
+            return response.json()
+        except JSONDecodeError as e:
+            Logger.log(response.status_code)
+            Logger.log(response.content)
+            Logger.log(e)
+            raise Exception(f'Could not process Trakt request: {url} {body}')
 
     @classmethod
     def get_show_details(cls, title):
@@ -90,6 +97,10 @@ class TraktAPI:
 
     @classmethod
     def add_episodes_to_history(cls, watches: List[Watch]):
+        Logger.sub_sub_title('Adding watches to history')
+        for watch in watches:
+            Logger.log(watch.__str__() + ' - ' + watch.end.strftime('%Y-%m-%d %H:%M'))
+
         url = f'{cls.base_url}/sync/history'
         body = {
             'movies': [{
@@ -105,6 +116,10 @@ class TraktAPI:
 
     @classmethod
     def remove_episodes_from_history(cls, watches: List[Watch]):
+        Logger.sub_sub_title('Removing watches from history')
+        for watch in watches:
+            Logger.log(watch.__str__())
+
         url = f'{cls.base_url}/sync/history/remove'
         body = {
             'movies': [{
