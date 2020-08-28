@@ -61,6 +61,9 @@ class Watch:
         self.end = watched_at
         self.runtime = runtime
 
+    def __str__(self) -> str:
+        return self.title
+
     def get_start(self):
         return self.end - relativedelta(minutes=self.runtime)
 
@@ -83,6 +86,9 @@ class EpisodeWatch(Watch):
             'episode': f'S{str(self.season_no).rjust(2, "0")}E{str(self.episode_no).rjust(2, "0")}'
         }
         super().__init__(show_id, show_title, details, watched_at, runtime)
+
+    def __str__(self) -> str:
+        return f'{self.title} ({self.details["episode"]})'
 
     def get_export_dict(self) -> dict:
         return {
@@ -108,6 +114,9 @@ class MovieWatch(Watch):
             'year': self.year
         }
         Watch.__init__(self, movie_id, self.movie_title, details, watched_at, runtime)
+
+    def __str__(self) -> str:
+        return f'{self.title} ({self.year})'
 
     def get_export_dict(self):
         return {

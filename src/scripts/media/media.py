@@ -25,23 +25,26 @@ class MediaScript(Script, ABC):
 
     @classmethod
     def process_watches(cls, watches: List[Watch], calendar: Calendar, owner: Owner, location: GeoLocation):
+        cls.remove_watches_from_history(watches)
+        TraktAPI.add_episodes_to_history(watches)
+
+        Logger.sub_sub_title('Adding watch events to Google Calendar')
         for watch in watches:
-            Logger.log(watch.title + ' ' + watch.details['episode'] if isinstance(watch, EpisodeWatch) else '')
-            cls.remove_watch_from_history(watch)
-            TraktAPI.add_episodes_to_history([watch])
+            Logger.log(watch.__str__())
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod
-    def remove_watch_from_history(cls, watch: Watch):
+    def remove_watches_from_history(cls, watches: List[Watch]):
         add_again = []
-        if isinstance(watch, EpisodeWatch):
-            watches = TraktAPI.get_history_for_episode(watch.episode_id)
-            for result in watches:
-                old_watch = TempEpisodeWatch.from_result(result)
-                if abs(old_watch.watched_at - watch.end).days > 5:
-                    runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
-                    add_again.append(EpisodeWatch(old_watch, runtime))
-        TraktAPI.remove_episodes_from_history([watch])
+        for watch in watches:
+            if isinstance(watch, EpisodeWatch):
+                results = TraktAPI.get_history_for_episode(watch.episode_id)
+                for result in results:
+                    old_watch = TempEpisodeWatch.from_result(result)
+                    if abs(old_watch.watched_at - watch.end).days > 5:
+                        runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
+                        add_again.append(EpisodeWatch(old_watch, runtime))
+        TraktAPI.remove_episodes_from_history(watches)
         TraktAPI.add_episodes_to_history(add_again)
 
     @classmethod
