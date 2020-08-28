@@ -33,4 +33,5 @@ class AddMovieToHistory(MediaScript):
             year=details['year']
         )
         watches = [MovieWatch(temp_watch, details['runtime'])]
+        Logger.log(watches[0].__str__())
         self.process_watches(watches, self.calendar, self.owner, self.location)

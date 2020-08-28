@@ -59,6 +59,7 @@ class AddEpisodesToHistory(MediaScript):
                 watch = EpisodeWatch(temp_watch, details['runtime'])
                 start += relativedelta(minutes=details['runtime'])
                 watches.append(watch)
+                Logger.log(watch.__str__())
 
         if self.end:
             watches = self.spread_watches(watches, self.end - self.start)

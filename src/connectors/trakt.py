@@ -5,6 +5,7 @@ from typing import List
 
 import pytz
 import requests
+from requests import Response
 
 from src.models.watch import EpisodeWatch, Watch, MovieWatch
 from src.utils.file import File
@@ -28,29 +29,32 @@ class TraktAPI:
         }
 
     @classmethod
-    def get_request(cls, url, params):
+    def get_request(cls, url, params) -> dict:
         response = requests.get(url, headers=cls.get_headers(), params=params)
-        return response.json()
+        try:
+            return response.json()
+        except JSONDecodeError:
+            raise TraktException(response, url, params)
 
     @classmethod
     def get_request_paginated(cls, url, params, page=1):
         params['page'] = page
         response = requests.get(url, headers=cls.get_headers(), params=params)
-        results = response.json()
-        if int(response.headers.get('X-Pagination-Page-Count')) > params['page']:
-            results += cls.get_request_paginated(url, params, page + 1)
-        return results
+        try:
+            results = response.json()
+            if int(response.headers.get('X-Pagination-Page-Count')) > params['page']:
+                results += cls.get_request_paginated(url, params, page + 1)
+            return results
+        except JSONDecodeError:
+            raise TraktException(response, url, params)
 
     @classmethod
-    def post_request(cls, url, body):
+    def post_request(cls, url, body) -> dict:
         response = requests.post(url, headers=cls.get_headers(), json=body)
         try:
             return response.json()
-        except JSONDecodeError as e:
-            Logger.log(response.status_code)
-            Logger.log(response.content)
-            Logger.log(e)
-            raise Exception(f'Could not process Trakt request: {url} {body}')
+        except JSONDecodeError:
+            raise TraktException(response, url, body)
 
     @classmethod
     def get_show_details(cls, title):
@@ -97,10 +101,6 @@ class TraktAPI:
 
     @classmethod
     def add_episodes_to_history(cls, watches: List[Watch]):
-        Logger.sub_sub_title('Adding watches to history')
-        for watch in watches:
-            Logger.log(watch.__str__() + ' - ' + watch.end.strftime('%Y-%m-%d %H:%M'))
-
         url = f'{cls.base_url}/sync/history'
         body = {
             'movies': [{
@@ -116,10 +116,6 @@ class TraktAPI:
 
     @classmethod
     def remove_episodes_from_history(cls, watches: List[Watch]):
-        Logger.sub_sub_title('Removing watches from history')
-        for watch in watches:
-            Logger.log(watch.__str__())
-
         url = f'{cls.base_url}/sync/history/remove'
         body = {
             'movies': [{
@@ -135,3 +131,14 @@ class TraktAPI:
     def get_playback(cls, media_type: str = 'movie'):
         url = f'{cls.base_url}/sync/playback/{media_type}'
         return cls.get_request(url, {})
+
+
+class TraktException(Exception):
+
+    def __init__(self, response: Response, url: str, body: dict):
+        error_file = f'.logs/.error_{str(datetime.now().timestamp())}.html'
+
+        Logger.log(f'\n Something went wrong. See {error_file} for details.')
+        File.write_txt(str(response.text).split('\n'), error_file, log=False)
+        Logger.log('\n'.join([f'Body: {body}', f'Url: {url}', f'Status code: {response.status_code}']))
+        super().__init__(f'Could not process Trakt request to {url}.')
