@@ -2,7 +2,9 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
+from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
+from src.data.data import Calendars
 from src.scripts.media.media import MediaScript
 from src.utils.input import Input
 from src.utils.logger import Logger
@@ -25,6 +27,10 @@ class AddToCalendar(MediaScript):
 
     def run(self):
         Logger.title('Processing')
+
+        events = GoogleCalAPI.get_events(self.calendar, self.owner, 1000, self.start, self.end)
+        for event in events:
+            GoogleCalAPI.delete_event(self.calendar.get_cal_id(self.owner), event.event_id)
 
         history = sorted(TraktAPI.get_history(self.start, self.end), key=lambda x: x.get('watched_at'))
         for watch in self.get_watches_from_history(history):

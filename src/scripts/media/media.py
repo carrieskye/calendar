@@ -25,12 +25,17 @@ class MediaScript(Script, ABC):
 
     @classmethod
     def process_watches(cls, watches: List[Watch], calendar: Calendar, owner: Owner, location: GeoLocation):
+        Logger.sub_title('Updating history')
+
+        Logger.log('Removing old watches from history')
         cls.remove_watches_from_history(watches)
+
+        Logger.log('Adding watches to history')
         TraktAPI.add_episodes_to_history(watches)
 
-        Logger.sub_sub_title('Adding watch events to Google Calendar')
+        Logger.log('Adding watch events to Google Calendar')
+
         for watch in watches:
-            Logger.log(watch.__str__())
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod
