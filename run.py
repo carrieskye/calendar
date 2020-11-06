@@ -1,5 +1,6 @@
 import sys
 
+from src.scripts.activity.parse_child_export import ParseChildExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
 from src.scripts.activity.update_calendar import UpdateCalendar
 from src.scripts.location.add_location import AddLocation
@@ -17,6 +18,7 @@ SCRIPTS = {
     'Activity': {
         'Parse timing export': ParseTimingExportScript,
         'Update calendar': UpdateCalendar,
+        'Parse Child export': ParseChildExportScript
     },
     'Media': {
         'Add Trakt watches to calendar': AddToCalendar,

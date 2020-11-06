@@ -76,14 +76,27 @@ class LocationEvents(List[LocationEvent]):
                 to_remove.append(index)
             elif event.start + relativedelta(minutes=2) > event.end:
                 to_remove.append(index)
-
+        print(to_remove)
         for index in sorted(to_remove, reverse=True):
+            print(self[index].start, index, len(self))
             for timestamp in self[index].timestamps:
                 timestamp.location_id = ''
 
             self[index - 1].timestamps += self[index].timestamps + self[index + 1].timestamps
-            self[index - 1].end = self[index + 1].end
+            self[index - 1].end = self[index].end
             self.pop(index)
+
+        to_remove = []
+        for index, event in enumerate(self[:-1]):
+            if event.location_id == self[index + 1].location_id:
+                group_index = index
+                while group_index < len(self) - 1 and event.location_id == self[group_index + 1].location_id:
+                    group_index += 1
+                    self[index].timestamps += self[group_index].timestamps
+                    to_remove.append(group_index)
+                event.end = self[group_index].end
+
+        for index in sorted(to_remove, reverse=True):
             self.pop(index)
 
         self.table_print('Without short events')
