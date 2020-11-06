@@ -76,9 +76,8 @@ class LocationEvents(List[LocationEvent]):
                 to_remove.append(index)
             elif event.start + relativedelta(minutes=2) > event.end:
                 to_remove.append(index)
-        print(to_remove)
+
         for index in sorted(to_remove, reverse=True):
-            print(self[index].start, index, len(self))
             for timestamp in self[index].timestamps:
                 timestamp.location_id = ''
 
