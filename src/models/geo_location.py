@@ -11,8 +11,9 @@ from src.models.point import Point
 
 class GeoLocation:
 
-    def __init__(self, category: str, address: Address, time_zone: str, bounding_box: BoundingBox):
+    def __init__(self, category: str, address: Address, short: str, time_zone: str, bounding_box: BoundingBox):
         self.category = category
+        self.short = short
         self.address = address
         self.time_zone = time_zone
         self.bounding_box = bounding_box

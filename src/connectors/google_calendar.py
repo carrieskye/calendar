@@ -1,5 +1,7 @@
 import os
-from datetime import datetime, time, date
+import time
+from datetime import datetime, date
+from datetime import time as datetime_time
 from typing import List, Dict
 
 from dateutil.relativedelta import relativedelta
@@ -8,6 +10,7 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 # noinspection PyPackageRequirements
 from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
@@ -53,21 +56,26 @@ class GoogleCalAPI:
     @classmethod
     def get_events(cls, calendar: Calendar, owner: Owner, max_results: int, time_min: datetime,
                    time_max: datetime = datetime.now()) -> List[Event]:
-        events = cls.service.events().list(
-            calendarId=calendar.get_cal_id(owner),
-            timeMin=time_min.isoformat() + 'Z',
-            timeMax=time_max.isoformat() + 'Z',
-            maxResults=max_results,
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute().get('items', [])
-        return [Event.from_dict(event, calendar, owner) for event in events]
+        try:
+            events = cls.service.events().list(
+                calendarId=calendar.get_cal_id(owner),
+                timeMin=time_min.isoformat() + 'Z',
+                timeMax=time_max.isoformat() + 'Z',
+                maxResults=max_results,
+                singleEvents=True,
+                orderBy='startTime'
+            ).execute().get('items', [])
+            return [Event.from_dict(event, calendar, owner) for event in events]
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.get_events(calendar, owner, max_results, time_min, time_max)
 
     @classmethod
     def get_all_events_for_day(cls, start: date):
         from src.data.data import Data
 
-        start = datetime.combine(start, time(4, 0))
+        start = datetime.combine(start, datetime_time(4, 0))
         end = start + relativedelta(days=1)
 
         return [event for calendar_name, calendar in Data.calendar_dict.items()
@@ -76,38 +84,62 @@ class GoogleCalAPI:
 
     @classmethod
     def delete_event(cls, calendar_id: str, event_id: str):
-        return cls.service.events().delete(
-            calendarId=calendar_id,
-            eventId=event_id
-        ).execute()
+        try:
+            return cls.service.events().delete(
+                calendarId=calendar_id,
+                eventId=event_id
+            ).execute()
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.delete_event(calendar_id, event_id)
 
     @classmethod
     def create_event(cls, calendar_id: str, event: Event):
-        return cls.service.events().insert(
-            calendarId=calendar_id,
-            body=event.serialise_for_google()
-        ).execute()
+        try:
+            return cls.service.events().insert(
+                calendarId=calendar_id,
+                body=event.serialise_for_google()
+            ).execute()
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.create_event(calendar_id, event)
 
     @classmethod
     def update_event(cls, calendar_id: str, event_id: str, event: Event):
-        return cls.service.events().update(
-            calendarId=calendar_id,
-            eventId=event_id,
-            body=event.serialise_for_google()
-        ).execute()
+        try:
+            return cls.service.events().update(
+                calendarId=calendar_id,
+                eventId=event_id,
+                body=event.serialise_for_google()
+            ).execute()
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.update_event(calendar_id, event_id, event)
 
     @classmethod
     def move_event(cls, calendar_id: str, event_id: str, destination: str):
-        return cls.service.events().move(
-            calendarId=calendar_id,
-            eventId=event_id,
-            destination=destination
-        ).execute()
+        try:
+            return cls.service.events().move(
+                calendarId=calendar_id,
+                eventId=event_id,
+                destination=destination
+            ).execute()
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.move_event(calendar_id, event_id, destination)
 
     @classmethod
     def get_event_instances(cls, calendar_id: str, event_id: str):
-        response = cls.service.events().instances(
-            calendarId=calendar_id,
-            eventId=event_id
-        ).execute()
-        return response
+        try:
+            return cls.service.events().instances(
+                calendarId=calendar_id,
+                eventId=event_id
+            ).execute()
+        except HttpError:
+            Logger.log('Rate limit exceeded, trying again in 90s.')
+            time.sleep(90)
+            return cls.get_event_instances(calendar_id, event_id)
