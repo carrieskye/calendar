@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from json import JSONDecodeError
 from typing import List
@@ -54,6 +55,10 @@ class TraktAPI:
         try:
             return response.json()
         except JSONDecodeError:
+            if response.status_code == 429:
+                Logger.log('Rate limit exceeded, trying again in 30s.')
+                time.sleep(30)
+                return cls.post_request(url, body)
             raise TraktException(response, url, body)
 
     @classmethod

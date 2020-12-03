@@ -26,16 +26,28 @@ class ParseTimingExportScript(ActivityScript):
 
             export = File.read_csv(f'data/activity/{owner.name}/All Activities.csv', log=False)
 
-            activities_per_day = defaultdict(Activities)
+            all_activities = Activities()
             for item in export:
                 if item['Project'].split(' ▸ ')[0].lower() == 'todo':
                     continue
                 activity = Activity.from_dict(item, self.location.time_zone, owner)
+                if activity.location and not 'short' in activity.location.__dict__:
+                    raise Exception(f'No short for {activity.location.address}')
+                all_activities.append(activity)
+
+            activities_per_day = defaultdict(Activities)
+            for activity in all_activities:
                 start_day = (activity.start.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
-                end_day = (activity.end.date_time - relativedelta(hours=5)).strftime('%Y-%m-%d')
+                if not activities_per_day[start_day]:
+                    previous_day = (activity.start.date_time - relativedelta(days=1, hours=5)).strftime('%Y-%m-%d')
+                    if previous_day in activities_per_day.keys():
+                        last_activity = activities_per_day[previous_day][-1]
+                        last_activity_end = last_activity.end.date_time
+                        if last_activity_end + relativedelta(minutes=30) > activity.start.date_time \
+                                and last_activity.title == activity.title:
+                            activities_per_day[previous_day].append(activity)
+                            continue
                 activities_per_day[start_day].append(activity)
-                if start_day != end_day:
-                    activities_per_day[end_day].append(activity)
 
             for day, activities in activities_per_day.items():
                 activities.merge_short_activities()

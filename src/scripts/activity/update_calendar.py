@@ -2,6 +2,7 @@ import json
 from datetime import datetime, time
 
 import jsonpickle
+import pytz
 from dateutil.relativedelta import relativedelta
 
 from src.connectors.google_calendar import GoogleCalAPI
@@ -22,10 +23,15 @@ class UpdateCalendar(ActivityScript):
 
         self.owner = self.get_owner(default=Owner.carrie)
         start = Input.get_date_input('Start')
-        self.start = datetime.combine(start, time(4, 0))
         days = Input.get_int_input('Days', '#days')
-        self.end = self.start + relativedelta(days=days)
         self.location = self.get_location()
+
+        # TODO find cleaner way later
+        self.start = datetime.combine(start, time(5, 0))
+        start_with_tz = self.start.astimezone(pytz.timezone(self.location.time_zone))
+        self.start_offset = int(str(start_with_tz)[-5:-3])
+        self.start = self.start - relativedelta(hours=self.start_offset)
+        self.end = self.start + relativedelta(days=days)
         self.work_from_home = Input.get_bool_input('Work from home', default='y')
 
     def run(self):
@@ -55,7 +61,9 @@ class UpdateCalendar(ActivityScript):
 
                 events = GoogleCalAPI.get_events(calendar, owner, 1000, day, day + relativedelta(days=1))
                 for event in events:
-                    GoogleCalAPI.delete_event(calendar.get_cal_id(owner), event.event_id)
+                    event_day = event.start.date_time - relativedelta(hours=5)
+                    if event_day.day == day.day:
+                        GoogleCalAPI.delete_event(calendar.get_cal_id(owner), event.event_id)
 
     def create_events(self, activities: Activities):
         for activity in activities:
@@ -74,7 +82,7 @@ class UpdateCalendar(ActivityScript):
             location = activity.location if activity.location else self.location
         event = Event(
             summary=summary,
-            location=location.address.__str__(),
+            location=location.short,
             description=description,
             start=activity.start,
             end=activity.end

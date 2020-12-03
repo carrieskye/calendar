@@ -29,6 +29,7 @@ class AddLocation(LocationScript):
         Logger.sub_sub_title('DETAILS')
         self.label = Input.get_string_input('Label')
         self.category = Input.get_string_input('Category')
+        self.short = Input.get_string_input('Short address')
         self.address = Input.get_string_input('Address')
 
     def run(self):
@@ -41,7 +42,8 @@ class AddLocation(LocationScript):
             time_zone = Input.get_string_input('Time zone', 'country/city', time_zone)
 
             Data.geo_location_dict.__add__(self.label,
-                                           GeoLocation(self.category, address, time_zone, self.bounding_box))
+                                           GeoLocation(self.category, address, self.short, time_zone,
+                                                       self.bounding_box))
 
             Logger.empty_line()
             Logger.bold('Added')

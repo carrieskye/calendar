@@ -36,6 +36,7 @@ class MediaScript(Script, ABC):
         Logger.log('Adding watch events to Google Calendar')
 
         for watch in watches:
+            Logger.log(f'- {watch.__str__()} {watch.get_start()} - {watch.end}', indent=1)
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod

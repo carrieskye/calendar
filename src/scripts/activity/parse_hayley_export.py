@@ -36,7 +36,7 @@ class ParseHayleyExportScript(ActivityScript):
         self.create_events()
 
     def create_events(self):
-        for category in ['breastfeeding', 'formula', 'breast milk', 'expressed', 'nappies', 'bath']:
+        for category in ['breastfeeding', 'formula', 'breast milk', 'expressed', 'nappies', 'bath', 'str', 'nap']:
             export = File.read_csv(f'data/hayley/Hayley - {category}.csv', log=False)
             for item in export:
                 start = parse(item['actual'] + ' ' + item['start'])
@@ -59,5 +59,7 @@ class ParseHayleyExportScript(ActivityScript):
             return 'Nappy'
         if category == 'expressed':
             return f'Expressing'
+        if category == 'str':
+            return 'Sleep training'
         else:
             return category.capitalize()

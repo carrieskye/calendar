@@ -28,7 +28,7 @@ class SubActivity:
 
 
 class Activity(SubActivity):
-    projects_to_ignore = ['Dental', 'Doctor', 'Pregnancy', 'Help people', 'Food', 'Family', 'Friends', 'Home studio']
+    projects_to_ignore = ['Doctor', 'Maternity', 'Help people', 'Food', 'Friends', 'Family', 'Home studio']
 
     def __init__(self, activity_id: int, title: str, start: EventDateTime, end: EventDateTime, calendar: Calendar,
                  owner: Owner, location: GeoLocation, projects: List[str] = [], sub_activities: List[SubActivity] = []):
@@ -101,7 +101,7 @@ class Activities(List[Activity]):
     def sort_chronically(self):
         self.sort(key=lambda x: x.start.__str__())
 
-    def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=30)):
+    def merge_short_activities(self, max_time_diff: timedelta = timedelta(minutes=20)):
         self.sort_chronically()
 
         activity_groups = defaultdict(Activities)
@@ -133,7 +133,7 @@ class Activities(List[Activity]):
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
-        longest_activity = max([activity, next_activity], key=lambda x: x.get_duration())
+        longest_activity = max([activity, next_activity], key=lambda x: (x.location is not None, x.get_duration()))
 
         longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start
