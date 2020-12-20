@@ -76,13 +76,17 @@ class UpdateCalendar(ActivityScript):
                 self.create_event(cal_id, activity, activity.title)
 
     def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = ''):
-        if summary in ['Amplyfi', 'Lunch'] and not self.work_from_home:
-            location = GeoLocations.tramshed_tech
+        if summary in ['Amplyfi', 'Lunch'] and not self.work_from_home and not activity.location:
+            location = GeoLocations.tramshed_tech.short
         else:
-            location = activity.location if activity.location else self.location
+            if activity.trajectory:
+                start_loc, end_loc = activity.trajectory.split(' > ')
+                location = f'{Data.geo_location_dict[start_loc].short} > {Data.geo_location_dict[end_loc].short}'
+            else:
+                location = activity.location.short if activity.location else self.location.short
         event = Event(
             summary=summary,
-            location=location.short,
+            location=location,
             description=description,
             start=activity.start,
             end=activity.end

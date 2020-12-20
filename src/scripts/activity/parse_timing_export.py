@@ -31,7 +31,7 @@ class ParseTimingExportScript(ActivityScript):
                 if item['Project'].split(' ▸ ')[0].lower() == 'todo':
                     continue
                 activity = Activity.from_dict(item, self.location.time_zone, owner)
-                if activity.location and not 'short' in activity.location.__dict__:
+                if activity.location and 'short' not in activity.location.__dict__:
                     raise Exception(f'No short for {activity.location.address}')
                 all_activities.append(activity)
 
@@ -43,7 +43,7 @@ class ParseTimingExportScript(ActivityScript):
                     if previous_day in activities_per_day.keys():
                         last_activity = activities_per_day[previous_day][-1]
                         last_activity_end = last_activity.end.date_time
-                        if last_activity_end + relativedelta(minutes=30) > activity.start.date_time \
+                        if last_activity_end + relativedelta(minutes=20) > activity.start.date_time \
                                 and last_activity.title == activity.title:
                             activities_per_day[previous_day].append(activity)
                             continue

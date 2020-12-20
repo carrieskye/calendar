@@ -36,7 +36,7 @@ class AddLocation(LocationScript):
         country = self.address.split(', ')[-1].replace('UK', 'United Kingdom')
         country_code = pycountry.countries.lookup(country).alpha_2
 
-        if country_code in ['GB', 'BE']:
+        if country_code in ['GB', 'BE', 'AT', 'CH', 'FR', 'DE']:
             address = COUNTRY_ADDRESSES[country_code.upper()].parse_from_string(self.address)
             time_zone = country_timezones(country_code)[0]
             time_zone = Input.get_string_input('Time zone', 'country/city', time_zone)

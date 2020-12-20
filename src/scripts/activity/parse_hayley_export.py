@@ -1,3 +1,5 @@
+import os
+import re
 from datetime import time, datetime
 
 from dateutil.parser import parse
@@ -15,6 +17,17 @@ from src.utils.logger import Logger
 
 
 class ParseHayleyExportScript(ActivityScript):
+    long_categories = {
+        'bath': 'Bath',
+        'bf': 'Breastfeeding',
+        'bm': 'Breast milk',
+        'exp': 'Expressing',
+        'for': 'Formula',
+        'nap': 'Nap',
+        'np': 'Nappy',
+        'slbf': 'Breastfeeding + sleeping',
+        'str': 'Sleep training'
+    }
 
     def __init__(self):
         super().__init__()
@@ -36,8 +49,11 @@ class ParseHayleyExportScript(ActivityScript):
         self.create_events()
 
     def create_events(self):
-        for category in ['breastfeeding', 'formula', 'breast milk', 'expressed', 'nappies', 'bath', 'str', 'nap']:
-            export = File.read_csv(f'data/hayley/Hayley - {category}.csv', log=False)
+        for file in os.listdir('data/hayley'):
+            if not file.endswith('.csv'):
+                continue
+            export = File.read_csv(f'data/hayley/{file}', log=False)
+            category = re.match(r'Hayley - (?P<category>[a-z]*).csv', file).group('category')
             for item in export:
                 start = parse(item['actual'] + ' ' + item['start'])
                 if not self.start < start < self.end:
@@ -45,21 +61,10 @@ class ParseHayleyExportScript(ActivityScript):
                 hours, minutes = item['total'].split(':')
                 end = start + relativedelta(hours=int(hours), minutes=int(minutes))
                 event = Event(
-                    summary=self.get_summary(category),
+                    summary=self.long_categories[category],
                     location=self.location.address.__str__(),
                     start=EventDateTime(start, self.location.time_zone),
                     end=EventDateTime(end, self.location.time_zone)
                 )
                 Logger.log(event.summary)
                 GoogleCalAPI.create_event(Calendars.chores.shared, event)
-
-    @staticmethod
-    def get_summary(category: str) -> str:
-        if category == 'nappies':
-            return 'Nappy'
-        if category == 'expressed':
-            return f'Expressing'
-        if category == 'str':
-            return 'Sleep training'
-        else:
-            return category.capitalize()
