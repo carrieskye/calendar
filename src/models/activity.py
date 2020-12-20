@@ -31,12 +31,14 @@ class Activity(SubActivity):
     projects_to_ignore = ['Doctor', 'Maternity', 'Help people', 'Food', 'Friends', 'Family', 'Home studio']
 
     def __init__(self, activity_id: int, title: str, start: EventDateTime, end: EventDateTime, calendar: Calendar,
-                 owner: Owner, location: GeoLocation, projects: List[str] = [], sub_activities: List[SubActivity] = []):
+                 owner: Owner, location: GeoLocation, trajectory: str, projects: List[str] = [],
+                 sub_activities: List[SubActivity] = []):
         super().__init__(activity_id, projects, start, end)
         self.title = title
         self.calendar = calendar
         self.owner = owner
         self.location = location
+        self.trajectory = trajectory
         self.sub_activities = sub_activities
 
     def __str__(self) -> str:
@@ -54,6 +56,7 @@ class Activity(SubActivity):
             'calendar': self.calendar.name,
             'owner': self.owner.name,
             'location': self.location.address if self.location else '',
+            'trajectory': self.trajectory,
             'details': [x.__str__() for x in self.sub_activities]
         }
 
@@ -64,12 +67,22 @@ class Activity(SubActivity):
     def from_dict(cls, original: dict, time_zone: str, owner: Owner) -> Activity:
         activity_id = original['ID']
         projects = original['Project'].split(' ▸ ') + [original['Title']]
-        start = EventDateTime(parse(original['Start Date']), time_zone)
-        end = EventDateTime(parse(original['End Date']), time_zone)
         calendar = Data.calendar_dict[projects.pop(0).lower()]
         notes = Formatter.deserialise_details(original['Notes'])
         owner = Owner.shared if notes.get('shared', False) else owner
         location = Data.geo_location_dict[notes['location']] if 'location' in notes else None
+        trajectory = notes['trajectory'] if 'trajectory' in notes else ''
+
+        start_time_zone = location.time_zone if location else time_zone
+        end_time_zone = location.time_zone if location else time_zone
+
+        if trajectory:
+            start_location, end_location = trajectory.split(' > ')
+            start_time_zone = Data.geo_location_dict[start_location].time_zone
+            end_time_zone = Data.geo_location_dict[end_location].time_zone
+
+        start = EventDateTime(parse(original['Start Date']), start_time_zone)
+        end = EventDateTime(parse(original['End Date']), end_time_zone)
 
         title, sub_activities = original['Title'], []
         projects = list(filter(lambda x: x != 'Various', projects))
@@ -93,7 +106,7 @@ class Activity(SubActivity):
             elif notes.get('location'):
                 sub_activities = [SubActivity(activity_id, [title], start, end)]
 
-        return cls(activity_id, title, start, end, calendar, owner, location, projects, sub_activities)
+        return cls(activity_id, title, start, end, calendar, owner, location, trajectory, projects, sub_activities)
 
 
 class Activities(List[Activity]):
@@ -117,7 +130,9 @@ class Activities(List[Activity]):
             for index, activity in enumerate(activities_to_merge[:-1]):
                 next_activity = activities_to_merge[index + 1]
                 time_diff = next_activity.start.date_time - activity.end.date_time
-                if time_diff <= max_time_diff and activity.owner == next_activity.owner:
+                if time_diff <= max_time_diff and activity.owner == next_activity.owner \
+                        and (activity.location == next_activity.location
+                             or not activity.location or not next_activity.location):
                     to_merge.append(index)
 
             for index in sorted(to_merge, reverse=True):
