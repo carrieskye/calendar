@@ -105,6 +105,11 @@ class TraktAPI:
         return cls.get_request(url, {'extended': 'full'})
 
     @classmethod
+    def get_history_for_movie(cls, movie_id: str):
+        url = f'{cls.base_url}/sync/history/movies/{movie_id}'
+        return cls.get_request(url, {'extended': 'full'})
+
+    @classmethod
     def add_episodes_to_history(cls, watches: List[Watch]):
         url = f'{cls.base_url}/sync/history'
         body = {
