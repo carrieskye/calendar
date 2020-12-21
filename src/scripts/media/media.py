@@ -50,6 +50,16 @@ class MediaScript(Script, ABC):
                     if abs(old_watch.watched_at - watch.end).days > 5:
                         runtime = cls.get_episode_runtime(watch.trakt_id, watch.season_no, watch.episode_no)
                         add_again.append(EpisodeWatch(old_watch, runtime))
+            elif isinstance(watch, MovieWatch):
+                results = TraktAPI.get_history_for_movie(watch.trakt_id)
+                for result in results:
+                    old_watch = TempMovieWatch.from_result(result)
+                    if abs(old_watch.watched_at - watch.end).days > 5:
+                        runtime = cls.get_movie_runtime(watch.trakt_id)
+                        add_again.append(MovieWatch(old_watch, runtime))
+            else:
+                raise Exception('Unknown watch type')
+
         TraktAPI.remove_episodes_from_history(watches)
         TraktAPI.add_episodes_to_history(add_again)
 
