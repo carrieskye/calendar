@@ -1,5 +1,6 @@
 import sys
 
+from src.scripts.activity.larry_default_working_day import LarryDefaultWorkingDayScript
 from src.scripts.activity.parse_hayley_export import ParseHayleyExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
 from src.scripts.activity.update_calendar import UpdateCalendar
@@ -18,7 +19,8 @@ SCRIPTS = {
     'Activity': {
         'Parse timing export': ParseTimingExportScript,
         'Update calendar': UpdateCalendar,
-        'Parse Hayley export': ParseHayleyExportScript
+        'Parse Hayley export': ParseHayleyExportScript,
+        'Larry default working day': LarryDefaultWorkingDayScript
     },
     'Media': {
         'Add Trakt watches to calendar': AddToCalendar,

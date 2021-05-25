@@ -24,6 +24,7 @@ class Calendars:
     food = Data.calendar_dict['food']
     health = Data.calendar_dict['health']
     leisure = Data.calendar_dict['leisure']
+    kids = Data.calendar_dict['kids']
     meetings = Data.calendar_dict['meetings']
     music = Data.calendar_dict['music']
     projects = Data.calendar_dict['projects']

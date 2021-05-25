@@ -18,14 +18,17 @@ from src.utils.logger import Logger
 
 class ParseHayleyExportScript(ActivityScript):
     long_categories = {
-        'bath': 'Bath',
+        'cln': 'Cleaning',
+        'blw': 'Baby led weaning',
         'bf': 'Breastfeeding',
+        'bt': 'Bedtime routine',
         'bm': 'Breast milk',
         'exp': 'Expressing',
         'for': 'Formula',
         'nap': 'Nap',
         'np': 'Nappy',
-        'slbf': 'Breastfeeding + sleeping',
+        'pl': 'Play',
+        'cos': 'Co-sleeping + feeding',
         'str': 'Sleep training'
     }
 
@@ -52,16 +55,28 @@ class ParseHayleyExportScript(ActivityScript):
         for file in os.listdir('data/hayley'):
             if not file.endswith('.csv'):
                 continue
+            category = re.match(r'(?P<category>[a-z]*).csv', file).group('category')
+            if category not in self.long_categories:
+                continue
             export = File.read_csv(f'data/hayley/{file}', log=False)
-            category = re.match(r'Hayley - (?P<category>[a-z]*).csv', file).group('category')
             for item in export:
+                if not item['weekday']:
+                    continue
                 start = parse(item['actual'] + ' ' + item['start'])
                 if not self.start < start < self.end:
                     continue
                 hours, minutes = item['total'].split(':')
                 end = start + relativedelta(hours=int(hours), minutes=int(minutes))
+
+                if category == 'cln':
+                    summary = item['type'].capitalize()
+                elif category == 'blw':
+                    summary = item['meal'].capitalize()
+                else:
+                    summary = self.long_categories[category]
+
                 event = Event(
-                    summary=self.long_categories[category],
+                    summary=summary,
                     location=self.location.address.__str__(),
                     start=EventDateTime(start, self.location.time_zone),
                     end=EventDateTime(end, self.location.time_zone)
