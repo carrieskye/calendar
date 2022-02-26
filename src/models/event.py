@@ -5,12 +5,20 @@ from src.models.event_datetime import EventDateTime
 
 
 class Event:
-
-    def __init__(self, summary: str, location: str, start: EventDateTime, end: EventDateTime, description: str = '',
-                 event_id: str = '', calendar: Calendar = None, owner: Owner = None):
+    def __init__(
+        self,
+        summary: str,
+        location: str,
+        start: EventDateTime,
+        end: EventDateTime,
+        description: str = "",
+        event_id: str = "",
+        calendar: Calendar = None,
+        owner: Owner = None,
+    ):
         self.summary = summary
-        self.location = location if location else ''
-        self.description = description if description else ''
+        self.location = location if location else ""
+        self.description = description if description else ""
         self.start = start
         self.end = end
         self.event_id = event_id
@@ -19,23 +27,23 @@ class Event:
 
     def serialise_for_google(self) -> dict:
         return {
-            'summary': self.summary,
-            'location': self.location,
-            'description': self.description,
-            'start': self.start.serialise_for_google(),
-            'end': self.end.serialise_for_google(),
-            'visibility': 'default'
+            "summary": self.summary,
+            "location": self.location,
+            "description": self.description,
+            "start": self.start.serialise_for_google(),
+            "end": self.end.serialise_for_google(),
+            "visibility": "default",
         }
 
     @classmethod
     def from_dict(cls, original: dict, calendar: Calendar, owner: Owner) -> Event:
         return cls(
-            summary=original.get('summary'),
-            location=original.get('location'),
-            description=original.get('description'),
-            start=EventDateTime.from_dict(original.get('start')),
-            end=EventDateTime.from_dict(original.get('end')),
-            event_id=original.get('id'),
+            summary=original.get("summary"),
+            location=original.get("location"),
+            description=original.get("description"),
+            start=EventDateTime.from_dict(original.get("start")),
+            end=EventDateTime.from_dict(original.get("end")),
+            event_id=original.get("id"),
             calendar=calendar,
-            owner=owner
+            owner=owner,
         )

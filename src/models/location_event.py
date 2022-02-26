@@ -5,15 +5,20 @@ from typing import List
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from src.utils.table_print import TablePrint
 
 from src.data.data import Data
 from src.models.location_timestamp import LocationTimestamps, LocationTimestamp
-from src.utils.table_print import TablePrint
 
 
 class LocationEvent:
-
-    def __init__(self, start: datetime, end: datetime, timestamps: List[LocationTimestamp], location_id: str):
+    def __init__(
+        self,
+        start: datetime,
+        end: datetime,
+        timestamps: List[LocationTimestamp],
+        location_id: str,
+    ):
         self.start = start
         self.end = end
         self.timestamps = timestamps
@@ -21,13 +26,14 @@ class LocationEvent:
 
     @classmethod
     def from_location_timestamp(cls, timestamp: LocationTimestamp) -> LocationEvent:
-        return cls(timestamp.date_time, timestamp.date_time, [timestamp], timestamp.location_id)
+        return cls(
+            timestamp.date_time, timestamp.date_time, [timestamp], timestamp.location_id
+        )
 
 
 class LocationEvents(List[LocationEvent]):
-
     def table_print(self, title: str):
-        headers = ['START', 'END', 'DURATION', 'RECORDS', 'LOCATION']
+        headers = ["START", "END", "DURATION", "RECORDS", "LOCATION"]
         width = [9, 9, 9, 7, 30]
         table_print = TablePrint(title, headers, width)
         first_location = [x.location_id for x in self if x.location_id][0]
@@ -38,13 +44,15 @@ class LocationEvents(List[LocationEvent]):
                 time_zone = Data.geo_location_dict[event.location_id].time_zone
             start = self.ignore_dst(event.start, time_zone)
             end = self.ignore_dst(event.end, time_zone)
-            table_print.print_line([
-                start.strftime('%H:%M:%S'),
-                end.strftime('%H:%M:%S'),
-                end - start if end - start else '0:00:00',
-                len(event.timestamps),
-                event.location_id
-            ])
+            table_print.print_line(
+                [
+                    start.strftime("%H:%M:%S"),
+                    end.strftime("%H:%M:%S"),
+                    end - start if end - start else "0:00:00",
+                    len(event.timestamps),
+                    event.location_id,
+                ]
+            )
 
     def merge_events(self):
         to_merge = []
@@ -53,10 +61,13 @@ class LocationEvents(List[LocationEvent]):
                 continue
             if self[index - 1].location_id != self[index + 1].location_id:
                 continue
-            if event.start + relativedelta(minutes=5) <= event.end or len(event.timestamps) >= 10:
+            if event.start + relativedelta(minutes=5) <= event.end:
                 continue
-            if event.start + relativedelta(minutes=2) <= event.end and len(event.timestamps) >= 5:
+            if len(event.timestamps) >= 10:
                 continue
+            if event.start + relativedelta(minutes=2) <= event.end:
+                if len(event.timestamps) >= 5:
+                    continue
             to_merge.append(index)
 
         for index in sorted(to_merge, reverse=True):
@@ -65,23 +76,28 @@ class LocationEvents(List[LocationEvent]):
             self.pop(index)
             self.pop(index)
 
-        self.table_print('Merged events')
+        self.table_print("Merged events")
 
     def remove_short_events(self):
         to_remove = []
         for index, event in enumerate(self):
             if not event.location_id:
                 continue
-            if len(event.timestamps) < 5 and event.start + relativedelta(minutes=5) > event.end:
+            if (
+                len(event.timestamps) < 5
+                and event.start + relativedelta(minutes=5) > event.end
+            ):
                 to_remove.append(index)
             elif event.start + relativedelta(minutes=2) > event.end:
                 to_remove.append(index)
 
         for index in sorted(to_remove, reverse=True):
             for timestamp in self[index].timestamps:
-                timestamp.location_id = ''
+                timestamp.location_id = ""
 
-            self[index - 1].timestamps += self[index].timestamps + self[index + 1].timestamps
+            self[index - 1].timestamps += (
+                self[index].timestamps + self[index + 1].timestamps
+            )
             self[index - 1].end = self[index].end
             self.pop(index)
 
@@ -89,7 +105,10 @@ class LocationEvents(List[LocationEvent]):
         for index, event in enumerate(self[:-1]):
             if event.location_id == self[index + 1].location_id:
                 group_index = index
-                while group_index < len(self) - 1 and event.location_id == self[group_index + 1].location_id:
+                while (
+                    group_index < len(self) - 1
+                    and event.location_id == self[group_index + 1].location_id
+                ):
                     group_index += 1
                     self[index].timestamps += self[group_index].timestamps
                     to_remove.append(group_index)
@@ -98,7 +117,7 @@ class LocationEvents(List[LocationEvent]):
         for index in sorted(to_remove, reverse=True):
             self.pop(index)
 
-        self.table_print('Without short events')
+        self.table_print("Without short events")
 
     @classmethod
     def from_location_timestamps(cls, timestamps: LocationTimestamps) -> LocationEvents:
@@ -118,7 +137,7 @@ class LocationEvents(List[LocationEvent]):
                 current_event = new_event
 
         location_events.append(current_event)
-        location_events.table_print('Location events')
+        location_events.table_print("Location events")
         return location_events
 
     @staticmethod
