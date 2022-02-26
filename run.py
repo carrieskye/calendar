@@ -1,5 +1,9 @@
 import sys
 
+from skye_comlib.utils.formatter import Formatter
+from skye_comlib.utils.input import Input
+from skye_comlib.utils.logger import Logger
+
 from src.scripts.activity.larry_default_working_day import LarryDefaultWorkingDayScript
 from src.scripts.activity.parse_hayley_export import ParseHayleyExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
@@ -11,61 +15,68 @@ from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
 from src.scripts.work.add_days import AddDays
 from src.scripts.work.update_project import UpdateProject
-from src.utils.formatter import Formatter
-from src.utils.input import Input
-from src.utils.logger import Logger
 
 SCRIPTS = {
-    'Activity': {
-        'Parse timing export': ParseTimingExportScript,
-        'Update calendar': UpdateCalendar,
-        'Parse Hayley export': ParseHayleyExportScript,
-        'Larry default working day': LarryDefaultWorkingDayScript
+    "Activity": {
+        "Parse timing export": ParseTimingExportScript,
+        "Update calendar": UpdateCalendar,
+        "Parse Hayley export": ParseHayleyExportScript,
+        "Larry default working day": LarryDefaultWorkingDayScript,
     },
-    'Media': {
-        'Add Trakt watches to calendar': AddToCalendar,
-        'Add episodes to history': AddEpisodesToHistory,
-        'Add movie to history': AddMovieToHistory
+    "Media": {
+        "Add Trakt watches to calendar": AddToCalendar,
+        "Add episodes to history": AddEpisodesToHistory,
+        "Add movie to history": AddMovieToHistory,
     },
-    'Locations': {
-        'Update event times': UpdateEventTimes,
-        'Add new location': AddLocation
+    "Locations": {
+        "Update event times": UpdateEventTimes,
+        "Add new location": AddLocation,
     },
-    'Work': {
-        'Add work days': AddDays,
-        'Update work project': UpdateProject,
-    }
+    "Work": {
+        "Add work days": AddDays,
+        "Update work project": UpdateProject,
+    },
 }
 
-if __name__ == '__main__':
-    Logger.title('Selecting script')
+if __name__ == "__main__":
+    Logger.title("Selecting script")
 
     categories = list(SCRIPTS.keys())
-    options = '\n'.join(f'{str(index + 1).rjust(4)}) {x}' for index, x in enumerate(categories))
+    options = "\n".join(
+        f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(categories)
+    )
     if len(sys.argv) > 1:
         category_no = int(sys.argv[1]) - 1
     else:
         Logger.empty_line()
-        category_no = Input.get_int_input(f'Which category do you want to run?\n{options}\n\nCategory no. ') - 1
+        category_no = Input.get_int_input(
+            f"Which category do you want to run?\n{options}\n\nCategory no. "
+        )
+        category_no -= 1
 
     assert category_no in range(0, len(SCRIPTS))
     category = categories[category_no]
-    Logger.log(f'Selected {Formatter.make_bold(category)}')
+    Logger.log(f"Selected {Formatter.make_bold(category)}")
 
     scripts = list(SCRIPTS[category].keys())
-    options = '\n'.join(f'{str(index + 1).rjust(4)}) {x}' for index, x in enumerate(scripts))
+    options = "\n".join(
+        f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(scripts)
+    )
     if len(sys.argv) > 2:
         script_no = int(sys.argv[2]) - 1
     else:
         Logger.empty_line()
-        script_no = Input.get_int_input(f'Which script do you want to run?\n{options}\n\nScript no. ') - 1
+        script_no = Input.get_int_input(
+            f"Which script do you want to run?\n{options}\n\nScript no. "
+        )
+        script_no -= 1
 
     assert script_no in range(0, len(scripts))
     script_name = scripts[script_no]
-    Logger.log(f'Selected {Formatter.make_bold(script_name)}')
+    Logger.log(f"Selected {Formatter.make_bold(script_name)}")
 
-    Logger.title('Running script')
+    Logger.title("Running script")
     script = SCRIPTS[category][script_name]()
     script.run()
 
-    Logger.title('Done')
+    Logger.title("Done")

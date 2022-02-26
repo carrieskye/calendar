@@ -9,19 +9,25 @@ class Owner(Enum):
 
 
 class Calendar:
-
     def __init__(self, key: str, original: Dict[str, str]):
         assert key in original
 
         self.name = key
 
-        self.carrie = original.get(key, '')
-        self.larry = original.get(key + '_larry', '')
-        self.shared = original.get(key + '_shared', '')
+        self.carrie = original.get(key, "")
+        self.larry = original.get(key + "_larry", "")
+        self.shared = original.get(key + "_shared", "")
 
     def get_cal_id(self, owner: Owner):
         return self.__getattribute__(owner.name)
 
     def get_calendars(self):
-        return {k: v for k, v in {
-            Owner.carrie: self.carrie, Owner.larry: self.larry, Owner.shared: self.shared}.items() if v}
+        return {
+            k: v
+            for k, v in {
+                Owner.carrie: self.carrie,
+                Owner.larry: self.larry,
+                Owner.shared: self.shared,
+            }.items()
+            if v
+        }
