@@ -14,7 +14,7 @@ from src.models.watch import EpisodeWatch, Watch, MovieWatch
 
 
 class TraktAPI:
-    Logger.sub_sub_title("Loading Trakt")
+    Logger.log("Loading Trakt")
 
     base_url = "https://api.trakt.tv"
     client_id = os.environ.get("TRAKT_CLIENT_ID")

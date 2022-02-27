@@ -39,7 +39,7 @@ def load_credentials(scopes: List[str]) -> Credentials:
 
 
 class GoogleCalAPI:
-    Logger.sub_sub_title("Loading Google Calendar")
+    Logger.log("Loading Google Calendar")
     scopes = ["https://www.googleapis.com/auth/calendar"]
     service = build("calendar", "v3", credentials=load_credentials(scopes))
 
