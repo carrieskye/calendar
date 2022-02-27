@@ -5,7 +5,7 @@ from typing import List
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from src.utils.table_print import TablePrint
+from skye_comlib.utils.table_print import TablePrint
 
 from src.data.data import Data
 from src.models.location_timestamp import LocationTimestamps, LocationTimestamp

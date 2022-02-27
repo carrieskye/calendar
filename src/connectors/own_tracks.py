@@ -9,7 +9,7 @@ from src.models.calendar import Owner
 
 
 class OwnTracks:
-    Logger.sub_sub_title("Loading OwnTracks")
+    Logger.log("Loading OwnTracks")
     credentials = File.read_json("src/credentials/own_tracks.json")
 
     @classmethod
