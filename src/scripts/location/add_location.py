@@ -1,7 +1,9 @@
+import logging
+
 import pycountry
 from pytz import country_timezones
+from skye_comlib.utils.formatter import Formatter
 from skye_comlib.utils.input import Input
-from skye_comlib.utils.logger import Logger
 
 from src.data.data import Data
 from src.models.address import COUNTRY_ADDRESSES
@@ -17,7 +19,7 @@ class AddLocation(LocationScript):
 
         self.bounding_box = None
         if Input.get_bool_input("Bounding box"):
-            Logger.sub_sub_title("BOUNDING BOX")
+            logging.info(Formatter.sub_sub_title("BOUNDING BOX"))
             bounding_box = []
             for point in ["Bottom left", "Top left", "Top right", "Bottom right"]:
                 lat_lon = Input.get_string_input(f"{point}", input_type="<lat>, <lon>")
@@ -25,7 +27,7 @@ class AddLocation(LocationScript):
                 bounding_box.append(Point(float(latitude), float(longitude)))
             self.bounding_box = BoundingBox(*bounding_box)
 
-        Logger.sub_sub_title("DETAILS")
+        logging.info(Formatter.sub_sub_title("DETAILS"))
         self.label = Input.get_string_input("Label")
         self.category = Input.get_string_input("Category")
         self.short = Input.get_string_input("Short address")
@@ -49,8 +51,7 @@ class AddLocation(LocationScript):
                 ),
             )
 
-            Logger.empty_line()
-            Logger.bold("Added")
+            logging.info("Added")
             return
 
         raise Exception("Invalid country")

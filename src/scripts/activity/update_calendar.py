@@ -1,12 +1,14 @@
 import json
+import logging
 from datetime import datetime, time, date
+from pathlib import Path
 
 import jsonpickle
 import pytz
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
+from skye_comlib.utils.formatter import Formatter
 from skye_comlib.utils.input import Input
-from skye_comlib.utils.logger import Logger
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Data, GeoLocations
@@ -41,16 +43,16 @@ class UpdateCalendar(ActivityScript):
         return original_date_time - relativedelta(hours=offset)
 
     def run(self):
-        Logger.sub_title("Processing")
+        logging.info(Formatter.sub_title("Processing"), extra={"markup": True})
+
+        owner_dir = Path("data/activity") / self.owner.name
 
         day = self.start
         while day < self.end:
             try:
-                file_name = (
-                    f"data/activity/{self.owner.name}/json/%s.json"
-                    % day.strftime("%Y-%m-%d")
-                )
-                Logger.bold(day.strftime("%Y-%m-%d"))
+                day_str = day.strftime("%Y-%m-%d")
+                file_name = owner_dir / f"json/{day_str}.json"
+                logging.info(day_str)
                 activities = jsonpickle.decode(json.dumps(File.read_json(file_name)))
 
                 self.remove_events(day)
@@ -60,7 +62,6 @@ class UpdateCalendar(ActivityScript):
                 pass
 
             day += relativedelta(days=1)
-            Logger.empty_line()
 
     def remove_events(self, day: datetime):
         for calendar in Data.calendar_dict.values():
@@ -80,7 +81,8 @@ class UpdateCalendar(ActivityScript):
 
     def create_events(self, activities: Activities):
         for activity in activities:
-            Logger.log(activity.__str__())
+            for line in activity.__str__().split("\n"):
+                logging.info(line)
             cal_id = activity.calendar.get_cal_id(activity.owner)
             if activity.sub_activities:
                 sub_activities = "\n".join(
@@ -102,7 +104,10 @@ class UpdateCalendar(ActivityScript):
         else:
             if activity.trajectory:
                 start_loc, end_loc = activity.trajectory.split(" > ")
-                location = f"{Data.geo_location_dict[start_loc].short} > {Data.geo_location_dict[end_loc].short}"
+                location = (
+                    f"{Data.geo_location_dict[start_loc].short} > "
+                    f"{Data.geo_location_dict[end_loc].short}"
+                )
             else:
                 location = (
                     activity.location.short

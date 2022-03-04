@@ -75,7 +75,7 @@ class Activity(SubActivity):
             self.end.date_time.strftime("%H:%M:%S"),
         )
         for sub_activity in self.sub_activities:
-            result += f"\n  - {sub_activity.__str__()}"
+            result += f"\n  • {sub_activity.__str__()}"
         return result
 
     def flatten(self) -> dict:

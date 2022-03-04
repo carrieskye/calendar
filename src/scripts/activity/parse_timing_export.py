@@ -1,10 +1,12 @@
 import json
+import logging
 from collections import defaultdict
+from pathlib import Path
 
 import jsonpickle
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
-from skye_comlib.utils.logger import Logger
+from skye_comlib.utils.formatter import Formatter
 
 from src.models.activity import Activities, Activity
 from src.models.calendar import Owner
@@ -20,10 +22,12 @@ class ParseTimingExportScript(ActivityScript):
     def run(self):
         super().run()
 
-        for owner in [Owner.carrie, Owner.larry]:
-            Logger.sub_sub_title(owner.name)
+        for owner in [Owner.carrie]:
+            logging.info(Formatter.sub_title(owner.name), extra={"markup": True})
 
-            export = File.read_csv(f"data/activity/{owner.name}/All Activities.csv")
+            export = File.read_csv(
+                Path(f"data/activity/{owner.name}/All Activities.csv")
+            )
 
             all_activities = Activities()
             for item in export:
@@ -46,7 +50,10 @@ class ParseTimingExportScript(ActivityScript):
                     if previous_day in activities_per_day.keys():
                         last_activity = activities_per_day[previous_day][-1]
                         last_activity_end = last_activity.end.date_time
-                        if last_activity_end + relativedelta(minutes=20) > activity.start.date_time:
+                        if (
+                            last_activity_end + relativedelta(minutes=20)
+                            > activity.start.date_time
+                        ):
                             if last_activity.title == activity.title:
                                 activities_per_day[previous_day].append(activity)
                                 continue
@@ -56,13 +63,17 @@ class ParseTimingExportScript(ActivityScript):
                 activities.merge_short_activities(default_location=self.location)
                 activities.remove_double_activities()
 
-                dir_name = f"data/activity/{owner.name}/"
+                dir_name = Path(f"data/activity/{owner.name}")
                 File.write_csv(
-                    [x.flatten() for x in activities],
-                    f"{dir_name}/csv/{day}.csv",
+                    [x.flatten() for x in activities], dir_name / f"csv/{day}.csv",
                 )
                 File.write_json(
                     json.loads(jsonpickle.encode(activities)),
-                    f"{dir_name}/json/{day}.json",
+                    dir_name / f"json/{day}.json",
                 )
-                Logger.log(f"Processed {day}")
+                logging.info(f"Processed [bold]{day}", extra={"markup": True})
+
+            logging.info(
+                f"[bold green]Processed {len(activities_per_day)} activities.",
+                extra={"markup": True},
+            )

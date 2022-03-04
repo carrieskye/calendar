@@ -1,15 +1,15 @@
+import logging
 from datetime import datetime
 from typing import List
 
 import psycopg2
 from skye_comlib.utils.file import File
-from skye_comlib.utils.logger import Logger
 
 from src.models.calendar import Owner
 
 
 class OwnTracks:
-    Logger.log("Loading OwnTracks")
+    logging.info("Loading OwnTracks")
     credentials = File.read_json("src/credentials/own_tracks.json")
 
     @classmethod

@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from datetime import datetime
@@ -14,7 +15,7 @@ from src.models.watch import EpisodeWatch, Watch, MovieWatch
 
 
 class TraktAPI:
-    Logger.log("Loading Trakt")
+    logging.info("Loading Trakt")
 
     base_url = "https://api.trakt.tv"
     client_id = os.environ.get("TRAKT_CLIENT_ID")
