@@ -26,7 +26,7 @@ from src.scripts.script import Script
 
 
 class MediaScript(Script, ABC):
-    calendar = Calendars.leisure
+    calendar = Calendars.lazing
     runtime_cache = File.read_json("data/trakt/cache/runtime.json")
 
     @classmethod

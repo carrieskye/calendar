@@ -32,5 +32,5 @@ class CalendarDict(Dict[str, Calendar]):
                 name: json.loads(jsonpickle.encode(calendar))
                 for name, calendar in self.items()
             },
-            path="self.calendar_file",
+            path=self.calendar_file,
         )

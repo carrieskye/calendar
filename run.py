@@ -1,3 +1,4 @@
+import logging
 import sys
 
 from skye_comlib.utils.formatter import Formatter
@@ -32,14 +33,12 @@ SCRIPTS = {
         "Update event times": UpdateEventTimes,
         "Add new location": AddLocation,
     },
-    "Work": {
-        "Add work days": AddDays,
-        "Update work project": UpdateProject,
-    },
+    "Work": {"Add work days": AddDays, "Update work project": UpdateProject,},
 }
 
 if __name__ == "__main__":
-    Logger.title("Selecting script")
+    Logger()
+    logging.info(Formatter.title("Selecting script"), extra={"markup": True})
 
     categories = list(SCRIPTS.keys())
     options = "\n".join(
@@ -48,7 +47,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         category_no = int(sys.argv[1]) - 1
     else:
-        Logger.empty_line()
         category_no = Input.get_int_input(
             f"Which category do you want to run?\n{options}\n\nCategory no. "
         )
@@ -56,7 +54,7 @@ if __name__ == "__main__":
 
     assert category_no in range(0, len(SCRIPTS))
     category = categories[category_no]
-    Logger.log(f"Selected {Formatter.make_bold(category)}")
+    logging.info(f"Selected [bold]{category}", extra={"markup": True})
 
     scripts = list(SCRIPTS[category].keys())
     options = "\n".join(
@@ -65,7 +63,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         script_no = int(sys.argv[2]) - 1
     else:
-        Logger.empty_line()
         script_no = Input.get_int_input(
             f"Which script do you want to run?\n{options}\n\nScript no. "
         )
@@ -73,10 +70,8 @@ if __name__ == "__main__":
 
     assert script_no in range(0, len(scripts))
     script_name = scripts[script_no]
-    Logger.log(f"Selected {Formatter.make_bold(script_name)}")
+    logging.info(f"Selected [bold]{script_name}", extra={"markup": True})
 
-    Logger.title("Running script")
+    logging.info(Formatter.title("Running script"), extra={"markup": True})
     script = SCRIPTS[category][script_name]()
     script.run()
-
-    Logger.title("Done")
