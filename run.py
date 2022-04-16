@@ -14,8 +14,6 @@ from src.scripts.location.update_event_times import UpdateEventTimes
 from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
-from src.scripts.work.add_days import AddDays
-from src.scripts.work.update_project import UpdateProject
 
 SCRIPTS = {
     "Activity": {
@@ -29,11 +27,7 @@ SCRIPTS = {
         "Add episodes to history": AddEpisodesToHistory,
         "Add movie to history": AddMovieToHistory,
     },
-    "Locations": {
-        "Update event times": UpdateEventTimes,
-        "Add new location": AddLocation,
-    },
-    "Work": {"Add work days": AddDays, "Update work project": UpdateProject,},
+    "Locations": {"Update event times": UpdateEventTimes, "Add new location": AddLocation},
 }
 
 if __name__ == "__main__":
@@ -41,15 +35,11 @@ if __name__ == "__main__":
     logging.info(Formatter.title("Selecting script"), extra={"markup": True})
 
     categories = list(SCRIPTS.keys())
-    options = "\n".join(
-        f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(categories)
-    )
+    options = "\n".join(f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(categories))
     if len(sys.argv) > 1:
         category_no = int(sys.argv[1]) - 1
     else:
-        category_no = Input.get_int_input(
-            f"Which category do you want to run?\n{options}\n\nCategory no. "
-        )
+        category_no = Input.get_int_input(f"Which category do you want to run?\n{options}\n\nCategory no. ")
         category_no -= 1
 
     assert category_no in range(0, len(SCRIPTS))
@@ -57,15 +47,11 @@ if __name__ == "__main__":
     logging.info(f"Selected [bold]{category}", extra={"markup": True})
 
     scripts = list(SCRIPTS[category].keys())
-    options = "\n".join(
-        f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(scripts)
-    )
+    options = "\n".join(f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(scripts))
     if len(sys.argv) > 2:
         script_no = int(sys.argv[2]) - 1
     else:
-        script_no = Input.get_int_input(
-            f"Which script do you want to run?\n{options}\n\nScript no. "
-        )
+        script_no = Input.get_int_input(f"Which script do you want to run?\n{options}\n\nScript no. ")
         script_no -= 1
 
     assert script_no in range(0, len(scripts))

@@ -21,14 +21,10 @@ class Script(ABC):
 
     @staticmethod
     def get_owner(default: Owner = Owner.shared) -> Owner:
-        owner = Input.get_string_input(
-            "Calendar owner", input_type="name", default=default.name,
-        )
+        owner = Input.get_string_input("Calendar owner", input_type="name", default=default.name)
         return Owner.__members__[owner]
 
     @staticmethod
     def get_location(default: str = "talygarn_st") -> GeoLocation:
-        location = Input.get_string_input(
-            "Location", input_type="name", default=default,
-        )
+        location = Input.get_string_input("Location", input_type="name", default=default)
         return Data.geo_location_dict[location]

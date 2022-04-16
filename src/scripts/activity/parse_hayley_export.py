@@ -1,12 +1,13 @@
+import logging
 import os
 import re
 from datetime import time, datetime
+from pathlib import Path
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
 from skye_comlib.utils.input import Input
-from skye_comlib.utils.logger import Logger
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Calendars
@@ -18,16 +19,17 @@ from src.scripts.activity.activity import ActivityScript
 
 class ParseHayleyExportScript(ActivityScript):
     long_categories = {
-        "cos": "Breastfeeding",
+        "bfs": "Breastfeeding",
         "bf": "Breastfeeding",
         "blw": "Baby led weaning",
         "bt": "Bedtime routine",
         "cln": "Cleaning",
         "bm": "Breast milk",
         "exp": "Expressing",
-        # 'for': 'Formula',
+        "for": "Formula",
         "nap": "Nap",
         "np": "Nappy",
+        "pt": "Potty",
         "pl": "Play",
         "str": "Sleep training",
     }
@@ -45,22 +47,21 @@ class ParseHayleyExportScript(ActivityScript):
     def run(self):
         super().run()
 
-        events = GoogleCalAPI.get_events(
-            Calendars.chores, Owner.carrie, 1000, self.start, self.end
-        )
+        events = GoogleCalAPI.get_events(Calendars.chores, Owner.carrie, 1000, self.start, self.end)
         for event in events:
             GoogleCalAPI.delete_event(Calendars.chores.carrie, event.event_id)
 
         self.create_events()
 
     def create_events(self):
-        for file in os.listdir("data/hayley"):
+        base_dir = Path("data/hayley")
+        for file in os.listdir(base_dir):
             if not file.endswith(".csv"):
                 continue
             category = re.match(r"(?P<category>[a-z]*).csv", file).group("category")
             if category not in self.long_categories:
                 continue
-            export = File.read_csv(f"data/hayley/{file}")
+            export = File.read_csv(base_dir / file)
             for item in export:
                 if not item["weekday"] or item["weekday"] == "#N/A":
                     continue
@@ -83,5 +84,5 @@ class ParseHayleyExportScript(ActivityScript):
                     start=EventDateTime(start, self.location.time_zone),
                     end=EventDateTime(end, self.location.time_zone),
                 )
-                Logger.log(event.summary)
+                logging.info(event.summary)
                 GoogleCalAPI.create_event(Calendars.chores.carrie, event)

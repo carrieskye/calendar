@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Dict
 
 import jsonpickle
@@ -9,7 +10,7 @@ from src.models.calendar import Calendar
 
 
 class CalendarDict(Dict[str, Calendar]):
-    calendar_file = "data/calendars.json"
+    calendar_file = Path("data/calendars.json")
 
     def __init__(self):
         super().__init__()
@@ -28,9 +29,6 @@ class CalendarDict(Dict[str, Calendar]):
 
     def export_to_file(self):
         File.write_json(
-            contents={
-                name: json.loads(jsonpickle.encode(calendar))
-                for name, calendar in self.items()
-            },
+            contents={name: json.loads(jsonpickle.encode(calendar)) for name, calendar in self.items()},
             path=self.calendar_file,
         )

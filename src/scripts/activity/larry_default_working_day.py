@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
 from skye_comlib.utils.input import Input
@@ -42,4 +44,4 @@ class LarryDefaultWorkingDayScript(ActivityScript):
             )
             day += relativedelta(days=1)
 
-        File.write_csv(activities, "data/activity/larry/All activities.csv")
+        File.write_csv(activities, Path("data/activity/larry/All activities.csv"))

@@ -24,10 +24,6 @@ class Calendar:
     def get_calendars(self):
         return {
             k: v
-            for k, v in {
-                Owner.carrie: self.carrie,
-                Owner.larry: self.larry,
-                Owner.shared: self.shared,
-            }.items()
+            for k, v in {Owner.carrie: self.carrie, Owner.larry: self.larry, Owner.shared: self.shared}.items()
             if v
         }

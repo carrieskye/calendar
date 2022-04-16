@@ -25,9 +25,7 @@ class ParseTimingExportScript(ActivityScript):
         for owner in [Owner.carrie]:
             logging.info(Formatter.sub_title(owner.name), extra={"markup": True})
 
-            export = File.read_csv(
-                Path(f"data/activity/{owner.name}/All Activities.csv")
-            )
+            export = File.read_csv(Path(f"data/activity/{owner.name}/All Activities.csv"))
 
             all_activities = Activities()
             for item in export:
@@ -40,20 +38,13 @@ class ParseTimingExportScript(ActivityScript):
 
             activities_per_day = defaultdict(Activities)
             for activity in all_activities:
-                start_day = (
-                    activity.start.date_time - relativedelta(hours=4)
-                ).strftime("%Y-%m-%d")
+                start_day = (activity.start.date_time - relativedelta(hours=4)).strftime("%Y-%m-%d")
                 if not activities_per_day[start_day]:
-                    previous_day = (
-                        activity.start.date_time - relativedelta(days=1, hours=4)
-                    ).strftime("%Y-%m-%d")
+                    previous_day = (activity.start.date_time - relativedelta(days=1, hours=4)).strftime("%Y-%m-%d")
                     if previous_day in activities_per_day.keys():
                         last_activity = activities_per_day[previous_day][-1]
                         last_activity_end = last_activity.end.date_time
-                        if (
-                            last_activity_end + relativedelta(minutes=20)
-                            > activity.start.date_time
-                        ):
+                        if last_activity_end + relativedelta(minutes=20) > activity.start.date_time:
                             if last_activity.title == activity.title:
                                 activities_per_day[previous_day].append(activity)
                                 continue
@@ -64,16 +55,8 @@ class ParseTimingExportScript(ActivityScript):
                 activities.remove_double_activities()
 
                 dir_name = Path(f"data/activity/{owner.name}")
-                File.write_csv(
-                    [x.flatten() for x in activities], dir_name / f"csv/{day}.csv",
-                )
-                File.write_json(
-                    json.loads(jsonpickle.encode(activities)),
-                    dir_name / f"json/{day}.json",
-                )
+                File.write_csv([x.flatten() for x in activities], dir_name / f"csv/{day}.csv")
+                File.write_json(json.loads(jsonpickle.encode(activities)), dir_name / f"json/{day}.json")
                 logging.info(f"Processed [bold]{day}", extra={"markup": True})
 
-            logging.info(
-                f"[bold green]Processed {len(activities_per_day)} activities.",
-                extra={"markup": True},
-            )
+            logging.info(f"[bold green]Processed {len(activities_per_day)} activities.", extra={"markup": True})

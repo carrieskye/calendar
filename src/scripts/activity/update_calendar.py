@@ -36,9 +36,7 @@ class UpdateCalendar(ActivityScript):
 
     def correct_time_offset(self, original: date):
         original_date_time = datetime.combine(original, time(5, 0))
-        date_time_with_tz = original_date_time.astimezone(
-            pytz.timezone(self.location.time_zone)
-        )
+        date_time_with_tz = original_date_time.astimezone(pytz.timezone(self.location.time_zone))
         offset = int(str(date_time_with_tz)[-5:-3])
         return original_date_time - relativedelta(hours=offset)
 
@@ -69,15 +67,11 @@ class UpdateCalendar(ActivityScript):
                 if not calendar.get_cal_id(owner):
                     continue
 
-                events = GoogleCalAPI.get_events(
-                    calendar, owner, 1000, day, day + relativedelta(days=1)
-                )
+                events = GoogleCalAPI.get_events(calendar, owner, 1000, day, day + relativedelta(days=1))
                 for event in events:
                     event_day = event.start.date_time - relativedelta(hours=4)
                     if event_day.day == day.day:
-                        GoogleCalAPI.delete_event(
-                            calendar.get_cal_id(owner), event.event_id
-                        )
+                        GoogleCalAPI.delete_event(calendar.get_cal_id(owner), event.event_id)
 
     def create_events(self, activities: Activities):
         for activity in activities:
@@ -85,40 +79,21 @@ class UpdateCalendar(ActivityScript):
                 logging.info(line)
             cal_id = activity.calendar.get_cal_id(activity.owner)
             if activity.sub_activities:
-                sub_activities = "\n".join(
-                    [x.__str__() for x in activity.sub_activities]
-                )
+                sub_activities = "\n".join([x.__str__() for x in activity.sub_activities])
                 self.create_event(cal_id, activity, activity.title, sub_activities)
             else:
                 self.create_event(cal_id, activity, activity.title)
 
-    def create_event(
-        self, cal_id: str, activity: Activity, summary: str, description: str = ""
-    ):
-        if (
-            summary in ["Amplyfi", "Lunch"]
-            and not self.work_from_home
-            and not activity.location
-        ):
+    def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = ""):
+        if summary in ["Amplyfi", "Lunch"] and not self.work_from_home and not activity.location:
             location = GeoLocations.tramshed_tech.short
         else:
             if activity.trajectory:
                 start_loc, end_loc = activity.trajectory.split(" > ")
-                location = (
-                    f"{Data.geo_location_dict[start_loc].short} > "
-                    f"{Data.geo_location_dict[end_loc].short}"
-                )
+                location = f"{Data.geo_location_dict[start_loc].short} > " f"{Data.geo_location_dict[end_loc].short}"
             else:
-                location = (
-                    activity.location.short
-                    if activity.location
-                    else self.location.short
-                )
+                location = activity.location.short if activity.location else self.location.short
         event = Event(
-            summary=summary,
-            location=location,
-            description=description,
-            start=activity.start,
-            end=activity.end,
+            summary=summary, location=location, description=description, start=activity.start, end=activity.end
         )
         GoogleCalAPI.create_event(cal_id, event)

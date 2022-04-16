@@ -1,12 +1,13 @@
+import logging
 from abc import ABC
 from datetime import timedelta
+from pathlib import Path
 from random import randint, shuffle
 from typing import List
 
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
 from skye_comlib.utils.formatter import Formatter
-from skye_comlib.utils.logger import Logger
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
@@ -15,42 +16,28 @@ from src.models.calendar import Owner, Calendar
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.geo_location import GeoLocation
-from src.models.watch import (
-    Watch,
-    EpisodeWatch,
-    MovieWatch,
-    TempEpisodeWatch,
-    TempMovieWatch,
-)
+from src.models.watch import Watch, EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch
 from src.scripts.script import Script
 
 
 class MediaScript(Script, ABC):
     calendar = Calendars.lazing
-    runtime_cache = File.read_json("data/trakt/cache/runtime.json")
+    runtime_cache = File.read_json(Path("data/trakt/cache/runtime.json"))
 
     @classmethod
-    def process_watches(
-        cls,
-        watches: List[Watch],
-        calendar: Calendar,
-        owner: Owner,
-        location: GeoLocation,
-    ):
-        Logger.sub_title("Updating history")
+    def process_watches(cls, watches: List[Watch], calendar: Calendar, owner: Owner, location: GeoLocation):
+        logging.info(Formatter.sub_title("Updating history"), extra={"markup": True})
 
-        Logger.log("Removing old watches from history")
+        logging.info("Removing old watches from history")
         cls.remove_watches_from_history(watches)
 
-        Logger.log("Adding watches to history")
+        logging.info("Adding watches to history")
         TraktAPI.add_episodes_to_history(watches)
 
-        Logger.log("Adding watch events to Google Calendar")
+        logging.info("Adding watch events to Google Calendar")
 
         for watch in watches:
-            Logger.log(
-                f"- {watch.__str__()} {watch.get_start()} - {watch.end}", indent=1
-            )
+            logging.info(f"- {watch.__str__()} {watch.get_start()} - {watch.end}")
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod
@@ -62,9 +49,7 @@ class MediaScript(Script, ABC):
                 for result in results:
                     old_watch = TempEpisodeWatch.from_result(result)
                     if abs(old_watch.watched_at - watch.end).days > 5:
-                        runtime = cls.get_episode_runtime(
-                            watch.trakt_id, str(watch.season_no), watch.episode_no
-                        )
+                        runtime = cls.get_episode_runtime(watch.trakt_id, str(watch.season_no), watch.episode_no)
                         add_again.append(EpisodeWatch(old_watch, runtime))
             elif isinstance(watch, MovieWatch):
                 results = TraktAPI.get_history_for_movie(watch.trakt_id)
@@ -85,9 +70,7 @@ class MediaScript(Script, ABC):
         for result in history:
             if result.get("type") == "episode":
                 temp_watch = TempEpisodeWatch.from_result(result)
-                runtime = cls.get_episode_runtime(
-                    temp_watch.show_id, temp_watch.season_no, temp_watch.episode_no
-                )
+                runtime = cls.get_episode_runtime(temp_watch.show_id, temp_watch.season_no, temp_watch.episode_no)
                 watch = EpisodeWatch(temp_watch, runtime)
             else:
                 temp_watch = TempMovieWatch.from_result(result)
@@ -104,9 +87,7 @@ class MediaScript(Script, ABC):
     def get_episode_details(cls, show_id: str, season_no: str, episode_no: str):
         # TODO there's an issue if the season is already in the cache but the data has been updated
         try:
-            return cls.runtime_cache["shows"][str(show_id)][str(season_no)][
-                str(episode_no)
-            ]
+            return cls.runtime_cache["shows"][str(show_id)][str(season_no)][str(episode_no)]
 
         except KeyError:
             results = TraktAPI.get_season_details(show_id, season_no)
@@ -123,7 +104,7 @@ class MediaScript(Script, ABC):
                 for result in results
             }
             cls.runtime_cache["shows"][show_id][season_no] = cache_entry
-            File.write_json(cls.runtime_cache, "data/trakt/cache/runtime.json")
+            File.write_json(cls.runtime_cache, Path("data/trakt/cache/runtime.json"))
 
             return cache_entry[str(episode_no)]
 
@@ -136,7 +117,7 @@ class MediaScript(Script, ABC):
             result = TraktAPI.get_movie(movie_id)
 
             cls.runtime_cache["movies"][movie_id] = result.get("runtime")
-            File.write_json(cls.runtime_cache, "data/trakt/cache/runtime.json")
+            File.write_json(cls.runtime_cache, Path("data/trakt/cache/runtime.json"))
 
             return result.get("runtime")
 
@@ -159,9 +140,7 @@ class MediaScript(Script, ABC):
         return watches
 
     @staticmethod
-    def create_watch_event(
-        calendar: Calendar, owner: Owner, watch: Watch, location: GeoLocation
-    ):
+    def create_watch_event(calendar: Calendar, owner: Owner, watch: Watch, location: GeoLocation):
         event = Event(
             summary=watch.title,
             location=location.address.__str__(),

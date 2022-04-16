@@ -12,14 +12,7 @@ from src.models.point import Point
 
 
 class LocationTimestamp:
-    def __init__(
-        self,
-        date_time: datetime,
-        latitude: float,
-        longitude: float,
-        accuracy: int,
-        location_id: str = None,
-    ):
+    def __init__(self, date_time: datetime, latitude: float, longitude: float, accuracy: int, location_id: str = None):
         self.date_time = date_time
         self.latitude = latitude
         self.longitude = longitude
@@ -53,9 +46,7 @@ class LocationTimestamp:
         df = radians(lat_2 - lat_1)
         dl = radians(lon_2 - lon_1)
 
-        a = sin(df / 2) * sin(df / 2) + cos(phi_1) * cos(phi_2) * sin(dl / 2) * sin(
-            dl / 2
-        )
+        a = sin(df / 2) * sin(df / 2) + cos(phi_1) * cos(phi_2) * sin(dl / 2) * sin(dl / 2)
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return earth_radius * c
@@ -69,9 +60,7 @@ class LocationTimestamps(List[LocationTimestamp]):
         records_per_timestamp = defaultdict(list)
         for location in self:
             records_per_timestamp[location.date_time].append(location)
-        duplicates = dict(
-            filter(lambda x: len(x[1]) > 1, records_per_timestamp.items())
-        )
+        duplicates = dict(filter(lambda x: len(x[1]) > 1, records_per_timestamp.items()))
         for locations in duplicates.values():
             for location in locations[1:]:
                 self.remove(location)

@@ -41,12 +41,7 @@ class TempEpisodeWatch:
 
 class TempMovieWatch:
     def __init__(
-        self,
-        watched_at: datetime,
-        movie_id: str,
-        movie_title: str = None,
-        slug: str = None,
-        year: int = None,
+        self, watched_at: datetime, movie_id: str, movie_title: str = None, slug: str = None, year: int = None
     ):
         self.watched_at = watched_at
         self.movie_id = movie_id
@@ -66,14 +61,7 @@ class TempMovieWatch:
 
 
 class Watch:
-    def __init__(
-        self,
-        trakt_id: str,
-        title: str,
-        details: dict,
-        watched_at: datetime,
-        runtime: int,
-    ):
+    def __init__(self, trakt_id: str, title: str, details: dict, watched_at: datetime, runtime: int):
         self.trakt_id = trakt_id
         self.title = title
         self.details = details

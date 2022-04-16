@@ -12,13 +12,7 @@ from src.models.location_timestamp import LocationTimestamps, LocationTimestamp
 
 
 class LocationEvent:
-    def __init__(
-        self,
-        start: datetime,
-        end: datetime,
-        timestamps: List[LocationTimestamp],
-        location_id: str,
-    ):
+    def __init__(self, start: datetime, end: datetime, timestamps: List[LocationTimestamp], location_id: str):
         self.start = start
         self.end = end
         self.timestamps = timestamps
@@ -26,9 +20,7 @@ class LocationEvent:
 
     @classmethod
     def from_location_timestamp(cls, timestamp: LocationTimestamp) -> LocationEvent:
-        return cls(
-            timestamp.date_time, timestamp.date_time, [timestamp], timestamp.location_id
-        )
+        return cls(timestamp.date_time, timestamp.date_time, [timestamp], timestamp.location_id)
 
 
 class LocationEvents(List[LocationEvent]):
@@ -83,10 +75,7 @@ class LocationEvents(List[LocationEvent]):
         for index, event in enumerate(self):
             if not event.location_id:
                 continue
-            if (
-                len(event.timestamps) < 5
-                and event.start + relativedelta(minutes=5) > event.end
-            ):
+            if len(event.timestamps) < 5 and event.start + relativedelta(minutes=5) > event.end:
                 to_remove.append(index)
             elif event.start + relativedelta(minutes=2) > event.end:
                 to_remove.append(index)
@@ -95,9 +84,7 @@ class LocationEvents(List[LocationEvent]):
             for timestamp in self[index].timestamps:
                 timestamp.location_id = ""
 
-            self[index - 1].timestamps += (
-                self[index].timestamps + self[index + 1].timestamps
-            )
+            self[index - 1].timestamps += self[index].timestamps + self[index + 1].timestamps
             self[index - 1].end = self[index].end
             self.pop(index)
 
@@ -105,10 +92,7 @@ class LocationEvents(List[LocationEvent]):
         for index, event in enumerate(self[:-1]):
             if event.location_id == self[index + 1].location_id:
                 group_index = index
-                while (
-                    group_index < len(self) - 1
-                    and event.location_id == self[group_index + 1].location_id
-                ):
+                while group_index < len(self) - 1 and event.location_id == self[group_index + 1].location_id:
                     group_index += 1
                     self[index].timestamps += self[group_index].timestamps
                     to_remove.append(group_index)

@@ -38,17 +38,12 @@ class AddLocation(LocationScript):
         country_code = pycountry.countries.lookup(country).alpha_2
 
         if country_code in COUNTRY_ADDRESSES.keys():
-            address = COUNTRY_ADDRESSES[country_code.upper()].parse_from_string(
-                self.address
-            )
+            address = COUNTRY_ADDRESSES[country_code.upper()].parse_from_string(self.address)
             time_zone = country_timezones(country_code)[0]
             time_zone = Input.get_string_input("Time zone", "country/city", time_zone)
 
             Data.geo_location_dict.__add__(
-                self.label,
-                GeoLocation(
-                    self.category, address, self.short, time_zone, self.bounding_box
-                ),
+                self.label, GeoLocation(self.category, address, self.short, time_zone, self.bounding_box)
             )
 
             logging.info("Added")

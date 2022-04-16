@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Dict
 
 import jsonpickle
@@ -8,7 +9,7 @@ from src.models.geo_location import GeoLocation
 
 
 class GeoLocationDict(Dict[str, GeoLocation]):
-    geo_file = "data/geo_locations.json"
+    geo_file = Path("data/geo_locations.json")
 
     def __init__(self):
         super().__init__()
@@ -24,9 +25,6 @@ class GeoLocationDict(Dict[str, GeoLocation]):
 
     def export_to_file(self):
         File.write_json(
-            contents={
-                label: json.loads(jsonpickle.encode(geo_location))
-                for label, geo_location in self.items()
-            },
+            contents={label: json.loads(jsonpickle.encode(geo_location)) for label, geo_location in self.items()},
             path=self.geo_file,
         )

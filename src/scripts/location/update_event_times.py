@@ -14,16 +14,12 @@ class UpdateEventTimes(LocationScript):
 
         self.owner = self.get_owner(default=Owner.carrie)
         yesterday = (datetime.now() - relativedelta(days=1)).date()
-        start = Input.get_date_input(
-            "Date", min_date=datetime(2019, 11, 20).date(), default=yesterday
-        )
+        start = Input.get_date_input("Date", min_date=datetime(2019, 11, 20).date(), default=yesterday)
         self.start = datetime.combine(start, time(4, 0))
         self.end = self.start + relativedelta(days=1)
 
     def run(self):
-        location_timestamps = self.get_location_timestamps(
-            self.start, self.end, self.owner
-        )
+        location_timestamps = self.get_location_timestamps(self.start, self.end, self.owner)
         location_timestamps.filter_incorrect_locations()
 
         location_events = LocationEvents.from_location_timestamps(location_timestamps)

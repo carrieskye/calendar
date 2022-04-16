@@ -5,6 +5,7 @@ from datetime import timedelta
 from typing import List
 
 from dateutil.parser import parse
+from pytz import timezone
 from skye_comlib.utils.formatter import Formatter
 
 from src.data.data import Data
@@ -14,13 +15,7 @@ from src.models.geo_location import GeoLocation
 
 
 class SubActivity:
-    def __init__(
-        self,
-        activity_id: int,
-        projects: List[str],
-        start: EventDateTime,
-        end: EventDateTime,
-    ):
+    def __init__(self, activity_id: int, projects: List[str], start: EventDateTime, end: EventDateTime):
         self.activity_id = activity_id
         self.projects = projects
         self.start = start
@@ -29,10 +24,7 @@ class SubActivity:
     def __str__(self) -> str:
         self.start.correct_time_zone()
         self.end.correct_time_zone()
-        period = "%s - %s" % (
-            self.start.date_time.strftime("%H:%M:%S"),
-            self.end.date_time.strftime("%H:%M:%S"),
-        )
+        period = "%s - %s" % (self.start.date_time.strftime("%H:%M:%S"), self.end.date_time.strftime("%H:%M:%S"))
         title = " ▸ ".join(self.projects)
         return f"{period}: {title}"
 
@@ -70,9 +62,10 @@ class Activity(SubActivity):
         self.sub_activities = sub_activities
 
     def __str__(self) -> str:
-        result = f"{self.title} ({self.calendar.name}): %s - %s" % (
-            self.start.date_time.strftime("%H:%M:%S"),
-            self.end.date_time.strftime("%H:%M:%S"),
+        result = (
+            f"{self.title} ({self.calendar.name}): "
+            f"{self.start.date_time.strftime('%H:%M:%S')} - "
+            f"{self.end.date_time.strftime('%H:%M:%S')}"
         )
         for sub_activity in self.sub_activities:
             result += f"\n  • {sub_activity.__str__()}"
@@ -100,9 +93,7 @@ class Activity(SubActivity):
         calendar = Data.calendar_dict[projects.pop(0).lower()]
         notes = Formatter.de_serialise_details(original["Notes"])
         owner = Owner.shared if notes.get("shared", False) else owner
-        location = (
-            Data.geo_location_dict[notes["location"]] if "location" in notes else None
-        )
+        location = Data.geo_location_dict[notes["location"]] if "location" in notes else None
         trajectory = notes["trajectory"] if "trajectory" in notes else ""
         details = notes["details"] if "details" in notes else ""
 
@@ -126,11 +117,7 @@ class Activity(SubActivity):
             url = notes["url"]
             name = original["Title"]
             detail = notes["episode"] if "episode" in notes else notes["year"]
-            sub_activities = [
-                SubActivity(
-                    activity_id, [f'<a href="{url}">{name} ({detail})</a>'], start, end
-                )
-            ]
+            sub_activities = [SubActivity(activity_id, [f'<a href="{url}">{name} ({detail})</a>'], start, end)]
 
         else:
             if projects[0] in cls.projects_to_ignore:
@@ -138,42 +125,21 @@ class Activity(SubActivity):
 
             title = projects.pop(0)
             if notes.get("transport"):
-                sub_activities = [
-                    SubActivity(
-                        activity_id, [notes.get("transport").capitalize()], start, end
-                    )
-                ]
+                sub_activities = [SubActivity(activity_id, [notes.get("transport").capitalize()], start, end)]
             elif projects:
                 sub_activities = [SubActivity(activity_id, projects, start, end)]
             elif notes.get("location"):
-                sub_activities = [
-                    SubActivity(
-                        activity_id, [title] if not details else [details], start, end
-                    )
-                ]
+                sub_activities = [SubActivity(activity_id, [title] if not details else [details], start, end)]
 
-        return cls(
-            activity_id,
-            title,
-            start,
-            end,
-            calendar,
-            owner,
-            location,
-            trajectory,
-            projects,
-            sub_activities,
-        )
+        return cls(activity_id, title, start, end, calendar, owner, location, trajectory, projects, sub_activities)
 
 
 class Activities(List[Activity]):
     def sort_chronically(self):
-        self.sort(key=lambda x: x.start.__str__())
+        self.sort(key=lambda x: x.start.date_time.astimezone(timezone("UTC")))
 
     def merge_short_activities(
-        self,
-        max_time_diff: timedelta = timedelta(minutes=20),
-        default_location: GeoLocation = None,
+        self, max_time_diff: timedelta = timedelta(minutes=20), default_location: GeoLocation = None
     ):
         self.sort_chronically()
 
@@ -226,14 +192,9 @@ class Activities(List[Activity]):
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
-        longest_activity = max(
-            [activity, next_activity],
-            key=lambda x: (x.location is not None, x.get_duration()),
-        )
+        longest_activity = max([activity, next_activity], key=lambda x: (x.location is not None, x.get_duration()),)
 
-        longest_activity.sub_activities = (
-            activity.sub_activities + next_activity.sub_activities
-        )
+        longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start
         longest_activity.end = next_activity.end
         self.insert(index, longest_activity)
