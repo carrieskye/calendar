@@ -3,13 +3,13 @@ import os
 import time
 from datetime import datetime
 from json import JSONDecodeError
+from pathlib import Path
 from typing import List
 
 import pytz
 import requests
 from requests import Response
 from skye_comlib.utils.file import File
-from skye_comlib.utils.logger import Logger
 
 from src.models.watch import EpisodeWatch, Watch, MovieWatch
 
@@ -19,7 +19,7 @@ class TraktAPI:
 
     base_url = "https://api.trakt.tv"
     client_id = os.environ.get("TRAKT_CLIENT_ID")
-    token = File.read_json("src/credentials/trakt_token.json")["access_token"]
+    token = File.read_json(Path("src/credentials/trakt_token.json"))["access_token"]
 
     @classmethod
     def get_headers(cls):
@@ -57,7 +57,7 @@ class TraktAPI:
             return response.json()
         except JSONDecodeError:
             if response.status_code == 429:
-                Logger.log("Rate limit exceeded, trying again in 30s.")
+                logging.warning("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.post_request(url, body)
             raise TraktException(response, url, body)
@@ -137,16 +137,8 @@ class TraktAPI:
     def remove_episodes_from_history(cls, watches: List[Watch]):
         url = f"{cls.base_url}/sync/history/remove"
         body = {
-            "movies": [
-                {"ids": {"trakt": watch.trakt_id}}
-                for watch in watches
-                if isinstance(watch, MovieWatch)
-            ],
-            "episodes": [
-                {"ids": {"trakt": watch.episode_id}}
-                for watch in watches
-                if isinstance(watch, EpisodeWatch)
-            ],
+            "movies": [{"ids": {"trakt": watch.trakt_id}} for watch in watches if isinstance(watch, MovieWatch)],
+            "episodes": [{"ids": {"trakt": watch.episode_id}} for watch in watches if isinstance(watch, EpisodeWatch)],
         }
         return cls.post_request(url, body)
 
@@ -158,13 +150,9 @@ class TraktAPI:
 
 class TraktException(Exception):
     def __init__(self, response: Response, url: str, body: dict):
-        error_file = f".logs/.error_{str(datetime.now().timestamp())}.html"
+        error_file = Path(f".logs/.error_{str(datetime.now().timestamp())}.html")
 
-        Logger.log(f"\n Something went wrong. See {error_file} for details.")
-        File.write_txt(str(response.text).split("\n"), error_file, log=False)
-        Logger.log(
-            "\n".join(
-                [f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]
-            )
-        )
+        logging.error(f"Something went wrong. See {error_file} for details.")
+        File.write_txt(str(response.text).split("\n"), error_file)
+        logging.error("\n".join([f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]))
         super().__init__(f"Could not process Trakt request to {url}.")

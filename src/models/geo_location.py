@@ -10,14 +10,7 @@ from src.models.point import Point
 
 
 class GeoLocation:
-    def __init__(
-        self,
-        category: str,
-        address: Address,
-        short: str,
-        time_zone: str,
-        bounding_box: BoundingBox,
-    ):
+    def __init__(self, category: str, address: Address, short: str, time_zone: str, bounding_box: BoundingBox):
         self.category = category
         self.short = short
         self.address = address
@@ -48,9 +41,7 @@ class GeoLocation:
 
             lat_1, lon_1 = [polygon[i].latitude, polygon[i].longitude]
             lat_2, lon_2 = [polygon[j].latitude, polygon[j].longitude]
-            if ((lat_1 < lat_point) and (lat_2 >= lat_point)) or (
-                (lat_2 < lat_point) and (lat_1 >= lat_point)
-            ):
+            if ((lat_1 < lat_point) and (lat_2 >= lat_point)) or ((lat_2 < lat_point) and (lat_1 >= lat_point)):
                 if lon_1 + (lat_point - lat_1) / (lat_2 - lat_1) * (lon_2 - lon_1) < lon_point:
                     odd_nodes = not odd_nodes
         return odd_nodes
@@ -59,31 +50,17 @@ class GeoLocation:
         bb = self.bounding_box
         d = accuracy / 1000
 
-        new_bottom_left = GeoLocation.extend_point(
-            bb.bottom_left, bb.top_left, bb.bottom_right, d
-        )
-        new_top_left = GeoLocation.extend_point(
-            bb.top_left, bb.top_right, bb.bottom_left, d
-        )
-        new_top_right = GeoLocation.extend_point(
-            bb.top_right, bb.bottom_right, bb.top_left, d
-        )
-        new_bottom_right = GeoLocation.extend_point(
-            bb.bottom_right, bb.bottom_left, bb.top_right, d
-        )
+        new_bottom_left = GeoLocation.extend_point(bb.bottom_left, bb.top_left, bb.bottom_right, d)
+        new_top_left = GeoLocation.extend_point(bb.top_left, bb.top_right, bb.bottom_left, d)
+        new_top_right = GeoLocation.extend_point(bb.top_right, bb.bottom_right, bb.top_left, d)
+        new_bottom_right = GeoLocation.extend_point(bb.bottom_right, bb.bottom_left, bb.top_right, d)
 
-        return BoundingBox(
-            new_bottom_left, new_top_left, new_top_right, new_bottom_right
-        )
+        return BoundingBox(new_bottom_left, new_top_left, new_top_right, new_bottom_right)
 
     @staticmethod
     def deserialise(serialised: dict):
-        serialised["bounding_box"] = BoundingBox.deserialise(
-            serialised.get("bounding_box")
-        )
-        serialised["address"] = Address.get_address_for_country(
-            serialised.get("address")
-        )
+        serialised["bounding_box"] = BoundingBox.deserialise(serialised.get("bounding_box"))
+        serialised["address"] = Address.get_address_for_country(serialised.get("address"))
         return GeoLocation(**serialised)
 
     @staticmethod

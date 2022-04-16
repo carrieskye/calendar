@@ -16,9 +16,7 @@ class Point:
         y = mx + b
         b = -mx + y
         """
-        m = (point_a.longitude - point_b.longitude) / (
-            point_a.latitude - point_b.latitude
-        )
+        m = (point_a.longitude - point_b.longitude) / (point_a.latitude - point_b.latitude)
         b = -(point_a.latitude * m) + point_a.longitude
         return m, b
 

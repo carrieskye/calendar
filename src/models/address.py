@@ -99,9 +99,7 @@ class UKAddress(Address):
         postal_code: str = "",
         city: str = "",
     ):
-        super().__init__(
-            address_lines, house_no, street, district, postal_code, city, "", "UK"
-        )
+        super().__init__(address_lines, house_no, street, district, postal_code, city, "", "UK")
 
     def __str__(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -119,9 +117,7 @@ class UKAddress(Address):
     @classmethod
     def parse_from_string(cls, address_string) -> UKAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street, district = UKAddress.parse_other_parts_uk(
-            address_split[:-2]
-        )
+        address_lines, house_no, street, district = UKAddress.parse_other_parts_uk(address_split[:-2])
         city, postal_code = UKAddress.parse_postal_code_uk(address_split[-2])
         return cls(
             address_lines=address_lines,
@@ -135,9 +131,7 @@ class UKAddress(Address):
     @staticmethod
     def parse_postal_code_uk(city_and_postal_code):
         postal_code, city = ["", ""]
-        postal_codes = re.findall(
-            r"[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}", city_and_postal_code
-        )
+        postal_codes = re.findall(r"[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}", city_and_postal_code)
         if not postal_codes:
             postal_codes = re.findall(r"[A-Z]{1,2}[0-9][0-9A-Z]?", city_and_postal_code)
         if postal_codes:
@@ -151,9 +145,7 @@ class UKAddress(Address):
     def parse_other_parts_uk(other_parts):
         address_lines, street, house_no, district = [[], "", "", [""]]
         for index, part in enumerate(other_parts):
-            if any(
-                [part.endswith(" " + street_abbr) for street_abbr in UK_STREET_ABBR]
-            ):
+            if any([part.endswith(" " + street_abbr) for street_abbr in UK_STREET_ABBR]):
                 street = part
                 address_lines = other_parts[:index]
                 if len(other_parts) > index + 1:
@@ -182,17 +174,8 @@ class UKAddress(Address):
 
 
 class BEAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "BE"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "BE")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -211,31 +194,16 @@ class BEAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> BEAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = BEAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = BEAddress.parse_other_parts(address_split[:-2])
         city, postal_code = BEAddress.parse_postal_code(address_split[-2])
         return BEAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class ATAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "AT"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "AT")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -254,31 +222,16 @@ class ATAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> ATAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = ATAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = ATAddress.parse_other_parts(address_split[:-2])
         city, postal_code = ATAddress.parse_postal_code(address_split[-2])
         return ATAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class CHAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "CH"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "CH")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -297,31 +250,16 @@ class CHAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> CHAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = CHAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = CHAddress.parse_other_parts(address_split[:-2])
         city, postal_code = CHAddress.parse_postal_code(address_split[-2])
         return CHAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class FRAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "FR"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "FR")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -340,31 +278,16 @@ class FRAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> FRAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = FRAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = FRAddress.parse_other_parts(address_split[:-2])
         city, postal_code = FRAddress.parse_postal_code(address_split[-2])
         return FRAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class DEAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "DE"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "DE")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -383,31 +306,16 @@ class DEAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> DEAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = DEAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = DEAddress.parse_other_parts(address_split[:-2])
         city, postal_code = DEAddress.parse_postal_code(address_split[-2])
         return DEAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class NOAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "NO"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "NO")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -426,31 +334,16 @@ class NOAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> NOAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = BEAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = BEAddress.parse_other_parts(address_split[:-2])
         city, postal_code = BEAddress.parse_postal_code(address_split[-2])
         return NOAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 
 class SEAddress(Address):
-    def __init__(
-        self,
-        address_lines: List[str],
-        house_no: str,
-        street: str,
-        postal_code: str,
-        city: str,
-    ):
-        Address.__init__(
-            self, address_lines, house_no, street, "", postal_code, city, "", "SE"
-        )
+    def __init__(self, address_lines: List[str], house_no: str, street: str, postal_code: str, city: str):
+        Address.__init__(self, address_lines, house_no, street, "", postal_code, city, "", "SE")
 
     def stringify(self) -> str:
         address = ", ".join(line for line in self.address_lines if line)
@@ -469,16 +362,10 @@ class SEAddress(Address):
     @staticmethod
     def parse_from_string(address_string) -> SEAddress:
         address_split = address_string.split(", ")
-        address_lines, house_no, street = BEAddress.parse_other_parts(
-            address_split[:-2]
-        )
+        address_lines, house_no, street = BEAddress.parse_other_parts(address_split[:-2])
         city, postal_code = BEAddress.parse_postal_code(address_split[-2])
         return SEAddress(
-            address_lines=address_lines,
-            house_no=house_no,
-            street=street,
-            postal_code=postal_code,
-            city=city,
+            address_lines=address_lines, house_no=house_no, street=street, postal_code=postal_code, city=city
         )
 
 

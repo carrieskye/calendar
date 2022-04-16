@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 import psycopg2
@@ -10,7 +11,7 @@ from src.models.calendar import Owner
 
 class OwnTracks:
     logging.info("Loading OwnTracks")
-    credentials = File.read_json("src/credentials/own_tracks.json")
+    credentials = File.read_json(Path("src/credentials/own_tracks.json"))
 
     @classmethod
     def get_records(cls, start: datetime, end: datetime, owner: Owner) -> List[tuple]:
