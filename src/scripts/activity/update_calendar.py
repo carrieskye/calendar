@@ -50,7 +50,7 @@ class UpdateCalendar(ActivityScript):
             try:
                 day_str = day.strftime("%Y-%m-%d")
                 file_name = owner_dir / f"json/{day_str}.json"
-                logging.info(day_str)
+                logging.info(f"[bold]{day_str}", extra={"markup": True})
                 activities = jsonpickle.decode(json.dumps(File.read_json(file_name)))
 
                 self.remove_events(day)
@@ -75,8 +75,11 @@ class UpdateCalendar(ActivityScript):
 
     def create_events(self, activities: Activities):
         for activity in activities:
-            for line in activity.__str__().split("\n"):
-                logging.info(line)
+            logging.info(
+                f"{activity.start.date_time.strftime('%H:%M:%S')} - "
+                f"{activity.end.date_time.strftime('%H:%M:%S')}: "
+                f"{activity.title} ({activity.calendar.name})"
+            )
             cal_id = activity.calendar.get_cal_id(activity.owner)
             if activity.sub_activities:
                 sub_activities = "\n".join([x.__str__() for x in activity.sub_activities])

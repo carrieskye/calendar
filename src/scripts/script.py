@@ -12,12 +12,12 @@ from src.models.geo_location import GeoLocation
 class Script(ABC):
     @abstractmethod
     def __init__(self):
-        logging.info(Formatter.sub_title("Input"), extra={"markup": True})
+        logging.info(Formatter.sub_title("Input"))
 
     @abstractmethod
     def run(self):
         print()
-        logging.info(Formatter.sub_title("Processing"), extra={"markup": True})
+        logging.info(Formatter.sub_title("Processing"))
 
     @staticmethod
     def get_owner(default: Owner = Owner.shared) -> Owner:
