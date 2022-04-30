@@ -15,6 +15,8 @@ from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
 
+Logger.configure()
+
 SCRIPTS = {
     "Activity": {
         "Parse timing export": ParseTimingExportScript,
@@ -31,8 +33,7 @@ SCRIPTS = {
 }
 
 if __name__ == "__main__":
-    Logger()
-    logging.info(Formatter.title("Selecting script"), extra={"markup": True})
+    logging.info(Formatter.title("Selecting script"))
 
     categories = list(SCRIPTS.keys())
     options = "\n".join(f"{str(index + 1).rjust(4)}) {x}" for index, x in enumerate(categories))
@@ -58,6 +59,6 @@ if __name__ == "__main__":
     script_name = scripts[script_no]
     logging.info(f"Selected [bold]{script_name}", extra={"markup": True})
 
-    logging.info(Formatter.title("Running script"), extra={"markup": True})
+    logging.info(Formatter.title("Running script"))
     script = SCRIPTS[category][script_name]()
     script.run()

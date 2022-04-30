@@ -23,7 +23,7 @@ class ParseTimingExportScript(ActivityScript):
         super().run()
 
         for owner in [Owner.carrie]:
-            logging.info(Formatter.sub_title(owner.name), extra={"markup": True})
+            logging.info(Formatter.sub_title(owner.name))
 
             export = File.read_csv(Path(f"data/activity/{owner.name}/All Activities.csv"))
 
@@ -59,4 +59,4 @@ class ParseTimingExportScript(ActivityScript):
                 File.write_json(json.loads(jsonpickle.encode(activities)), dir_name / f"json/{day}.json")
                 logging.info(f"Processed [bold]{day}", extra={"markup": True})
 
-            logging.info(f"[bold green]Processed {len(activities_per_day)} activities.", extra={"markup": True})
+            logging.info(f"\n[bold pale_green3]Processed {len(activities_per_day)} days.", extra={"markup": True})

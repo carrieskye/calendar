@@ -18,7 +18,7 @@ from skye_comlib.utils.formatter import Formatter
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
 
-logging.info(Formatter.title("Loading connectors"), extra={"markup": True})
+logging.info(Formatter.title("Loading connectors"))
 
 
 def load_credentials(scopes: List[str]) -> Credentials:
