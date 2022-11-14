@@ -1,9 +1,7 @@
-import json
 import logging
 from datetime import datetime, time, date
 from pathlib import Path
 
-import jsonpickle
 import pytz
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
@@ -51,7 +49,7 @@ class UpdateCalendar(ActivityScript):
                 day_str = day.strftime("%Y-%m-%d")
                 file_name = owner_dir / f"json/{day_str}.json"
                 logging.info(f"[bold]{day_str}", extra={"markup": True})
-                activities = jsonpickle.decode(json.dumps(File.read_json(file_name)))
+                activities = File.read_json_pickle(file_name)
 
                 self.remove_events(day)
                 self.create_events(activities)
