@@ -15,7 +15,7 @@ from src.data.data import Calendars
 from src.models.calendar import Owner, Calendar
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
-from src.models.geo_location import GeoLocation
+from src.models.location.geo_location import GeoLocation
 from src.models.watch import Watch, EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch
 from src.scripts.script import Script
 

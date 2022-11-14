@@ -11,7 +11,7 @@ from skye_comlib.utils.formatter import Formatter
 from src.data.data import Data
 from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
-from src.models.geo_location import GeoLocation
+from src.models.location.geo_location import GeoLocation
 
 
 class SubActivity:
@@ -192,7 +192,10 @@ class Activities(List[Activity]):
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
-        longest_activity = max([activity, next_activity], key=lambda x: (x.location is not None, x.get_duration()),)
+        longest_activity = max(
+            [activity, next_activity],
+            key=lambda x: (x.location is not None, x.get_duration()),
+        )
 
         longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
         longest_activity.start = activity.start

@@ -1,18 +1,18 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.data.calendars import CalendarDict
 from src.data.geo_locations import GeoLocationDict
 
 
-@dataclass
 class Data:
-    geo_location_dict = GeoLocationDict()
-    calendar_dict = CalendarDict()
+    geo_location_dict: GeoLocationDict = GeoLocationDict()
+    calendar_dict: CalendarDict = CalendarDict()
 
 
 class GeoLocations:
     bromsgrove_st = Data.geo_location_dict["bromsgrove_st"]
     talygarn_st = Data.geo_location_dict["talygarn_st"]
+    jarnvagsgatan = Data.geo_location_dict["järnvagsgatan"]
     tramshed_tech = Data.geo_location_dict["tramshed_tech"]
     viola_arena = Data.geo_location_dict["viola_arena"]
 

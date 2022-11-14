@@ -1,9 +1,7 @@
-import json
 import logging
 from collections import defaultdict
 from pathlib import Path
 
-import jsonpickle
 from dateutil.relativedelta import relativedelta
 from skye_comlib.utils.file import File
 from skye_comlib.utils.formatter import Formatter
@@ -56,7 +54,7 @@ class ParseTimingExportScript(ActivityScript):
 
                 dir_name = Path(f"data/activity/{owner.name}")
                 File.write_csv([x.flatten() for x in activities], dir_name / f"csv/{day}.csv")
-                File.write_json(json.loads(jsonpickle.encode(activities)), dir_name / f"json/{day}.json")
+                File.write_json_pickle(activities, dir_name / f"json/{day}.json")
                 logging.info(f"Processed [bold]{day}", extra={"markup": True})
 
             logging.info(f"\n[bold pale_green3]Processed {len(activities_per_day)} days.", extra={"markup": True})

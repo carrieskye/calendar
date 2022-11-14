@@ -10,6 +10,7 @@ from src.scripts.activity.parse_hayley_export import ParseHayleyExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
 from src.scripts.activity.update_calendar import UpdateCalendar
 from src.scripts.location.add_location import AddLocation
+from src.scripts.location.print_locations import PrintLocations
 from src.scripts.location.update_event_times import UpdateEventTimes
 from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
@@ -29,7 +30,11 @@ SCRIPTS = {
         "Add episodes to history": AddEpisodesToHistory,
         "Add movie to history": AddMovieToHistory,
     },
-    "Locations": {"Update event times": UpdateEventTimes, "Add new location": AddLocation},
+    "Locations": {
+        "Update event times": UpdateEventTimes,
+        "Add new location": AddLocation,
+        "Print locations": PrintLocations,
+    },
 }
 
 if __name__ == "__main__":

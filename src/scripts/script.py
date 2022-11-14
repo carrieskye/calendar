@@ -6,7 +6,7 @@ from skye_comlib.utils.input import Input
 
 from src.data.data import Data
 from src.models.calendar import Owner
-from src.models.geo_location import GeoLocation
+from src.models.location.geo_location import GeoLocation
 
 
 class Script(ABC):
@@ -25,6 +25,6 @@ class Script(ABC):
         return Owner.__members__[owner]
 
     @staticmethod
-    def get_location(default: str = "talygarn_st") -> GeoLocation:
+    def get_location(default: str = "järnvagsgatan") -> GeoLocation:
         location = Input.get_string_input("Location", input_type="name", default=default)
         return Data.geo_location_dict[location]
