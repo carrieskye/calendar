@@ -22,4 +22,5 @@ class GeoLocationDict(Dict[str, GeoLocation]):
             self[geo_location.label] = geo_location
 
     def export_to_file(self):
-        File.write_json(contents=[geo_location.to_dict() for geo_location in self.values()], path=self.geo_file)
+        contents = sorted(self.values(), key=lambda x: (x.address.country, x.address.city, x.category))
+        File.write_csv(contents=[x.to_dict() for x in contents], path=self.geo_file)

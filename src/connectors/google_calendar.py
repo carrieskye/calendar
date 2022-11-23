@@ -18,6 +18,7 @@ from skye_comlib.utils.formatter import Formatter
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
 
+logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logging.info(Formatter.title("Loading connectors"))
 
 
