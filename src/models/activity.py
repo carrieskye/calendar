@@ -38,6 +38,7 @@ class Activity(SubActivity):
         "Family",
         "Home studio",
         "Travel",
+        "Household"
     ]
 
     def __init__(
