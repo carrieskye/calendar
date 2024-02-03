@@ -10,13 +10,11 @@ from src.models.location.geo_location import GeoLocation
 
 
 class Script(ABC):
-    @abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         logging.info(Formatter.sub_title("Input"))
 
     @abstractmethod
-    def run(self):
-        print()
+    def run(self) -> None:
         logging.info(Formatter.sub_title("Processing"))
 
     @staticmethod

@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import List
 
-from pydantic import BaseModel, root_validator
-from pytz import country_timezones
+from pydantic import BaseModel, model_validator
+from pytz import country_timezones  # type: ignore
 from skye_comlib.utils.file import File
 
 from src.address_parser import AddressParser
@@ -16,12 +16,15 @@ class GeoLocation(BaseModel):
     short: str
     address: Address
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def from_dict(cls, values: dict) -> dict:
         if not isinstance(values, Address):
             values["address"] = AddressParser.run(values["address"])
         if not values.get("time_zone"):
-            values["time_zone"] = country_timezones(values["address"].country_code)[0]
+            country_code = values["address"].country_code
+            if country_code == "UK":
+                country_code = "GB"
+            values["time_zone"] = country_timezones(country_code)[0]
         return {k: v for k, v in values.items() if k not in ["country", "city"]}
 
     def to_dict(self) -> dict:

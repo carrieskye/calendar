@@ -1,0 +1,9 @@
+[flake8]
+# it's not a bug that we aren't using all of hacking
+max-line-length = 120
+max-expression-complexity=12
+max-cognitive-complexity=17
+inline-quotes = "
+multiline-quotes = """
+ignore = W503,T201,CCR001,E501,N805
+extend-ignore = E203

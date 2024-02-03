@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta  # type: ignore
 from skye_comlib.utils.input import Input
 
 from src.models.calendar import Owner
@@ -9,16 +9,16 @@ from src.scripts.location.location import LocationScript
 
 
 class UpdateEventTimes(LocationScript):
-    def __init__(self):
+    def __init__(self) -> None:
         super(UpdateEventTimes, self).__init__()
 
         self.owner = self.get_owner(default=Owner.carrie)
         yesterday = (datetime.now() - relativedelta(days=1)).date()
         start = Input.get_date_input("Date", min_date=datetime(2019, 11, 20).date(), default=yesterday)
-        self.start = datetime.combine(start, time(4, 0))
+        self.start = datetime.combine(start, time(4))
         self.end = self.start + relativedelta(days=1)
 
-    def run(self):
+    def run(self) -> None:
         location_timestamps = self.get_location_timestamps(self.start, self.end, self.owner)
         location_timestamps.filter_incorrect_locations()
 

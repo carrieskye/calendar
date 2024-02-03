@@ -1,29 +1,20 @@
-from __future__ import annotations
+from typing import Optional
+
+from pydantic import BaseModel, Field
 
 from src.models.calendar import Calendar, Owner
 from src.models.event_datetime import EventDateTime
 
 
-class Event:
-    def __init__(
-        self,
-        summary: str,
-        location: str,
-        start: EventDateTime,
-        end: EventDateTime,
-        description: str = "",
-        event_id: str = "",
-        calendar: Calendar = None,
-        owner: Owner = None,
-    ):
-        self.summary = summary
-        self.location = location if location else ""
-        self.description = description if description else ""
-        self.start = start
-        self.end = end
-        self.event_id = event_id
-        self.calendar = calendar
-        self.owner = owner
+class Event(BaseModel):
+    summary: str
+    location: Optional[str] = Field(None)
+    description: str = Field("")
+    start: EventDateTime
+    end: EventDateTime
+    event_id: str = Field("")
+    calendar: Optional[Calendar] = Field(None)
+    owner: Optional[Owner] = Field(None)
 
     def serialise_for_google(self) -> dict:
         return {
@@ -36,14 +27,14 @@ class Event:
         }
 
     @classmethod
-    def from_dict(cls, original: dict, calendar: Calendar, owner: Owner) -> Event:
+    def from_dict(cls, original: dict, calendar: Calendar, owner: Owner) -> "Event":
         return cls(
-            summary=original.get("summary"),
+            summary=original["summary"],
             location=original.get("location"),
-            description=original.get("description"),
-            start=EventDateTime.from_dict(original.get("start")),
-            end=EventDateTime.from_dict(original.get("end")),
-            event_id=original.get("id"),
+            description=original.get("description", ""),
+            start=EventDateTime.from_dict(original["start"]),
+            end=EventDateTime.from_dict(original["end"]),
+            event_id=original.get("id", ""),
             calendar=calendar,
             owner=owner,
         )

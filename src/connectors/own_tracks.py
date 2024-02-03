@@ -21,13 +21,13 @@ class OwnTracks:
                 f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',
                 f'time < \'{end.strftime("%Y-%m-%d %H:%M:%S")}\'',
                 f"user_id = {user_id}",
-            ]
+            ],
         )
-        query = f"SELECT * FROM public.positions {conditions}"
+        query = f"SELECT * FROM public.positions {conditions}"  # noqa: S608
 
         conn = psycopg2.connect(**cls.credentials)
         cur = conn.cursor()
         cur.execute(query)
         records = cur.fetchall()
         conn.close()
-        return records
+        return records  # noqa: R504

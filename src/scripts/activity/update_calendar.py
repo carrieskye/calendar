@@ -1,44 +1,43 @@
 import logging
-from datetime import datetime, time, date
+from datetime import date, datetime, time
 from pathlib import Path
 
-import pytz
-from dateutil.relativedelta import relativedelta
+import pytz  # type: ignore
+from dateutil.relativedelta import relativedelta  # type: ignore
 from skye_comlib.utils.file import File
 from skye_comlib.utils.formatter import Formatter
 from skye_comlib.utils.input import Input
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Data, GeoLocations
-from src.models.activity import Activity, Activities
+from src.models.activity.activities import Activities
+from src.models.activity.activity import Activity
 from src.models.calendar import Owner
 from src.models.event import Event
-from src.scripts.activity.activity import ActivityScript
+from src.scripts.activity.activity_script import ActivityScript
 
 
 class UpdateCalendar(ActivityScript):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-        self.owner = self.get_owner(default=Owner.carrie)
         start = Input.get_date_input("Start")
-        # end = Input.get_date_input("End")
         days = Input.get_int_input("Days", "#days")
-        self.location = self.get_location()
 
-        # TODO find cleaner way later
+        self.owner = Owner.carrie
+        self.work_from_home = True
+        self.location = Data.geo_location_dict["järnvägsgatan"]
+
         self.start = self.correct_time_offset(start)
-        # self.end = self.correct_time_offset(end)
         self.end = self.start + relativedelta(days=days)
-        self.work_from_home = Input.get_bool_input("Work from home", default="y")
 
-    def correct_time_offset(self, original: date):
-        original_date_time = datetime.combine(original, time(5, 0))
+    def correct_time_offset(self, original: date) -> datetime:
+        original_date_time = datetime.combine(original, time(5))
         date_time_with_tz = original_date_time.astimezone(pytz.timezone(self.location.time_zone))
         offset = int(str(date_time_with_tz)[-5:-3])
         return original_date_time - relativedelta(hours=offset)
 
-    def run(self):
+    def run(self) -> None:
         logging.info(Formatter.sub_title("Processing"), extra={"markup": True})
 
         owner_dir = Path("data/activity") / self.owner.name
@@ -59,7 +58,7 @@ class UpdateCalendar(ActivityScript):
 
             day += relativedelta(days=1)
 
-    def remove_events(self, day: datetime):
+    def remove_events(self, day: datetime) -> None:
         for calendar in Data.calendar_dict.values():
             for owner in [self.owner, Owner.shared]:
                 if not calendar.get_cal_id(owner):
@@ -71,12 +70,12 @@ class UpdateCalendar(ActivityScript):
                     if event_day.day == day.day:
                         GoogleCalAPI.delete_event(calendar.get_cal_id(owner), event.event_id)
 
-    def create_events(self, activities: Activities):
+    def create_events(self, activities: Activities) -> None:
         for activity in activities:
             logging.info(
                 f"{activity.start.date_time.strftime('%H:%M:%S')} - "
                 f"{activity.end.date_time.strftime('%H:%M:%S')}: "
-                f"{activity.title} ({activity.calendar.name})"
+                f"{activity.title} ({activity.calendar.name})",
             )
             cal_id = activity.calendar.get_cal_id(activity.owner)
             if activity.sub_activities:
@@ -85,16 +84,22 @@ class UpdateCalendar(ActivityScript):
             else:
                 self.create_event(cal_id, activity, activity.title)
 
-    def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = ""):
+    def create_event(self, cal_id: str, activity: Activity, summary: str, description: str = "") -> None:
         if summary in ["Amplyfi", "Lunch"] and not self.work_from_home and not activity.location:
             location = GeoLocations.tramshed_tech.short
         else:
             if activity.trajectory:
-                start_loc, end_loc = activity.trajectory.split(" > ")
-                location = f"{Data.geo_location_dict[start_loc].short} > " f"{Data.geo_location_dict[end_loc].short}"
+                location = (
+                    f"{Data.geo_location_dict[activity.trajectory.origin].short} > "
+                    f"{Data.geo_location_dict[activity.trajectory.destination].short}"
+                )
             else:
                 location = activity.location.short if activity.location else self.location.short
         event = Event(
-            summary=summary, location=location, description=description, start=activity.start, end=activity.end
+            summary=summary,
+            location=location,
+            description=description,
+            start=activity.start,
+            end=activity.end,
         )
         GoogleCalAPI.create_event(cal_id, event)

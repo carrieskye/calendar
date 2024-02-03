@@ -1,14 +1,14 @@
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta  # type: ignore
 from skye_comlib.utils.file import File
 from skye_comlib.utils.input import Input
 
-from src.scripts.activity.activity import ActivityScript
+from src.scripts.activity.activity_script import ActivityScript
 
 
 class LarryDefaultWorkingDayScript(ActivityScript):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.start = Input.get_date_input("Start")
         days = Input.get_int_input("Days", "#days")
@@ -16,7 +16,7 @@ class LarryDefaultWorkingDayScript(ActivityScript):
 
         self.location = self.get_location()
 
-    def run(self):
+    def run(self) -> None:
         super().run()
 
         activities = []
@@ -30,7 +30,7 @@ class LarryDefaultWorkingDayScript(ActivityScript):
                     "Project": "Work",
                     "Title": "Delio",
                     "Notes": "",
-                }
+                },
             )
             activities.append(
                 {
@@ -40,7 +40,7 @@ class LarryDefaultWorkingDayScript(ActivityScript):
                     "Project": "Work",
                     "Title": "Delio",
                     "Notes": "",
-                }
+                },
             )
             day += relativedelta(days=1)
 

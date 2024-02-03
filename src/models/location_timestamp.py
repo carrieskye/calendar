@@ -3,21 +3,21 @@ from __future__ import annotations
 import operator
 from collections import defaultdict
 from datetime import datetime
-from math import radians, atan2, sin, cos, sqrt
-from typing import Tuple, List
+from math import atan2, cos, radians, sin, sqrt
+from typing import List, Optional, Tuple
 
+from pydantic import BaseModel, Field
 from skye_comlib.utils.table_print import TablePrint
 
 from src.models.point import Point
 
 
-class LocationTimestamp:
-    def __init__(self, date_time: datetime, latitude: float, longitude: float, accuracy: int, location_id: str = None):
-        self.date_time = date_time
-        self.latitude = latitude
-        self.longitude = longitude
-        self.accuracy = accuracy
-        self.location_id = location_id
+class LocationTimestamp(BaseModel):
+    date_time: datetime
+    latitude: float
+    longitude: float
+    accuracy: int
+    location_id: Optional[str] = Field(None)
 
     @classmethod
     def from_database(cls, db_record: Tuple) -> LocationTimestamp:
@@ -31,11 +31,13 @@ class LocationTimestamp:
 
     @classmethod
     def from_google(cls, takeout: dict) -> LocationTimestamp:
+        latitude_e7 = takeout.get("latitudeE7")
+        longitude_e7 = takeout.get("longitudeE7")
         return cls(
-            date_time=datetime.fromtimestamp(int(takeout.get("timestampMs")) / 1000),
-            latitude=int(takeout.get("latitudeE7")) / 10000000,
-            longitude=int(takeout.get("longitudeE7")) / 10000000,
-            accuracy=int(takeout.get("accuracy")),
+            date_time=datetime.fromtimestamp(int(takeout.get("timestampMs", 0)) / 1000),
+            latitude=int(latitude_e7) / 10000000 if latitude_e7 else 0,
+            longitude=int(longitude_e7) / 10000000 if longitude_e7 else 0,
+            accuracy=int(takeout.get("accuracy", 0)),
         )
 
     @staticmethod
@@ -56,7 +58,7 @@ class LocationTimestamp:
 
 
 class LocationTimestamps(List[LocationTimestamp]):
-    def remove_duplicate_records(self):
+    def remove_duplicate_records(self) -> None:
         records_per_timestamp = defaultdict(list)
         for location in self:
             records_per_timestamp[location.date_time].append(location)
@@ -65,16 +67,16 @@ class LocationTimestamps(List[LocationTimestamp]):
             for location in locations[1:]:
                 self.remove(location)
 
-    def filter_incorrect_locations(self):
+    def filter_incorrect_locations(self) -> None:
         incorrect_locations = []
         for index, location in enumerate(self):
-            group = self[max(0, index - 4): min(len(self) - 1, index + 5)]
+            group = self[max(0, index - 4) : min(len(self) - 1, index + 5)]
             if len([x for x in group if x.location_id == location.location_id]) == 1:
                 incorrect_locations.append(index)
         for index in sorted(incorrect_locations, reverse=True):
             self.pop(index)
 
-    def table_print(self, title: str):
+    def table_print(self, title: str) -> None:
         headers = ["TIME", "LAT - LON", "ACCURACY", "LOCATION"]
         table_print = TablePrint(title, headers, [8, 25, 10, 30])
 
@@ -85,7 +87,7 @@ class LocationTimestamps(List[LocationTimestamp]):
                     f"{location.latitude}, {location.longitude}",
                     location.accuracy,
                     location.location_id,
-                ]
+                ],
             )
 
     @classmethod

@@ -4,22 +4,22 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "==2.2.2"
-geopy = "==2.3.0"
-google = "==3.0.0"
-google-auth-oauthlib = "==0.7.1"
-google-api-python-client = "==2.66.0"
-jsonpickle = "==2.2.0"
-prettytable = "==3.5.0"
-psycopg2-binary	= "==2.9.5"
-pycountry = "==22.3.5"
-pydantic = "==1.10.2"
-python-dateutil = "==2.8.2"
-pytz = "==2022.6"
-requests = "==2.28.1"
-rich = "==12.6.0"
+flask = "*"
+geopy = "*"
+google = "*"
+google-auth-oauthlib = "*"
+google-api-python-client = "*"
+jsonpickle = "*"
+prettytable = "*"
+psycopg2-binary	= "*"
+pycountry = "*"
+pydantic = "*"
+python-dateutil = "*"
+pytz = "*"
+requests = "*"
+rich = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"

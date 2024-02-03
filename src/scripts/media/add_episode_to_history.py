@@ -1,16 +1,19 @@
 import logging
+from typing import List
 
-from dateutil import tz
-from dateutil.relativedelta import relativedelta
+from dateutil import tz  # type: ignore
+from dateutil.relativedelta import relativedelta  # type: ignore
 from skye_comlib.utils.input import Input
 
 from src.connectors.trakt import TraktAPI
-from src.models.watch import EpisodeWatch, TempEpisodeWatch
+from src.data.data import Data
+from src.models.calendar import Owner
+from src.models.watch import EpisodeWatch, TempEpisodeWatch, Watch
 from src.scripts.media.media import MediaScript
 
 
 class AddEpisodesToHistory(MediaScript):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.show_title = Input.get_string_input("Show", "title")
@@ -19,16 +22,19 @@ class AddEpisodesToHistory(MediaScript):
         self.last_season = Input.get_int_input("Last season", "no", self.first_season)
         self.last_episode = Input.get_int_input("Last episode", "no", self.first_episode)
         self.start = Input.get_date_time_input("Start")
-        spread = Input.get_bool_input("Spread")
-        self.end = Input.get_date_time_input("End", default=self.start) if spread else self.start
-        self.owner = self.get_owner()
-        self.location = self.get_location()
+        if self.first_season == self.last_season and self.first_episode == self.last_episode:
+            self.end = None
+        else:
+            spread = Input.get_bool_input("Spread")
+            self.end = Input.get_date_time_input("End", default=self.start) if spread else None
+        self.owner = Owner.carrie
+        self.location = Data.geo_location_dict["järnvägsgatan"]
 
-    def run(self):
+    def run(self) -> None:
         start = self.start.replace(tzinfo=tz.gettz(self.location.time_zone))
-        show = TraktAPI.get_show_details(self.show_title)
-        show_id = show.get("ids").get("trakt")
-        watches = []
+        show = TraktAPI.search_show(self.show_title)
+        show_id = show.ids.trakt
+        watches: List[Watch] = []
         episodes = {}
 
         if self.first_season == self.last_season:
@@ -43,7 +49,7 @@ class AddEpisodesToHistory(MediaScript):
 
         for season_no, episode_range in episodes.items():
             for episode_no in episode_range:
-                details = self.get_episode_details(show_id, str(season_no), str(episode_no))
+                details = self.get_episode_details(show_id, season_no, episode_no)
                 temp_watch = TempEpisodeWatch(
                     watched_at=start + relativedelta(minutes=details["runtime"]),
                     show_id=show_id,
@@ -52,7 +58,7 @@ class AddEpisodesToHistory(MediaScript):
                     episode_no=episode_no,
                     episode_id=details["trakt_id"],
                     episode_title=details["title"],
-                    slug=show["ids"]["slug"],
+                    slug=show.ids.slug,
                 )
                 watch = EpisodeWatch(temp_watch, details["runtime"])
                 start += relativedelta(minutes=details["runtime"])

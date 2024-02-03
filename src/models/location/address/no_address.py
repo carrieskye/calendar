@@ -1,10 +1,10 @@
-from pydantic import root_validator
+from pydantic import model_validator
 
 from src.models.location.address.address import Address
 
 
 class NOAddress(Address):
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def from_string(cls, values: dict) -> dict:
         address_split = values["original"].split(", ")
         values.update(cls.parse_other_parts(address_split[:-2]))

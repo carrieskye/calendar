@@ -1,4 +1,5 @@
 import argparse
+from typing import Dict, List, Type
 
 from skye_comlib.utils.logger import Logger
 
@@ -12,17 +13,18 @@ from src.scripts.location.update_event_times import UpdateEventTimes
 from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
+from src.scripts.script import Script
 
 Logger.configure()
 
 
-def run_multiple(task_dict: dict, tasks_str: str):
+def run_multiple(task_dict: dict, tasks_str: str) -> None:
     task_names = list(task_dict.keys())
     if not tasks_str:
         tasks_str = input(
-            "Please select tasks:" + "\n".join([f"{idx}) {task}" for idx, task in enumerate(task_names)]) + "\nTasks: "
+            "Please select tasks:" + "\n".join([f"{idx}) {task}" for idx, task in enumerate(task_names)]) + "\nTasks: ",
         )
-    tasks = []
+    tasks: List[int] = []
     for number in tasks_str.split(","):
         if "-" in number:
             start, end = number.split("-")
@@ -30,14 +32,14 @@ def run_multiple(task_dict: dict, tasks_str: str):
         else:
             tasks.append(int(number))
     for task in tasks:
-        script = task_dict[task_names[task]]()
-        script.run()
+        _script = task_dict[task_names[task]]()
+        _script.run()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    FUNCTION_MAP = {
+    FUNCTION_MAP: Dict[str, Type[Script]] = {
         "Parse timing export": ParseTimingExportScript,  # 0
         "Update calendar": UpdateCalendar,  # 1
         "Parse Hayley export": ParseHayleyExportScript,  # 2
@@ -53,7 +55,7 @@ if __name__ == "__main__":
     parser.add_argument("--numbers", "--n", type=str, required=False)
     args = parser.parse_args()
     try:
-        script = FUNCTION_MAP[args.task]
+        script: Script = FUNCTION_MAP[args.task]()
         script.run()
     except KeyError:
         run_multiple(FUNCTION_MAP, args.numbers)

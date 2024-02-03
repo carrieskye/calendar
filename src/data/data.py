@@ -1,18 +1,30 @@
-from dataclasses import dataclass, field
-
 from src.data.calendars import CalendarDict
 from src.data.geo_locations import GeoLocationDict
+from src.data.icons import IconsDict
+from src.data.runtime_cache import RuntimeCache
 
 
 class Data:
     geo_location_dict: GeoLocationDict = GeoLocationDict()
     calendar_dict: CalendarDict = CalendarDict()
+    icons_dict: IconsDict = IconsDict()
+    runtime_cache: RuntimeCache = RuntimeCache()
+
+    projects_to_ignore = [
+        "Help people",
+        "Food",
+        "Friends",
+        "Family",
+        "Home studio",
+        "Travel",
+        "Household",
+    ]
 
 
 class GeoLocations:
     bromsgrove_st = Data.geo_location_dict["bromsgrove_st"]
     talygarn_st = Data.geo_location_dict["talygarn_st"]
-    jarnvagsgatan = Data.geo_location_dict["järnvagsgatan"]
+    jarnvagsgatan = Data.geo_location_dict["järnvägsgatan"]
     tramshed_tech = Data.geo_location_dict["tramshed_tech"]
     viola_arena = Data.geo_location_dict["viola_arena"]
 
