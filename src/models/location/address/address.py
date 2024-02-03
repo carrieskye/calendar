@@ -1,27 +1,28 @@
 import re
 from typing import List, Optional
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class Address(BaseModel):
-    address_lines: List[str]
-    house_no: Optional[str]
-    street: Optional[str]
-    district: Optional[str]
-    postal_code: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    country_code: Optional[str]
-    country: Optional[str]
-    original: Optional[str]
+    address_lines: List[str] = Field(default_factory=list)
+    house_no: Optional[str] = Field(None)
+    street: Optional[str] = Field(None)
+    district: Optional[str] = Field(None)
+    postal_code: Optional[str] = Field(None)
+    city: Optional[str] = Field(None)
+    state: Optional[str] = Field(None)
+    country_code: str
+    country: str
+    original: Optional[str] = Field(None)
 
     def __str__(self) -> str:
-        return ", ".join([x.strip() for x in self.address_parts if x and x.strip()])
+        return ", ".join([x.strip() for x in self.address_parts])
 
     @property
     def address_parts(self) -> List[str]:
-        return self.address_lines + [self.street_part, self.district, self.city_part, self.country]
+        parts = self.address_lines + [self.street_part, self.district, self.city_part, self.country]
+        return [x for x in parts if x and x.strip()]
 
     @property
     def street_part(self) -> str:
@@ -31,7 +32,7 @@ class Address(BaseModel):
     def city_part(self) -> str:
         return f"{self.postal_code} {self.city}"
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def from_string(cls, values: dict) -> dict:
         return values
 
@@ -59,7 +60,6 @@ class Address(BaseModel):
     def parse_city_and_postal_code(city_and_postal_code: str) -> dict:
         if match := re.fullmatch(r"(?P<postal_code>[0-9 ]+) (?P<city>[^0-9]+)", city_and_postal_code):
             return match.groupdict()
-        elif match := re.fullmatch(r"(?P<city>[^0-9]+) (?P<postal_code>[0-9 ]+)", city_and_postal_code):
+        if match := re.fullmatch(r"(?P<city>[^0-9]+) (?P<postal_code>[0-9 ]+)", city_and_postal_code):
             return match.groupdict()
-        else:
-            return {"postal_code": "", "city": city_and_postal_code}
+        return {"postal_code": "", "city": city_and_postal_code}

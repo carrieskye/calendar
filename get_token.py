@@ -10,16 +10,17 @@ from flask import Flask, abort, request
 REDIRECT_URI = "http://localhost:3000/trakt_callback"
 
 app = Flask(__name__)
+STATE = ""
 
 
 @app.route("/")
-def homepage():
+def homepage() -> str:
     text = '<a href="%s">Authenticate with Trakt</a>'
     return text % make_authorization_url()
 
 
 @app.route("/trakt_callback")
-def trakt_callback():
+def trakt_callback() -> str:
     error = request.args.get("error", "")
     if error:
         return "Error: " + error
@@ -33,7 +34,7 @@ def trakt_callback():
     return token
 
 
-def make_authorization_url():
+def make_authorization_url() -> str:
     state = str(uuid4())
     save_created_state(state)
 
@@ -47,16 +48,16 @@ def make_authorization_url():
     return "https://api.trakt.tv/oauth/authorize?" + urlencode(params)
 
 
-def save_created_state(state):
+def save_created_state(state: str) -> None:
     global STATE
     STATE = state
 
 
-def is_valid_state(state):
+def is_valid_state(state: str) -> bool:
     return STATE == state
 
 
-def get_token(code):
+def get_token(code: str) -> str:
     post_data = {
         "client_id": CLIENT_ID,
         "client_secret": SECRET,
@@ -65,11 +66,11 @@ def get_token(code):
         "redirect_uri": REDIRECT_URI,
     }
 
-    response = requests.post("https://api.trakt.tv/oauth/token", data=post_data)
+    response = requests.post("https://api.trakt.tv/oauth/token", data=post_data, timeout=60)
     return response.json()
 
 
 if __name__ == "__main__":
     CLIENT_ID = os.environ.get("TRAKT_CLIENT_ID")
     SECRET = os.environ.get("TRAKT_SECRET")
-    app.run(debug=True, port=3000)
+    app.run(port=3000)

@@ -10,9 +10,10 @@ def read_row_to_csv(row: str) -> List[str]:
     reader = csv.reader(StringIO(row))
     for line in reader:
         return line
+    return []
 
 
-def fix_file(path: Path):
+def fix_file(path: Path) -> None:
     contents = File.read_txt(path)
 
     fixed_contents = []

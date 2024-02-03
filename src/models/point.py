@@ -1,8 +1,8 @@
-from __future__ import annotations
+from typing import Tuple
 
 
 class Point:
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude: float, longitude: float):
         self.latitude = latitude
         self.longitude = longitude
 
@@ -10,7 +10,7 @@ class Point:
         return f"{self.latitude}, {self.longitude}"
 
     @staticmethod
-    def get_line_through_points(point_a: Point, point_b: Point) -> (float, float):
+    def get_line_through_points(point_a: "Point", point_b: "Point") -> Tuple[float, float]:
         """
         m = (y_2 - y_1) / (x_2 - x_1)
         y = mx + b
@@ -19,7 +19,3 @@ class Point:
         m = (point_a.longitude - point_b.longitude) / (point_a.latitude - point_b.latitude)
         b = -(point_a.latitude * m) + point_a.longitude
         return m, b
-
-    @classmethod
-    def deserialise(cls, serialised: dict) -> Point:
-        return cls(**serialised)

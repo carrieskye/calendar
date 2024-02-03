@@ -1,67 +1,61 @@
 from datetime import datetime
+from typing import Dict, Optional
 
-from dateutil.parser import parse
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta  # type: ignore
+from pydantic import BaseModel, Field
+
+from src.models.trakt.history_item import (
+    HistoryItemEpisode,
+    HistoryItemExtendedEpisode,
+    HistoryItemExtendedMovie,
+    HistoryItemMovie,
+)
 
 
-class TempEpisodeWatch:
-    def __init__(
-        self,
-        watched_at: datetime,
-        show_id: str,
-        show_title: str,
-        season_no: int,
-        episode_no: int,
-        episode_id: str = None,
-        episode_title: str = None,
-        slug: str = None,
-    ):
-        self.watched_at = watched_at
-        self.show_id = show_id
-        self.show_title = show_title
-        self.season_no = season_no
-        self.episode_id = episode_id
-        self.episode_title = episode_title
-        self.episode_no = episode_no
-        self.slug = slug
+class TempEpisodeWatch(BaseModel):
+    watched_at: datetime
+    show_id: int
+    show_title: str
+    season_no: int
+    episode_no: int
+    episode_id: int
+    episode_title: Optional[str] = Field(None)
+    slug: Optional[str] = Field(None)
 
     @classmethod
-    def from_result(cls, result: dict):
+    def from_result(cls, result: HistoryItemEpisode | HistoryItemExtendedEpisode) -> "TempEpisodeWatch":
         return cls(
-            watched_at=parse(result.get("watched_at")),
-            show_id=str(result.get("show").get("ids").get("trakt")),
-            show_title=result.get("show").get("title"),
-            season_no=result.get("episode").get("season"),
-            episode_no=result.get("episode").get("number"),
-            episode_id=result.get("episode").get("ids").get("trakt"),
-            episode_title=result.get("episode").get("title"),
-            slug=result.get("show").get("ids").get("slug"),
+            watched_at=result.watched_at,
+            show_id=result.show.ids.trakt,
+            show_title=result.show.title,
+            season_no=result.episode.season,
+            episode_no=result.episode.number,
+            episode_id=result.episode.ids.trakt,
+            episode_title=result.episode.title,
+            slug=result.show.ids.slug,
         )
 
 
-class TempMovieWatch:
-    def __init__(
-        self, watched_at: datetime, movie_id: str, movie_title: str = None, slug: str = None, year: int = None
-    ):
-        self.watched_at = watched_at
-        self.movie_id = movie_id
-        self.movie_title = movie_title
-        self.slug = slug
-        self.year = year
+class TempMovieWatch(BaseModel):
+    watched_at: datetime
+    movie_id: int
+    movie_title: str
+    slug: str
+    year: int
 
     @classmethod
-    def from_result(cls, result: dict):
+    def from_result(cls, result: HistoryItemMovie | HistoryItemExtendedMovie) -> "TempMovieWatch":
         return cls(
-            watched_at=parse(result.get("watched_at")),
-            movie_id=result.get("movie").get("ids").get("trakt"),
-            movie_title=result.get("movie").get("title"),
-            slug=result.get("movie").get("ids").get("slug"),
-            year=result.get("movie").get("year"),
+            watched_at=result.watched_at,
+            movie_id=result.movie.ids.trakt,
+            movie_title=result.movie.title,
+            slug=result.movie.ids.slug,
+            year=result.movie.year,
         )
 
 
 class Watch:
-    def __init__(self, trakt_id: str, title: str, details: dict, watched_at: datetime, runtime: int):
+    def __init__(self, trakt_id: int, title: str, details: dict, watched_at: datetime, runtime: int):
         self.trakt_id = trakt_id
         self.title = title
         self.details = details
@@ -71,7 +65,7 @@ class Watch:
     def __str__(self) -> str:
         return self.title
 
-    def get_start(self):
+    def get_start(self) -> datetime:
         return self.end - relativedelta(minutes=self.runtime)
 
 
@@ -120,7 +114,7 @@ class MovieWatch(Watch):
     def __str__(self) -> str:
         return f"{self.title} ({self.year})"
 
-    def get_export_dict(self):
+    def get_export_dict(self) -> Dict[str, str | int]:
         return {
             "title": self.movie_title,
             "year": self.year,

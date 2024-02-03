@@ -1,6 +1,6 @@
 from abc import ABC
 from datetime import datetime
-from math import radians, sin, atan2, sqrt, cos
+from math import atan2, cos, radians, sin, sqrt
 
 from src.connectors.own_tracks import OwnTracks
 from src.data.data import Data
@@ -37,9 +37,10 @@ class LocationScript(Script, ABC):
                 distances[match] = cls.get_distance(location_timestamp.get_point(), intersection)
             match = min(distances.items(), key=lambda x: x[1])
             return match[0]
+        raise ValueError(f"No location found for {location_timestamp}")
 
     @classmethod
-    def filter_geo_locations(cls, location_timestamp: LocationTimestamp):
+    def filter_geo_locations(cls, location_timestamp: LocationTimestamp) -> dict:
         geo_locations = {}
         for label, geo_location in Data.geo_location_dict.items():
             if geo_location.bounding_box:
@@ -49,7 +50,7 @@ class LocationScript(Script, ABC):
         return geo_locations
 
     @staticmethod
-    def get_distance(point1: Point, point2: Point):
+    def get_distance(point1: Point, point2: Point) -> float:
         earth_radius = 6371e3
         phi_1 = radians(point1.latitude)
         phi_2 = radians(point2.latitude)

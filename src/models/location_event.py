@@ -1,30 +1,33 @@
-from __future__ import annotations
-
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
 
-import pytz
-from dateutil.relativedelta import relativedelta
+import pytz  # type: ignore
+from dateutil.relativedelta import relativedelta  # type: ignore
+from pydantic import BaseModel
 from skye_comlib.utils.table_print import TablePrint
 
 from src.data.data import Data
-from src.models.location_timestamp import LocationTimestamps, LocationTimestamp
+from src.models.location_timestamp import LocationTimestamp, LocationTimestamps
 
 
-class LocationEvent:
-    def __init__(self, start: datetime, end: datetime, timestamps: List[LocationTimestamp], location_id: str):
-        self.start = start
-        self.end = end
-        self.timestamps = timestamps
-        self.location_id = location_id
+class LocationEvent(BaseModel):
+    start: datetime
+    end: datetime
+    timestamps: List[LocationTimestamp]
+    location_id: Optional[str]
 
     @classmethod
-    def from_location_timestamp(cls, timestamp: LocationTimestamp) -> LocationEvent:
-        return cls(timestamp.date_time, timestamp.date_time, [timestamp], timestamp.location_id)
+    def from_location_timestamp(cls, timestamp: LocationTimestamp) -> "LocationEvent":
+        return cls(
+            start=timestamp.date_time,
+            end=timestamp.date_time,
+            timestamps=[timestamp],
+            location_id=timestamp.location_id,
+        )
 
 
 class LocationEvents(List[LocationEvent]):
-    def table_print(self, title: str):
+    def table_print(self, title: str) -> None:
         headers = ["START", "END", "DURATION", "RECORDS", "LOCATION"]
         width = [9, 9, 9, 7, 30]
         table_print = TablePrint(title, headers, width)
@@ -43,10 +46,10 @@ class LocationEvents(List[LocationEvent]):
                     end - start if end - start else "0:00:00",
                     len(event.timestamps),
                     event.location_id,
-                ]
+                ],
             )
 
-    def merge_events(self):
+    def merge_events(self) -> None:
         to_merge = []
         for index, event in enumerate(self):
             if index in [0, len(self) - 1] or event.location_id:
@@ -57,9 +60,8 @@ class LocationEvents(List[LocationEvent]):
                 continue
             if len(event.timestamps) >= 10:
                 continue
-            if event.start + relativedelta(minutes=2) <= event.end:
-                if len(event.timestamps) >= 5:
-                    continue
+            if event.start + relativedelta(minutes=2) <= event.end and len(event.timestamps) >= 5:
+                continue
             to_merge.append(index)
 
         for index in sorted(to_merge, reverse=True):
@@ -70,14 +72,14 @@ class LocationEvents(List[LocationEvent]):
 
         self.table_print("Merged events")
 
-    def remove_short_events(self):
+    def remove_short_events(self) -> None:
         to_remove = []
         for index, event in enumerate(self):
             if not event.location_id:
                 continue
-            if len(event.timestamps) < 5 and event.start + relativedelta(minutes=5) > event.end:
-                to_remove.append(index)
-            elif event.start + relativedelta(minutes=2) > event.end:
+            if (
+                len(event.timestamps) < 5 and event.start + relativedelta(minutes=5) > event.end
+            ) or event.start + relativedelta(minutes=2) > event.end:
                 to_remove.append(index)
 
         for index in sorted(to_remove, reverse=True):
@@ -104,7 +106,7 @@ class LocationEvents(List[LocationEvent]):
         self.table_print("Without short events")
 
     @classmethod
-    def from_location_timestamps(cls, timestamps: LocationTimestamps) -> LocationEvents:
+    def from_location_timestamps(cls, timestamps: LocationTimestamps) -> "LocationEvents":
         location_events = cls()
         current_event = LocationEvent.from_location_timestamp(timestamps[0])
         for timestamp in timestamps[1:]:
@@ -125,7 +127,7 @@ class LocationEvents(List[LocationEvent]):
         return location_events
 
     @staticmethod
-    def ignore_dst(event_time: datetime, time_zone: str):
-        if pytz.timezone(time_zone).dst(event_time) != timedelta(0):
+    def ignore_dst(event_time: datetime, time_zone: str) -> datetime:
+        if pytz.timezone(time_zone).dst(event_time) != timedelta():
             return event_time + pytz.timezone(time_zone).dst(event_time)
         return event_time

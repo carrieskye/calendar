@@ -9,7 +9,7 @@ from src.scripts.location.location import LocationScript
 
 
 class AddLocation(LocationScript):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         logging.info(Formatter.sub_sub_title("DETAILS"))
@@ -18,9 +18,10 @@ class AddLocation(LocationScript):
         self.short = Input.get_string_input("Short address")
         self.address = Input.get_string_input("Address")
 
-    def run(self):
+    def run(self) -> None:
         Data.geo_location_dict.__add__(
-            self.label, GeoLocation(category=self.category, label=self.label, short=self.short, address=self.address)
+            self.label,
+            GeoLocation(category=self.category, label=self.label, short=self.short, address=self.address),
         )
 
         logging.info("Added")
