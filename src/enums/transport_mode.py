@@ -6,5 +6,6 @@ class TransportMode(str, Enum):
     CYCLING = "cycling"
     DRIVING = "driving"
     TAXI = "taxi"
+    TRAIN = "train"
     UNDERGROUND = "underground"
     WALKING = "walking"
