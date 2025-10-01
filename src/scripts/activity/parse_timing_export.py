@@ -20,7 +20,7 @@ class ParseTimingExportScript(ActivityScript):
     def __init__(self) -> None:
         super().__init__()
 
-        self.location = Data.geo_location_dict["järnvägsgatan"]
+        self.location = Data.geo_location_dict["home"]
 
     def run(self) -> None:
         super().run()
