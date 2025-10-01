@@ -26,7 +26,7 @@ class UpdateCalendar(ActivityScript):
 
         self.owner = Owner.carrie
         self.work_from_home = True
-        self.location = Data.geo_location_dict["järnvägsgatan"]
+        self.location = Data.geo_location_dict["järnvägsgatan_41_orsa"]
 
         self.start = self.correct_time_offset(start)
         self.end = self.start + relativedelta(days=days)
