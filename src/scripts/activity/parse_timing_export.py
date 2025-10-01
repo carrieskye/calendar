@@ -50,6 +50,8 @@ class ParseTimingExportScript(ActivityScript):
                     activity.title = f"🏠 {activity.title.replace('Visit ', '')}"
                 elif activity.title.startswith("Birthday "):
                     activity.title = f"🎂 {activity.title.replace('Birthday ', '')}"
+                elif activity.title.startswith("Haircut "):
+                    activity.title = f"💇 {activity.title.replace('Haircut ', '')}"
                 elif " with " in activity.title:
                     what, who = activity.title.split(" with ")
                     icon = Data.icons_dict[what]
