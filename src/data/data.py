@@ -41,6 +41,7 @@ class Calendars:
     recreation = Data.calendar_dict["recreation"]
     school = Data.calendar_dict["school"]
     shared = Data.calendar_dict["shared"]
+    shared_diary = Data.calendar_dict["shared_diary"]
     shifts = Data.calendar_dict["shifts"]
     social = Data.calendar_dict["social"]
     sports = Data.calendar_dict["sports"]
