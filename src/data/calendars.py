@@ -1,8 +1,6 @@
-import json
 from pathlib import Path
 from typing import Dict
 
-import jsonpickle
 from skye_comlib.utils.file import File
 
 from src.connectors.google_calendar import GoogleCalAPI
@@ -29,6 +27,6 @@ class CalendarDict(Dict[str, Calendar]):
 
     def export_to_file(self) -> None:
         File.write_json(
-            contents={name: json.loads(jsonpickle.encode(calendar)) for name, calendar in self.items()},
+            contents={name: calendar.model_dump(mode="json") for name, calendar in self.items()},
             path=self.calendar_file,
         )

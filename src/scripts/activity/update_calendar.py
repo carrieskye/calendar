@@ -9,7 +9,7 @@ from skye_comlib.utils.formatter import Formatter
 from skye_comlib.utils.input import Input
 
 from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Data, GeoLocations
+from src.data.data import Calendars, Data, GeoLocations
 from src.models.activity.activities import Activities
 from src.models.activity.activity import Activity
 from src.models.calendar import Owner
@@ -61,13 +61,15 @@ class UpdateCalendar(ActivityScript):
     def remove_events(self, day: datetime) -> None:
         for calendar in Data.calendar_dict.values():
             for owner in [self.owner, Owner.shared]:
-                if not calendar.get_cal_id(owner):
+                if not calendar.get_cal_id(owner) or calendar == Calendars.shared_diary:
                     continue
 
                 events = GoogleCalAPI.get_events(calendar, owner, 1000, day, day + relativedelta(days=1))
                 for event in events:
                     event_day = event.start.date_time - relativedelta(hours=4)
                     if event_day.day == day.day:
+                        if calendar == Calendars.shared:
+                            GoogleCalAPI.create_event(calendar_id=Calendars.shared_diary.get_cal_id(owner), event=event)
                         GoogleCalAPI.delete_event(calendar.get_cal_id(owner), event.event_id)
 
     def create_events(self, activities: Activities) -> None:
