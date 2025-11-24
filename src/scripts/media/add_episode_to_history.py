@@ -28,7 +28,7 @@ class AddEpisodesToHistory(MediaScript):
             spread = Input.get_bool_input("Spread")
             self.end = Input.get_date_time_input("End", default=self.start) if spread else None
         self.owner = Owner.user
-        self.location = Data.geo_location_dict["järnvägsgatan"]
+        self.location = Data.geo_location_dict["home"]
 
     def run(self) -> None:
         start = self.start.replace(tzinfo=tz.gettz(self.location.time_zone))

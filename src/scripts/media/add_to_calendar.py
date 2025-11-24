@@ -25,7 +25,7 @@ class AddToCalendar(MediaScript):
         self.start = start + relativedelta(hours=4)
         self.end = self.start + relativedelta(days=days)
         self.owner = Owner.user
-        self.location = Data.geo_location_dict["järnvägsgatan"]
+        self.location = Data.geo_location_dict["home"]
 
     def run(self) -> None:
         events = GoogleCalAPI.get_events(self.calendar, self.owner, 1000, self.start, self.end)
