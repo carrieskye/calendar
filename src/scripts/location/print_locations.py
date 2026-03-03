@@ -30,3 +30,5 @@ class PrintLocations(LocationScript):
         for row in data:
             table.add_row(list(row.values()))
         print(table)
+
+        Data.geo_location_dict.export_to_file()
