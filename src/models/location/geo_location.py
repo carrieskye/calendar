@@ -6,12 +6,13 @@ from pytz import country_timezones  # type: ignore
 from skye_comlib.utils.file import File
 
 from src.address_parser import AddressParser
+from src.enums.location_category import LocationCategory
 from src.models.location.address.address import Address
 
 
 class GeoLocation(BaseModel):
     time_zone: str
-    category: str
+    category: LocationCategory
     label: str
     short: str
     address: Address
