@@ -1,11 +1,21 @@
 import json
 import os
+import sys
 from urllib.parse import urlencode
 from uuid import uuid4
 
-import requests
-from flask import Flask, abort, request
-from flask.typing import ResponseReturnValue
+try:
+    import requests
+    from flask import Flask, abort, request
+    from flask.typing import ResponseReturnValue
+except ModuleNotFoundError as exc:
+    print(
+        f"Missing dependency {exc.name!r}. Use the project virtualenv, e.g.\n"
+        "  pipenv install\n"
+        "  pipenv run python get_token.py",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from exc
 
 REDIRECT_URI = "http://localhost:3000/trakt_callback"
 
