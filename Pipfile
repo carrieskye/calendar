@@ -4,19 +4,12 @@
 # If Pipenv errors on .../virtualenvs/calendar-*/.project, remove only this app's stale dirs there
 # (e.g. calendar-QlH1QXrw and calendar-QlH1QXrw-python), then reinstall.
 # If logs show Using .../bin/python33.12.0 — fix or remove PIPENV_PYTHON in .env (see .env.example).
-#
-# skye-comlib / common_skye is not on PyPI. Install only into THIS project's venv (never plain `pip install`
-# on asdf/global Python — it will pin old setuptools and break pipenv):
-#   pipenv install --dev
-#   pipenv run pip install -e ../common_skye
-# Optional: uncomment the next line only if ../common_skye exists everywhere you run `pipenv lock` (not CI).
 [[source]]
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
-# skye-comlib = {editable = true, path = "../common_skye"}
 flask = ">=3"
 google-api-python-client = ">=2"
 google-auth-oauthlib = ">=1"
@@ -25,6 +18,7 @@ psycopg2-binary = ">=2.9"
 pydantic = ">=2"
 pycountry = ">=24"
 python-dateutil = ">=2.9"
+rich = ">=12"
 pytz = ">=2024"
 requests = ">=2.31"
 
