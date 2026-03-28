@@ -1,13 +1,13 @@
 from pathlib import Path
-from typing import Dict, cast
+from typing import cast
 
-from src.utils.file_io import File
+from src.utils import File
 
 
 class RuntimeCache:
     cache_file = Path("data/trakt/cache/runtime.json")
-    shows: Dict[str, Dict[str, Dict[str, dict]]]
-    movies: Dict[str, int]
+    shows: dict[str, dict[str, dict[str, dict]]]
+    movies: dict[str, int]
 
     def __init__(self) -> None:
         super().__init__()
@@ -37,8 +37,8 @@ class RuntimeCache:
             if not isinstance(content, dict):
                 self.shows, self.movies = {}, {}
                 return
-            self.shows = cast(Dict[str, Dict[str, Dict[str, dict]]], content.get("shows", {}))
-            self.movies = cast(Dict[str, int], content.get("movies", {}))
+            self.shows = cast(dict[str, dict[str, dict[str, dict]]], content.get("shows", {}))
+            self.movies = cast(dict[str, int], content.get("movies", {}))
         else:
             self.shows, self.movies = {}, {}
 

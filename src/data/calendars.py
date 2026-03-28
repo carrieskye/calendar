@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Dict
 
-from src.connectors.google_calendar import GoogleCalAPI
+from src.connectors import GoogleCalAPI
 from src.models.calendar import Calendar
-from src.utils.file_io import File
+from src.utils import File
 
 
-class CalendarDict(Dict[str, Calendar]):
+class CalendarDict(dict[str, Calendar]):
     calendar_file = Path("data/calendars.json")
 
     def __init__(self) -> None:

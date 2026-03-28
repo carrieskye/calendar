@@ -3,7 +3,6 @@ import os
 import time
 from datetime import date, datetime, time as datetime_time
 from pathlib import Path
-from typing import Dict, List
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 from google.auth.credentials import Credentials
@@ -14,14 +13,13 @@ from googleapiclient.errors import HttpError
 
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
-from src.utils.file_io import File
-from src.utils.formatting import Formatter
+from src.utils import File, Formatter
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logging.info(Formatter.title("Loading connectors"))
 
 
-def load_credentials(scopes: List[str]) -> Credentials:
+def load_credentials(scopes: list[str]) -> Credentials:
     credentials = None
     token_file = Path("src/credentials/token.pickle")
     if os.path.exists("src/credentials/token.pickle"):
@@ -44,7 +42,7 @@ class GoogleCalAPI:
     service = build("calendar", "v3", credentials=load_credentials(scopes))
 
     @classmethod
-    def get_calendars(cls) -> Dict[str, str]:
+    def get_calendars(cls) -> dict[str, str]:
         ignore = [
             "Trakt",
             "Todoist",
@@ -60,7 +58,7 @@ class GoogleCalAPI:
             "Contact Shared",
         ]
         raw_items = cls.service.calendarList().list().execute().get("items", [])
-        calendar_list: Dict[str, str] = {}
+        calendar_list: dict[str, str] = {}
         for calendar in raw_items:
             if calendar.get("summary") in ignore:
                 continue
@@ -81,7 +79,7 @@ class GoogleCalAPI:
         max_results: int,
         time_min: datetime,
         time_max: datetime,
-    ) -> List[Event]:
+    ) -> list[Event]:
         try:
             events = (
                 cls.service.events()
@@ -105,8 +103,8 @@ class GoogleCalAPI:
             raise e
 
     @classmethod
-    def get_all_events_for_day(cls, start: date) -> List[Event]:
-        from src.data.data import Data
+    def get_all_events_for_day(cls, start: date) -> list[Event]:
+        from src.data import Data
 
         start = datetime.combine(start, datetime_time(4))
         end = start + relativedelta(days=1)
@@ -173,7 +171,7 @@ class GoogleCalAPI:
             raise e
 
     @classmethod
-    def get_event_instances(cls, calendar_id: str, event_id: str) -> List[Event]:
+    def get_event_instances(cls, calendar_id: str, event_id: str) -> list[Event]:
         try:
             return cls.service.events().instances(calendarId=calendar_id, eventId=event_id).execute()
         except HttpError as e:

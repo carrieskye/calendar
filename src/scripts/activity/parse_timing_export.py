@@ -2,18 +2,17 @@ import logging
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
-from typing import Dict
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.data.data import Data
+from src.data import Data
 from src.models.activity.activities import Activities
 from src.models.activity.activity import Activity
 from src.models.calendar import Owner
 from src.models.timing.timing_item import TimingItem
-from src.scripts.activity.activity_script import ActivityScript
-from src.utils.file_io import File
-from src.utils.formatting import Formatter
+from src.utils import File, Formatter
+
+from .activity_script import ActivityScript
 
 
 class ParseTimingExportScript(ActivityScript):
@@ -40,7 +39,7 @@ class ParseTimingExportScript(ActivityScript):
                     raise Exception(f"No short for {activity.location.address}")
                 all_activities.append(activity)
 
-            activities_per_day: Dict[str, Activities] = defaultdict(Activities)
+            activities_per_day: dict[str, Activities] = defaultdict(Activities)
             for activity in all_activities:
                 if icon := Data.icons_dict.get(activity.title):
                     activity.title = f"{icon} {activity.title}"

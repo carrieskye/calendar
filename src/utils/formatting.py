@@ -1,6 +1,6 @@
 """Plain-text / ANSI formatting helpers for logs and exports."""
+
 import re
-from typing import Dict
 
 
 class Formatter:
@@ -15,7 +15,7 @@ class Formatter:
     def title(cls, text: str) -> str:
         border = "".join(["\u2550" for _ in range(0, len(text) + 2)])
         top_border = "\u2554" + border + "\u2557"
-        bottom_border = "\u255A" + border + "\u255D"
+        bottom_border = "\u255a" + border + "\u255d"
         return f"\n\n\n{top_border}\n\u2551 {text.upper()} \u2551\n{bottom_border}\n"
 
     @classmethod
@@ -38,8 +38,8 @@ class Formatter:
         return "\n".join([f"- {k}: {v}" for k, v in details.items()])
 
     @classmethod
-    def de_serialise_details(cls, details: str) -> Dict[str, str]:
-        de_serialised: Dict[str, str] = {}
+    def de_serialise_details(cls, details: str) -> dict[str, str]:
+        de_serialised: dict[str, str] = {}
         for row in details.split("\n"):
             match = re.fullmatch(r"- (.*): (.*)", row)
             if match:

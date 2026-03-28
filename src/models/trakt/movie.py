@@ -1,11 +1,8 @@
-__all__ = ["Movie", "ExtendedMovie"]
-
 from datetime import date, datetime
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from src.models.trakt.trakt_ids import TraktIds
+from .trakt_ids import TraktIds
 
 
 class Movie(BaseModel):
@@ -21,13 +18,13 @@ class ExtendedMovie(Movie):
     runtime: int
     country: str
     updated_at: datetime
-    trailer: Optional[str] = Field(None)
-    homepage: Optional[str] = Field(None)
+    trailer: str | None = Field(None)
+    homepage: str | None = Field(None)
     status: str
     rating: float
     votes: int
     comment_count: int
     language: str
-    available_translations: List[str]
-    genres: List[str]
-    certification: Optional[str] = Field(None)
+    available_translations: list[str]
+    genres: list[str]
+    certification: str | None = Field(None)

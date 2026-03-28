@@ -1,15 +1,13 @@
-__all__ = ["TimingItem"]
-
 from datetime import datetime, timedelta
-from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.data.data import Data
-from src.models.calendar import Calendar
-from src.models.location.geo_location import GeoLocation
-from src.models.timing.timing_notes import TimingNotes
-from src.utils.formatting import Formatter
+from src.data import Data
+from src.utils import Formatter
+
+from ..calendar import Calendar
+from ..location import GeoLocation
+from .timing_notes import TimingNotes
 
 
 class TimingItem(BaseModel):
@@ -19,7 +17,7 @@ class TimingItem(BaseModel):
     end_date: datetime = Field(alias="End Date")
     original_title: str = Field(alias="Title")
     notes: TimingNotes = Field(alias="Notes")
-    all_projects: List[str] = Field(alias="Project")
+    all_projects: list[str] = Field(alias="Project")
 
     @field_validator("duration", mode="before")
     def parse_duration(cls, value: str | timedelta) -> timedelta:
@@ -38,20 +36,20 @@ class TimingItem(BaseModel):
         raise TypeError("Notes must be str or TimingNotes")
 
     @field_validator("all_projects", mode="before")
-    def parse_projects(cls, value: str | List[str]) -> List[str]:
+    def parse_projects(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, list):
             return value
         return value.split(" ▸ ")
 
     @property
-    def projects(self) -> List[str]:
+    def projects(self) -> list[str]:
         return self.all_projects[2:] + [self.original_title]
 
     @property
     def calendar(self) -> Calendar:
         return Data.calendar_dict[self.all_projects[0].lower()]
 
-    def get_location(self) -> Optional[GeoLocation]:
+    def get_location(self) -> GeoLocation | None:
         if self.notes.trajectory:
             return Data.geo_location_dict[self.notes.trajectory.origin]
         if self.notes.location:

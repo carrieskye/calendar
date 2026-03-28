@@ -1,20 +1,19 @@
 import logging
 from datetime import datetime, time
-from typing import List, Optional
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.connectors.google_calendar import GoogleCalAPI
-from src.connectors.trakt import TraktAPI
-from src.data.data import Data
+from src.connectors import GoogleCalAPI, TraktAPI
+from src.data import Data
 from src.models.calendar import Owner
 from src.models.watch import Watch
-from src.scripts.media.media import MediaScript
-from src.utils.prompts import Input
+from src.utils import Input
+
+from .media import MediaScript
 
 
 class AddToCalendar(MediaScript):
-    def __init__(self, start: Optional[datetime] = None, days: Optional[int] = None):
+    def __init__(self, start: datetime | None = None, days: int | None = None):
         super().__init__()
 
         if start is None:
@@ -33,7 +32,7 @@ class AddToCalendar(MediaScript):
         for event in events:
             GoogleCalAPI.delete_event(self.calendar.get_cal_id(self.owner), event.event_id)
 
-        watches: List[Watch] = []
+        watches: list[Watch] = []
 
         movie_history = TraktAPI.get_history_for_movies(self.start, self.end)
         movie_history = sorted(movie_history, key=lambda x: x.watched_at)

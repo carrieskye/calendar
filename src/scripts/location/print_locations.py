@@ -1,9 +1,8 @@
-from typing import List
-
 from prettytable import PrettyTable
 
-from src.data.data import Data
-from src.scripts.location.location import LocationScript
+from src.data import Data
+
+from .location import LocationScript
 
 
 class PrintLocations(LocationScript):
@@ -11,7 +10,7 @@ class PrintLocations(LocationScript):
         super().__init__()
 
     def run(self) -> None:
-        data: List[dict] = []
+        data: list[dict] = []
         table = PrettyTable(align="l")
         for geo_location in Data.geo_location_dict.values():
             new_dict = {**geo_location.__dict__, **geo_location.address.__dict__}

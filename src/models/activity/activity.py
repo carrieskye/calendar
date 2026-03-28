@@ -1,23 +1,19 @@
-__all__ = ["Activity"]
-
 from datetime import timedelta
-from typing import List, Optional
 
-from src.models.activity.sub_activity import SubActivity
-from src.models.calendar import Calendar, Owner
-from src.models.event_datetime import EventDateTime
-from src.models.location.geo_location import GeoLocation
-from src.models.timing.timing_item import TimingItem
-from src.models.timing.timing_trajectory import TimingTrajectory
+from ..calendar import Calendar, Owner
+from ..event_datetime import EventDateTime
+from ..location import GeoLocation
+from ..timing import TimingItem, TimingTrajectory
+from .sub_activity import SubActivity
 
 
 class Activity(SubActivity):
     title: str
     calendar: Calendar
     owner: Owner
-    location: Optional[GeoLocation]
-    trajectory: Optional[TimingTrajectory]
-    sub_activities: List[SubActivity]
+    location: GeoLocation | None
+    trajectory: TimingTrajectory | None
+    sub_activities: list[SubActivity]
 
     def __str__(self) -> str:
         result = (
@@ -65,7 +61,7 @@ class Activity(SubActivity):
         )
 
     @staticmethod
-    def get_sub_activity(timing_item: TimingItem, start: EventDateTime, end: EventDateTime) -> Optional[SubActivity]:
+    def get_sub_activity(timing_item: TimingItem, start: EventDateTime, end: EventDateTime) -> SubActivity | None:
         if timing_item.calendar.name == "lazing" and timing_item.projects and timing_item.all_projects[1] == "TV":
             url = timing_item.notes.url
             name = timing_item.projects[-1]

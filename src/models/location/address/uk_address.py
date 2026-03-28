@@ -1,9 +1,8 @@
 import re
-from typing import List
 
 from pydantic import model_validator
 
-from src.models.location.address.address import Address
+from .address import Address
 
 UK_STREET_ABBR = [
     "Ave",
@@ -54,7 +53,7 @@ class UKAddress(Address):
         return values
 
     @staticmethod
-    def parse_other_parts(other_parts: List[str]) -> dict:
+    def parse_other_parts(other_parts: list[str]) -> dict:
         address_lines, street, house_no, district = [], "", "", [""]
         if other_parts:
             street_part_indices = [

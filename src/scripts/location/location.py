@@ -2,12 +2,13 @@ from abc import ABC
 from datetime import datetime
 from math import atan2, cos, radians, sin, sqrt
 
-from src.connectors.own_tracks import OwnTracks
-from src.data.data import Data
+from src.connectors import OwnTracks
+from src.data import Data
 from src.models.calendar import Owner
 from src.models.location_timestamp import LocationTimestamp, LocationTimestamps
 from src.models.point import Point
-from src.scripts.script import Script
+
+from ..script import Script
 
 
 class LocationScript(Script, ABC):

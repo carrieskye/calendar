@@ -1,6 +1,6 @@
 from pydantic import model_validator
 
-from src.models.location.address.address import Address
+from .address import Address
 
 
 class FRAddress(Address):

@@ -1,26 +1,25 @@
 import re
-from typing import List, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
 
 class Address(BaseModel):
-    address_lines: List[str] = Field(default_factory=list)
-    house_no: Optional[str] = Field(None)
-    street: Optional[str] = Field(None)
-    district: Optional[str] = Field(None)
-    postal_code: Optional[str] = Field(None)
-    city: Optional[str] = Field(None)
-    state: Optional[str] = Field(None)
+    address_lines: list[str] = Field(default_factory=list)
+    house_no: str | None = Field(None)
+    street: str | None = Field(None)
+    district: str | None = Field(None)
+    postal_code: str | None = Field(None)
+    city: str | None = Field(None)
+    state: str | None = Field(None)
     country_code: str
     country: str
-    original: Optional[str] = Field(None)
+    original: str | None = Field(None)
 
     def __str__(self) -> str:
         return ", ".join([x.strip() for x in self.address_parts])
 
     @property
-    def address_parts(self) -> List[str]:
+    def address_parts(self) -> list[str]:
         parts = self.address_lines + [self.street_part, self.district, self.city_part, self.country]
         return [x for x in parts if x and x.strip()]
 
@@ -37,7 +36,7 @@ class Address(BaseModel):
         return values
 
     @staticmethod
-    def parse_other_parts(other_parts: List[str]) -> dict:
+    def parse_other_parts(other_parts: list[str]) -> dict:
         address_lines, house_no, street = [], "", ""
         if other_parts:
             street = other_parts[-1]

@@ -1,4 +1,5 @@
 """Rich-backed logging setup (replaces custom Logger + ANSI-only handlers)."""
+
 import logging
 
 from rich.logging import RichHandler

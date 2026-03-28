@@ -1,13 +1,14 @@
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel, model_validator
 from pytz import country_timezones  # type: ignore
 
 from src.address_parser import AddressParser
-from src.enums.location_category import LocationCategory
-from src.models.location.address.address import Address
-from src.utils.file_io import File
+from src.enums import LocationCategory
+from src.utils import File
+
+from .address import Address
 
 
 class GeoLocation(BaseModel):
@@ -47,5 +48,5 @@ class GeoLocation(BaseModel):
         }
 
     @classmethod
-    def build_from_csv(cls, csv_file_path: Path) -> List["GeoLocation"]:
+    def build_from_csv(cls, csv_file_path: Path) -> list["GeoLocation"]:
         return [GeoLocation(**x) for x in File.read_csv(csv_file_path)]

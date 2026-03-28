@@ -1,12 +1,10 @@
-__all__ = ["HistoryItemMovie", "HistoryItemEpisode", "HistoryItemExtendedMovie", "HistoryItemExtendedEpisode"]
-
 from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.models.trakt.episode import Episode, ExtendedEpisode
-from src.models.trakt.movie import ExtendedMovie, Movie
-from src.models.trakt.show import Show
+from .episode import Episode, ExtendedEpisode
+from .movie import ExtendedMovie, Movie
+from .show import Show
 
 
 class HistoryItemBase(BaseModel):

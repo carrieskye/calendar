@@ -5,15 +5,14 @@ from pathlib import Path
 import pytz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars, Data, GeoLocations
-from src.models.activity.activities import Activities
-from src.models.activity.activity import Activity
+from src.connectors import GoogleCalAPI
+from src.data import Calendars, Data, GeoLocations
+from src.models.activity import Activities, Activity
 from src.models.calendar import Owner
 from src.models.event import Event
-from src.scripts.activity.activity_script import ActivityScript
-from src.utils.formatting import Formatter
-from src.utils.prompts import Input
+from src.utils import Formatter, Input
+
+from .activity_script import ActivityScript
 
 
 class UpdateCalendar(ActivityScript):

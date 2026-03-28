@@ -1,18 +1,16 @@
-__all__ = ["Activities"]
-
 from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
-from typing import Dict, List
 
 from pytz import timezone  # type: ignore
 
-from src.models.activity.activity import Activity
-from src.models.location.geo_location import GeoLocation
-from src.utils.file_io import File
+from src.utils import File
+
+from ..location import GeoLocation
+from .activity import Activity
 
 
-class Activities(List[Activity]):
+class Activities(list[Activity]):
     @classmethod
     def read_json_file(cls, path: Path) -> "Activities":
         raw = File.read_json(path)
@@ -31,7 +29,7 @@ class Activities(List[Activity]):
     def merge_short_activities(self, max_time_diff: timedelta, default_location: GeoLocation) -> None:
         self.sort_chronically()
 
-        activity_groups: Dict[str, Activities] = defaultdict(Activities)
+        activity_groups: dict[str, Activities] = defaultdict(Activities)
         for x in self:
             activity_groups[x.title].append(x)
 

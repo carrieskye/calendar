@@ -1,12 +1,11 @@
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 import psycopg2
 
 from src.models.calendar import Owner
-from src.utils.file_io import File
+from src.utils import File
 
 
 class OwnTracks:
@@ -14,7 +13,7 @@ class OwnTracks:
     credentials = File.read_json(Path("src/credentials/own_tracks.json"))
 
     @classmethod
-    def get_records(cls, start: datetime, end: datetime, owner: Owner) -> List[tuple]:
+    def get_records(cls, start: datetime, end: datetime, owner: Owner) -> list[tuple]:
         user_id = {Owner.user: 3, Owner.partner: 2}[owner]
         conditions = "WHERE " + " AND ".join(
             [

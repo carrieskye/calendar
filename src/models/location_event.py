@@ -1,20 +1,19 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
 
 import pytz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
 from pydantic import BaseModel
 
-from src.data.data import Data
-from src.models.location_timestamp import LocationTimestamp, LocationTimestamps
-from src.utils.tables import print_data_table
+from src.utils import print_data_table
+
+from .location_timestamp import LocationTimestamp, LocationTimestamps
 
 
 class LocationEvent(BaseModel):
     start: datetime
     end: datetime
-    timestamps: List[LocationTimestamp]
-    location_id: Optional[str]
+    timestamps: list[LocationTimestamp]
+    location_id: str | None
 
     @classmethod
     def from_location_timestamp(cls, timestamp: LocationTimestamp) -> "LocationEvent":
@@ -26,8 +25,10 @@ class LocationEvent(BaseModel):
         )
 
 
-class LocationEvents(List[LocationEvent]):
+class LocationEvents(list[LocationEvent]):
     def table_print(self, title: str) -> None:
+        from src.data import Data
+
         headers = ["START", "END", "DURATION", "RECORDS", "LOCATION"]
         width = [9, 9, 9, 7, 30]
         first_location = [x.location_id for x in self if x.location_id][0]

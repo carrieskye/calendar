@@ -2,21 +2,20 @@ import logging
 from abc import ABC
 from datetime import timedelta
 from random import randint, shuffle
-from typing import List
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.connectors.google_calendar import GoogleCalAPI
-from src.connectors.trakt import TraktAPI
-from src.data.data import Calendars, Data
+from src.connectors import GoogleCalAPI, TraktAPI
+from src.data import Calendars, Data
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.location.geo_location import GeoLocation
 from src.models.trakt.history_item import HistoryItemEpisode, HistoryItemMovie
 from src.models.watch import EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch, Watch
-from src.scripts.script import Script
-from src.utils.formatting import Formatter
+from src.utils import Formatter
+
+from ..script import Script
 
 
 class MediaScript(Script, ABC):
@@ -25,7 +24,7 @@ class MediaScript(Script, ABC):
     @classmethod
     def process_watches(
         cls,
-        watches: List[Watch],
+        watches: list[Watch],
         calendar: Calendar,
         owner: Owner,
         location: GeoLocation,
@@ -45,8 +44,8 @@ class MediaScript(Script, ABC):
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod
-    def remove_watches_from_history(cls, watches: List[Watch]) -> None:
-        add_again: List[Watch] = []
+    def remove_watches_from_history(cls, watches: list[Watch]) -> None:
+        add_again: list[Watch] = []
         for watch in watches:
             if isinstance(watch, EpisodeWatch):
                 results = TraktAPI.get_history_for_episode(watch.episode_id)
@@ -69,7 +68,7 @@ class MediaScript(Script, ABC):
         TraktAPI.add_episodes_to_history(add_again)
 
     @classmethod
-    def get_watches_from_episode_history(cls, history: List[HistoryItemEpisode]) -> List[EpisodeWatch]:
+    def get_watches_from_episode_history(cls, history: list[HistoryItemEpisode]) -> list[EpisodeWatch]:
         watches = []
         for result in history:
             temp_watch = TempEpisodeWatch.from_result(result)
@@ -79,7 +78,7 @@ class MediaScript(Script, ABC):
         return watches
 
     @classmethod
-    def get_watches_from_movie_history(cls, history: List[HistoryItemMovie]) -> List[MovieWatch]:
+    def get_watches_from_movie_history(cls, history: list[HistoryItemMovie]) -> list[MovieWatch]:
         watches = []
         for result in history:
             temp_watch = TempMovieWatch.from_result(result)
@@ -118,7 +117,7 @@ class MediaScript(Script, ABC):
             return result.runtime
 
     @classmethod
-    def spread_watches(cls, watches: List[Watch], duration: timedelta) -> List[Watch]:
+    def spread_watches(cls, watches: list[Watch], duration: timedelta) -> list[Watch]:
         total_runtime = sum([x.runtime for x in watches])
         total_breaks = duration.seconds - (total_runtime * 60)
 
