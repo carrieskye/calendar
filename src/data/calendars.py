@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Dict
 
-from skye_comlib.utils.file import File
-
 from src.connectors.google_calendar import GoogleCalAPI
 from src.models.calendar import Calendar
+from src.utils.file_io import File
 
 
 class CalendarDict(Dict[str, Calendar]):
@@ -15,7 +14,10 @@ class CalendarDict(Dict[str, Calendar]):
         self.load_from_file()
 
     def load_from_file(self) -> None:
-        for name, calendar in File.read_json(self.calendar_file).items():
+        raw = File.read_json(self.calendar_file)
+        if not isinstance(raw, dict):
+            return
+        for name, calendar in raw.items():
             self[name] = Calendar.model_validate(calendar)
 
     def load_from_google(self) -> None:

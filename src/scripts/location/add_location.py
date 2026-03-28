@@ -1,11 +1,10 @@
 import logging
 
-from skye_comlib.utils.formatter import Formatter
-from skye_comlib.utils.input import Input
-
 from src.data.data import Data
 from src.models.location.geo_location import GeoLocation
 from src.scripts.location.location import LocationScript
+from src.utils.formatting import Formatter
+from src.utils.prompts import Input
 
 
 class AddLocation(LocationScript):

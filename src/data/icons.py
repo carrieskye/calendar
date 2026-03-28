@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict
 
-from skye_comlib.utils.file import File
+from src.utils.file_io import File
 
 
 class IconsDict(Dict[str, str]):

@@ -94,4 +94,3 @@ class LocationCategory(str, Enum):
     FUNERAL_SERVICES = "funeral_services"
     GOVERNMENT = "government"
     NOTARY = "notary"
-

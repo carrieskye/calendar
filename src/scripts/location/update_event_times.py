@@ -1,11 +1,11 @@
 from datetime import datetime, time
 
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.input import Input
 
 from src.models.calendar import Owner
 from src.models.location_event import LocationEvents
 from src.scripts.location.location import LocationScript
+from src.utils.prompts import Input
 
 
 class UpdateEventTimes(LocationScript):

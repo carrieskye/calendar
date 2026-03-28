@@ -6,8 +6,6 @@ from pathlib import Path
 
 from dateutil.parser import parse  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.file import File
-from skye_comlib.utils.input import Input
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Calendars
@@ -15,6 +13,8 @@ from src.models.calendar import Owner
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.scripts.activity.activity_script import ActivityScript
+from src.utils.file_io import File
+from src.utils.prompts import Input
 
 
 class ParseChildExportScript(ActivityScript):

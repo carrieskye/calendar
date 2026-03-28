@@ -1,8 +1,6 @@
 import argparse
 from typing import Dict, List, Type
 
-from skye_comlib.utils.logger import Logger
-
 from src.scripts.activity.partner_default_working_day import PartnerDefaultWorkingDayScript
 from src.scripts.activity.parse_child_export import ParseChildExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
@@ -14,8 +12,9 @@ from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
 from src.scripts.script import Script
+from src.utils.logging_config import configure_logging
 
-Logger.configure()
+configure_logging()
 
 
 def run_multiple(task_dict: dict, tasks_str: str) -> None:
@@ -55,11 +54,11 @@ def main() -> None:
     parser.add_argument("--task", "--t", choices=FUNCTION_MAP.keys(), required=False)
     parser.add_argument("--numbers", "--n", type=str, required=False)
     args = parser.parse_args()
-    try:
+    if args.task is not None:
         script: Script = FUNCTION_MAP[args.task]()
         script.run()
-    except KeyError:
-        run_multiple(FUNCTION_MAP, args.numbers)
+    else:
+        run_multiple(FUNCTION_MAP, args.numbers or "")
 
 
 if __name__ == "__main__":

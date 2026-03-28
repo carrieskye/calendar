@@ -3,7 +3,7 @@ from io import StringIO
 from pathlib import Path
 from typing import List
 
-from skye_comlib.utils.file import File
+from src.utils.file_io import File
 
 
 def read_row_to_csv(row: str) -> List[str]:
@@ -26,13 +26,13 @@ def fix_file(path: Path) -> None:
 
     File.write_txt(fixed_contents, path)
 
-    contents = File.read_csv(path)
-    for row in contents:
-        for k, v in row.items():
+    csv_rows = File.read_csv(path)
+    for csv_row in csv_rows:
+        for k, v in csv_row.items():
             if v:
-                row[k] = v.replace("\\n", "\n")
+                csv_row[k] = v.replace("\\n", "\n")
 
-    File.write_csv(contents, path)
+    File.write_csv(csv_rows, path)
 
 
 if __name__ == "__main__":

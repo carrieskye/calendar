@@ -2,15 +2,29 @@ __all__ = ["Activities"]
 
 from collections import defaultdict
 from datetime import timedelta
+from pathlib import Path
 from typing import Dict, List
 
 from pytz import timezone  # type: ignore
 
 from src.models.activity.activity import Activity
 from src.models.location.geo_location import GeoLocation
+from src.utils.file_io import File
 
 
 class Activities(List[Activity]):
+    @classmethod
+    def read_json_file(cls, path: Path) -> "Activities":
+        raw = File.read_json(path)
+        if raw is None:
+            return cls()
+        if not isinstance(raw, list):
+            raise ValueError(f"Expected a JSON array in {path}, got {type(raw).__name__}")
+        return cls(Activity.model_validate(item) for item in raw)
+
+    def write_json_file(self, path: Path) -> None:
+        File.write_json([activity.model_dump(mode="json") for activity in self], path)
+
     def sort_chronically(self) -> None:
         self.sort(key=lambda x: x.start.date_time.astimezone(timezone("UTC")))
 

@@ -10,7 +10,6 @@ from typing import Any, Dict, List
 import pytz  # type: ignore
 import requests
 from requests import Response
-from skye_comlib.utils.file import File
 
 from src.models.trakt.episode import ExtendedEpisode
 from src.models.trakt.history_item import (
@@ -23,6 +22,14 @@ from src.models.trakt.movie import ExtendedMovie, Movie
 from src.models.trakt.season import ExtendedSeason
 from src.models.trakt.show import Show
 from src.models.watch import EpisodeWatch, MovieWatch, Watch
+from src.utils.file_io import File
+
+
+def _load_trakt_access_token() -> str:
+    raw = File.read_json(Path("src/credentials/trakt_token.json"))
+    if not isinstance(raw, dict):
+        raise TypeError("trakt_token.json must contain a JSON object")
+    return str(raw["access_token"])
 
 
 class TraktAPI:
@@ -30,7 +37,7 @@ class TraktAPI:
 
     base_url = "https://api.trakt.tv"
     client_id = os.environ.get("TRAKT_CLIENT_ID", "")
-    token = File.read_json(Path("src/credentials/trakt_token.json"))["access_token"]
+    token = _load_trakt_access_token()
 
     @classmethod
     def get_headers(cls) -> Dict[str, str]:
@@ -179,10 +186,10 @@ class TraktAPI:
 
 
 class TraktError(Exception):
-    def __init__(self, response: Response, url: str, body: dict):
+    def __init__(self, response: Response, url: str, body: dict) -> None:  # noqa: B042
+        super().__init__(f"Could not process Trakt request to {url}.")
         error_file = Path(f".logs/.error_{str(datetime.now().timestamp())}.html")
 
         logging.error(f"Something went wrong. See {error_file} for details.")
         File.write_txt(str(response.text).split("\n"), error_file)
         logging.error("\n".join([f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]))
-        super().__init__(f"Could not process Trakt request to {url}.")

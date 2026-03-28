@@ -1,12 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
 
-from skye_comlib.utils.formatter import Formatter
-from skye_comlib.utils.input import Input
-
 from src.data.data import Data
 from src.models.calendar import Owner
 from src.models.location.geo_location import GeoLocation
+from src.utils.formatting import Formatter
+from src.utils.prompts import Input
 
 
 class Script(ABC):

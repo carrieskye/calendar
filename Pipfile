@@ -1,13 +1,9 @@
-# Match pyproject.toml [project.dependencies]. skye-comlib: not on PyPI — after `pipenv sync`, run
-#   pipenv run pip install -e ../skye-comlib
-# Or uncomment the next line if that path exists, then `pipenv lock`.
 [[source]]
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
-# skye-comlib = {editable = true, path = "../skye-comlib"}
 flask = ">=3"
 google-api-python-client = ">=2"
 google-auth-oauthlib = ">=1"
@@ -16,11 +12,13 @@ psycopg2-binary = ">=2.9"
 pydantic = ">=2"
 pycountry = ">=24"
 python-dateutil = ">=2.9"
+rich = ">=12"
 pytz = ">=2024"
 requests = ">=2.31"
 
 [dev-packages]
 pytest = ">=8"
+types-python-dateutil = ">=2.9.0.0"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"

@@ -3,13 +3,13 @@ from typing import List
 
 from dateutil import tz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.input import Input
 
 from src.connectors.trakt import TraktAPI
 from src.data.data import Data
 from src.models.calendar import Owner
 from src.models.watch import EpisodeWatch, TempEpisodeWatch, Watch
 from src.scripts.media.media import MediaScript
+from src.utils.prompts import Input
 
 
 class AddEpisodesToHistory(MediaScript):
