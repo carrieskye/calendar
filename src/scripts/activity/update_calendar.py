@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pytz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.file import File
 from skye_comlib.utils.formatter import Formatter
 from skye_comlib.utils.input import Input
 
@@ -48,7 +47,7 @@ class UpdateCalendar(ActivityScript):
                 day_str = day.strftime("%Y-%m-%d")
                 file_name = owner_dir / f"json/{day_str}.json"
                 logging.info(f"[bold]{day_str}", extra={"markup": True})
-                activities = File.read_json_pickle(file_name)
+                activities = Activities.read_json_file(file_name)
 
                 self.remove_events(day)
                 self.create_events(activities)

@@ -104,7 +104,7 @@ class ParseTimingExportScript(ActivityScript):
 
                 dir_name = Path(f"data/activity/{owner.name}")
                 File.write_csv([x.flatten() for x in activities], dir_name / f"csv/{day}.csv")
-                File.write_json_pickle(activities, dir_name / f"json/{day}.json")
+                activities.write_json_file(dir_name / f"json/{day}.json")
                 logging.info(f"Processed [bold]{day}", extra={"markup": True})
 
             logging.info(

@@ -12,3 +12,7 @@ combine_as_imports = true
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-q"
+
+# Pylance/Pyright: sibling checkout is not always the selected venv; extraPaths fixes unresolved imports.
+[tool.pyright]
+extraPaths = ["../common_skye"]

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from pydantic import BaseModel, model_validator
 from pytz import country_timezones  # type: ignore
@@ -18,9 +18,16 @@ class GeoLocation(BaseModel):
     address: Address
 
     @model_validator(mode="before")
-    def from_dict(cls, values: dict) -> dict:
-        if not isinstance(values, Address):
-            values["address"] = AddressParser.run(values["address"])
+    def from_dict(cls, values: Any) -> Any:
+        if not isinstance(values, dict):
+            return values
+        addr = values.get("address")
+        if isinstance(addr, dict):
+            values["address"] = Address.model_validate(addr)
+        elif isinstance(addr, str):
+            values["address"] = AddressParser.run(addr)
+        elif not isinstance(addr, Address):
+            raise TypeError(f"address must be dict, str, or Address, got {type(addr).__name__}")
         if not values.get("time_zone"):
             country_code = values["address"].country_code
             if country_code == "UK":
