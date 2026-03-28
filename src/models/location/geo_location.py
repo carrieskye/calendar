@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
 from pytz import country_timezones  # type: ignore
 
 from src.address_parser import AddressParser
@@ -17,6 +17,21 @@ class GeoLocation(BaseModel):
     label: str
     short: str
     address: Address
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def parse_category(cls, value: str | LocationCategory | int) -> LocationCategory:
+        if isinstance(value, LocationCategory):
+            return value
+        if isinstance(value, str):
+            return LocationCategory.from_str(value)
+        if isinstance(value, int):
+            # Handle integer values from auto() in older serializations
+            for member in LocationCategory:
+                if member.value == value:
+                    return member
+            raise ValueError(f"No LocationCategory enum member with value {value}")
+        raise TypeError(f"Cannot convert {type(value).__name__} to LocationCategory")
 
     @model_validator(mode="before")
     def from_dict(cls, values: Any) -> Any:
@@ -41,7 +56,7 @@ class GeoLocation(BaseModel):
             "time_zone": self.time_zone,
             "country": self.address.country,
             "city": self.address.city,
-            "category": self.category,
+            "category": self.category.name.lower(),
             "label": self.label,
             "short": self.short,
             "address": self.address.original,

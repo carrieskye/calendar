@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.connectors import TraktAPI
 from src.data import Data
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.watch import EpisodeWatch, TempEpisodeWatch, Watch
 from src.utils import Input
 
@@ -27,7 +27,7 @@ class AddEpisodesToHistory(MediaScript):
         else:
             spread = Input.get_bool_input("Spread")
             self.end = Input.get_date_time_input("End", default=self.start) if spread else None
-        self.owner = Owner.user
+        self.owner = Owner.USER
         self.location = Data.geo_location_dict["home"]
 
     def run(self) -> None:

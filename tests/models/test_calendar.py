@@ -1,19 +1,20 @@
 import pytest
 
-from src.models.calendar import Calendar, Owner
+from src.enums import Owner
+from src.models.calendar import Calendar
 
 
 def test_calendar_get_cal_id() -> None:
     cal = Calendar(name="personal", user="id_c", partner="id_l", shared="id_s")
-    assert cal.get_cal_id(Owner.user) == "id_c"
-    assert cal.get_cal_id(Owner.partner) == "id_l"
-    assert cal.get_cal_id(Owner.shared) == "id_s"
+    assert cal.get_cal_id(Owner.USER) == "id_c"
+    assert cal.get_cal_id(Owner.PARTNER) == "id_l"
+    assert cal.get_cal_id(Owner.SHARED) == "id_s"
 
 
 def test_get_calendars_omits_empty_strings() -> None:
     cal = Calendar(name="x", user="only", partner="", shared="")
     ids = cal.get_calendars()
-    assert ids == {Owner.user: "only"}
+    assert ids == {Owner.USER: "only"}
 
 
 def test_from_key_success() -> None:

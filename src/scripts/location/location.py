@@ -4,7 +4,7 @@ from math import atan2, cos, radians, sin, sqrt
 
 from src.connectors import OwnTracks
 from src.data import Data
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.location_timestamp import LocationTimestamp, LocationTimestamps
 from src.models.point import Point
 

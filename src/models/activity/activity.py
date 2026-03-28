@@ -77,7 +77,7 @@ class Activity(SubActivity):
         if timing_item.notes.transport:
             return SubActivity(
                 activity_id=timing_item.id,
-                projects=[timing_item.notes.transport.capitalize()],
+                projects=[timing_item.notes.transport.name.capitalize()],
                 start=start,
                 end=end,
             )

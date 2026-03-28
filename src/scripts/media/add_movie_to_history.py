@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.connectors import TraktAPI
 from src.data import Data
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.watch import MovieWatch, TempMovieWatch, Watch
 from src.utils import Input
 
@@ -18,7 +18,7 @@ class AddMovieToHistory(MediaScript):
 
         self.movie_title = Input.get_string_input("Movie", "title")
         self.start = Input.get_date_time_input("Start")
-        self.owner = Owner.user
+        self.owner = Owner.USER
         self.location = Data.geo_location_dict["home"]
 
     def run(self) -> None:

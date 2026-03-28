@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.connectors import GoogleCalAPI
 from src.data import Calendars
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.utils import File, Input
@@ -47,7 +47,7 @@ class ParseChildExportScript(ActivityScript):
     def run(self) -> None:
         super().run()
 
-        events = GoogleCalAPI.get_events(Calendars.chores, Owner.user, 1000, self.start, self.end)
+        events = GoogleCalAPI.get_events(Calendars.chores, Owner.USER, 1000, self.start, self.end)
         for event in events:
             GoogleCalAPI.delete_event(Calendars.chores.user, event.event_id)
 

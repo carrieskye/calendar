@@ -7,7 +7,8 @@ from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Calendars, Data
-from src.models.calendar import Calendar, Owner
+from src.enums import Owner
+from src.models.calendar import Calendar
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 from src.models.location.geo_location import GeoLocation

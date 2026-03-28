@@ -2,7 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from src.data import Data
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.location.geo_location import GeoLocation
 from src.utils import Formatter, Input
 
@@ -16,9 +16,9 @@ class Script(ABC):
         logging.info(Formatter.sub_title("Processing"))
 
     @staticmethod
-    def get_owner(default: Owner = Owner.shared) -> Owner:
+    def get_owner(default: Owner = Owner.SHARED) -> Owner:
         owner = Input.get_string_input("Calendar owner", input_type="name", default=default.name)
-        return Owner.__members__[owner]
+        return Owner.__members__[owner.upper()]
 
     @staticmethod
     def get_location(default: str = "järnvagsgatan") -> GeoLocation:

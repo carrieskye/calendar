@@ -1,12 +1,6 @@
-from enum import Enum, auto
-
 from pydantic import BaseModel
 
-
-class Owner(Enum):
-    user = auto()
-    partner = auto()
-    shared = auto()
+from src.enums import Owner
 
 
 class Calendar(BaseModel):
@@ -16,12 +10,12 @@ class Calendar(BaseModel):
     shared: str
 
     def get_cal_id(self, owner: Owner) -> str:
-        return self.__getattribute__(owner.name)
+        return self.__getattribute__(owner.name.lower())
 
     def get_calendars(self) -> dict[Owner, str]:
         return {
             k: v
-            for k, v in {Owner.user: self.user, Owner.partner: self.partner, Owner.shared: self.shared}.items()
+            for k, v in {Owner.USER: self.user, Owner.PARTNER: self.partner, Owner.SHARED: self.shared}.items()
             if v
         }
 
