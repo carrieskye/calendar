@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Dict, List
 
 from pytz import timezone  # type: ignore
-from skye_comlib.utils.file import File
 
 from src.models.activity.activity import Activity
 from src.models.location.geo_location import GeoLocation
+from src.utils.file_io import File
 
 
 class Activities(List[Activity]):

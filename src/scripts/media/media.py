@@ -5,7 +5,6 @@ from random import randint, shuffle
 from typing import List
 
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.formatter import Formatter
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
@@ -17,6 +16,7 @@ from src.models.location.geo_location import GeoLocation
 from src.models.trakt.history_item import HistoryItemEpisode, HistoryItemMovie
 from src.models.watch import EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch, Watch
 from src.scripts.script import Script
+from src.utils.formatting import Formatter
 
 
 class MediaScript(Script, ABC):

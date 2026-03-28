@@ -1,72 +1,52 @@
+"""Interactive prompts using Rich (Prompt / IntPrompt / Confirm)."""
 import logging
 from datetime import date, datetime, time
+from typing import Optional
 
 from dateutil.parser import parse
-
-from skye_comlib.utils.formatter import Formatter
-from skye_comlib.utils.logger import Logger
+from rich.prompt import Confirm, IntPrompt, Prompt
 
 
-def _strtobool(val: str) -> int:
-    """Same truth set as distutils.util.strtobool (removed in Python 3.12). Returns 0 or 1."""
-    v = val.lower()
-    if v in ("y", "yes", "t", "true", "on", "1"):
-        return 1
-    if v in ("n", "no", "f", "false", "off", "0"):
-        return 0
-    raise ValueError(f"invalid truth value {val!r}")
-
-
-Logger.configure()
+_INPUT_PREFIX = "                    "
 
 
 class Input:
     @classmethod
     def get_string_input(cls, name: str, input_type: str = "", default: str = "") -> str:
-        prompt = cls.format_input_prompt(name, input_type, default)
-        lines = prompt.split("\n")
-        for line in lines[:-1]:
-            logging.info(line)
-
-        value = input(Formatter.bold(lines[-1]))
-        return value if value else default
-
-    @classmethod
-    def format_input_prompt(cls, name: str, input_type: str, default: str) -> str:
-        prompt = Formatter.bold(Logger.get_prefix() + name)
-
+        label = f"{_INPUT_PREFIX}{name}"
         if input_type or default:
-            prompt += Formatter.bold(" (")
-
+            label += " ("
             if input_type:
-                prompt += Formatter.bold(input_type)
-
+                label += input_type
             if default:
-                prompt += f" {default}?" if input_type else f"{default}?"
-
-            prompt += Formatter.bold(")")
-
-        prompt += " "
-        return prompt
-
-    @staticmethod
-    def get_bool_input(name: str, input_type: str = "y/n", default: str = "n") -> int:
-        value = Input.get_string_input(name, input_type, default)
-        return _strtobool(value) if value else _strtobool(default)
+                label += f" {default}?" if input_type else f"{default}?"
+            label += ")"
+        result = Prompt.ask(label, default=default or "", show_default=bool(default))
+        return result if result else default
 
     @classmethod
     def get_int_input(cls, name: str, input_type: str = "", default: int = 1) -> int:
-        value = cls.get_string_input(name, input_type, str(default))
-        return int(value) if value else default
+        label = f"{_INPUT_PREFIX}{name}"
+        if input_type:
+            label += f" ({input_type})"
+        return IntPrompt.ask(label, default=default)
+
+    @staticmethod
+    def get_bool_input(name: str, input_type: str = "y/n", default: str = "n") -> int:
+        default_bool = default.lower() in ("y", "yes", "t", "true", "on", "1")
+        label = f"{_INPUT_PREFIX}{name}"
+        if input_type:
+            label += f" ({input_type})"
+        return 1 if Confirm.ask(label, default=default_bool) else 0
 
     @classmethod
     def get_date_input(
         cls,
         name: str,
         input_type: str = "YYYY-mm-dd",
-        default: date = None,
-        min_date: date = None,
-        max_date: date = None,
+        default: Optional[date] = None,
+        min_date: Optional[date] = None,
+        max_date: Optional[date] = None,
     ) -> date:
         if default is None:
             default = datetime.now().date()
@@ -87,9 +67,9 @@ class Input:
     def get_time_input(
         name: str,
         input_type: str = "HH:MM:SS",
-        default: time = None,
-        min_time: time = None,
-        max_time: time = None,
+        default: Optional[time] = None,
+        min_time: Optional[time] = None,
+        max_time: Optional[time] = None,
     ) -> time:
         if default is None:
             default = datetime.now().time()
@@ -110,9 +90,9 @@ class Input:
     def get_date_time_input(
         name: str,
         input_type: str = "YYYY-mm-dd HH:MM",
-        default: datetime = None,
-        min_date_time: datetime = None,
-        max_date_time: datetime = None,
+        default: Optional[datetime] = None,
+        min_date_time: Optional[datetime] = None,
+        max_date_time: Optional[datetime] = None,
     ) -> datetime:
         if default is None:
             default = datetime.now()

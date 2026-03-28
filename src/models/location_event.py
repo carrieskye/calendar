@@ -4,10 +4,10 @@ from typing import List, Optional
 import pytz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
 from pydantic import BaseModel
-from skye_comlib.utils.table_print import TablePrint
 
 from src.data.data import Data
 from src.models.location_timestamp import LocationTimestamp, LocationTimestamps
+from src.utils.tables import print_data_table
 
 
 class LocationEvent(BaseModel):
@@ -30,16 +30,15 @@ class LocationEvents(List[LocationEvent]):
     def table_print(self, title: str) -> None:
         headers = ["START", "END", "DURATION", "RECORDS", "LOCATION"]
         width = [9, 9, 9, 7, 30]
-        table_print = TablePrint(title, headers, width)
         first_location = [x.location_id for x in self if x.location_id][0]
         time_zone = Data.geo_location_dict[first_location].time_zone
-
+        rows = []
         for event in self:
             if event.location_id:
                 time_zone = Data.geo_location_dict[event.location_id].time_zone
             start = self.ignore_dst(event.start, time_zone)
             end = self.ignore_dst(event.end, time_zone)
-            table_print.print_line(
+            rows.append(
                 [
                     start.strftime("%H:%M:%S"),
                     end.strftime("%H:%M:%S"),
@@ -48,6 +47,7 @@ class LocationEvents(List[LocationEvent]):
                     event.location_id,
                 ],
             )
+        print_data_table(title, headers, width, rows)
 
     def merge_events(self) -> None:
         to_merge = []

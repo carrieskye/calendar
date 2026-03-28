@@ -1,7 +1,7 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, cast
 
-from skye_comlib.utils.file import File
+from src.utils.file_io import File
 
 
 class RuntimeCache:
@@ -34,8 +34,11 @@ class RuntimeCache:
     def load_from_file(self) -> None:
         if self.cache_file.exists():
             content = File.read_json(self.cache_file)
-            self.shows = content.get("shows", {})
-            self.movies = content.get("movies", {})
+            if not isinstance(content, dict):
+                self.shows, self.movies = {}, {}
+                return
+            self.shows = cast(Dict[str, Dict[str, Dict[str, dict]]], content.get("shows", {}))
+            self.movies = cast(Dict[str, int], content.get("movies", {}))
         else:
             self.shows, self.movies = {}, {}
 

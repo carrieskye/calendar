@@ -4,8 +4,6 @@ from pathlib import Path
 
 import pytz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.formatter import Formatter
-from skye_comlib.utils.input import Input
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.data.data import Calendars, Data, GeoLocations
@@ -14,6 +12,8 @@ from src.models.activity.activity import Activity
 from src.models.calendar import Owner
 from src.models.event import Event
 from src.scripts.activity.activity_script import ActivityScript
+from src.utils.formatting import Formatter
+from src.utils.prompts import Input
 
 
 class UpdateCalendar(ActivityScript):

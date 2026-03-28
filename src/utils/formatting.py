@@ -1,4 +1,6 @@
+"""Plain-text / ANSI formatting helpers for logs and exports."""
 import re
+from typing import Dict
 
 
 class Formatter:
@@ -36,8 +38,8 @@ class Formatter:
         return "\n".join([f"- {k}: {v}" for k, v in details.items()])
 
     @classmethod
-    def de_serialise_details(cls, details: str) -> dict:
-        de_serialised = {}
+    def de_serialise_details(cls, details: str) -> Dict[str, str]:
+        de_serialised: Dict[str, str] = {}
         for row in details.split("\n"):
             match = re.fullmatch(r"- (.*): (.*)", row)
             if match:

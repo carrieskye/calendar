@@ -5,8 +5,6 @@ from pathlib import Path
 from typing import Dict
 
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.file import File
-from skye_comlib.utils.formatter import Formatter
 
 from src.data.data import Data
 from src.models.activity.activities import Activities
@@ -14,6 +12,8 @@ from src.models.activity.activity import Activity
 from src.models.calendar import Owner
 from src.models.timing.timing_item import TimingItem
 from src.scripts.activity.activity_script import ActivityScript
+from src.utils.file_io import File
+from src.utils.formatting import Formatter
 
 
 class ParseTimingExportScript(ActivityScript):

@@ -1,8 +1,6 @@
 import argparse
 from typing import Dict, List, Type
 
-from skye_comlib.utils.logger import Logger
-
 from src.scripts.activity.larry_default_working_day import LarryDefaultWorkingDayScript
 from src.scripts.activity.parse_hayley_export import ParseHayleyExportScript
 from src.scripts.activity.parse_timing_export import ParseTimingExportScript
@@ -14,8 +12,9 @@ from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
 from src.scripts.media.add_movie_to_history import AddMovieToHistory
 from src.scripts.media.add_to_calendar import AddToCalendar
 from src.scripts.script import Script
+from src.utils.logging_config import configure_logging
 
-Logger.configure()
+configure_logging()
 
 
 def run_multiple(task_dict: dict, tasks_str: str) -> None:

@@ -1,9 +1,8 @@
 from pathlib import Path
 from typing import Dict
 
-from skye_comlib.utils.file import File
-
 from src.models.location.geo_location import GeoLocation
+from src.utils.file_io import File
 
 
 class GeoLocationDict(Dict[str, GeoLocation]):

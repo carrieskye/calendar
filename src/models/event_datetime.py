@@ -27,4 +27,7 @@ class EventDateTime(BaseModel):
 
     @classmethod
     def from_dict(cls, original: dict) -> "EventDateTime":
-        return EventDateTime(date_time=parse(original.get("dateTime")), time_zone=original.get("timeZone", ""))
+        raw_dt = original.get("dateTime")
+        if raw_dt is None:
+            raise ValueError("from_dict requires dateTime")
+        return EventDateTime(date_time=parse(str(raw_dt)), time_zone=str(original.get("timeZone", "")))

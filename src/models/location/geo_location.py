@@ -3,11 +3,11 @@ from typing import Any, List
 
 from pydantic import BaseModel, model_validator
 from pytz import country_timezones  # type: ignore
-from skye_comlib.utils.file import File
 
 from src.address_parser import AddressParser
 from src.enums.location_category import LocationCategory
 from src.models.location.address.address import Address
+from src.utils.file_io import File
 
 
 class GeoLocation(BaseModel):

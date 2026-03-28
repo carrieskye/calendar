@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import List
 
 import psycopg2
-from skye_comlib.utils.file import File
 
 from src.models.calendar import Owner
+from src.utils.file_io import File
 
 
 class OwnTracks:

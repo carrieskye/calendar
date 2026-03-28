@@ -7,9 +7,9 @@ from math import atan2, cos, radians, sin, sqrt
 from typing import List, Optional, Tuple
 
 from pydantic import BaseModel, Field
-from skye_comlib.utils.table_print import TablePrint
 
 from src.models.point import Point
+from src.utils.tables import print_data_table
 
 
 class LocationTimestamp(BaseModel):
@@ -78,17 +78,17 @@ class LocationTimestamps(List[LocationTimestamp]):
 
     def table_print(self, title: str) -> None:
         headers = ["TIME", "LAT - LON", "ACCURACY", "LOCATION"]
-        table_print = TablePrint(title, headers, [8, 25, 10, 30])
-
-        for location in self:
-            table_print.print_line(
-                [
-                    location.date_time.strftime("%H:%M:%S"),
-                    f"{location.latitude}, {location.longitude}",
-                    location.accuracy,
-                    location.location_id,
-                ],
-            )
+        widths = [8, 25, 10, 30]
+        rows = [
+            [
+                location.date_time.strftime("%H:%M:%S"),
+                f"{location.latitude}, {location.longitude}",
+                location.accuracy,
+                location.location_id,
+            ]
+            for location in self
+        ]
+        print_data_table(title, headers, widths, rows)
 
     @classmethod
     def from_database(cls, db_records: List[Tuple]) -> LocationTimestamps:

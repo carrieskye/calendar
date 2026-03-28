@@ -1,9 +1,8 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 from typing import List, Optional
 
 from dateutil.relativedelta import relativedelta  # type: ignore
-from skye_comlib.utils.input import Input
 
 from src.connectors.google_calendar import GoogleCalAPI
 from src.connectors.trakt import TraktAPI
@@ -11,14 +10,16 @@ from src.data.data import Data
 from src.models.calendar import Owner
 from src.models.watch import Watch
 from src.scripts.media.media import MediaScript
+from src.utils.prompts import Input
 
 
 class AddToCalendar(MediaScript):
     def __init__(self, start: Optional[datetime] = None, days: Optional[int] = None):
         super().__init__()
 
-        if not start:
-            start = Input.get_date_input("Start")
+        if start is None:
+            start_day = Input.get_date_input("Start")
+            start = datetime.combine(start_day, time.min)
         if not days:
             days = Input.get_int_input("Days", input_type="#days")
 

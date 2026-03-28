@@ -11,11 +11,11 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from skye_comlib.utils.file import File
-from skye_comlib.utils.formatter import Formatter
 
 from src.models.calendar import Calendar, Owner
 from src.models.event import Event
+from src.utils.file_io import File
+from src.utils.formatting import Formatter
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 logging.info(Formatter.title("Loading connectors"))

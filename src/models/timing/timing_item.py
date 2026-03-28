@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from pydantic import BaseModel, Field, field_validator
-from skye_comlib.utils.formatter import Formatter
 
 from src.data.data import Data
 from src.models.calendar import Calendar
 from src.models.location.geo_location import GeoLocation
 from src.models.timing.timing_notes import TimingNotes
+from src.utils.formatting import Formatter
 
 
 class TimingItem(BaseModel):
@@ -32,8 +32,10 @@ class TimingItem(BaseModel):
     def parse_notes(cls, value: str | TimingNotes) -> TimingNotes:
         if isinstance(value, TimingNotes):
             return value
-        value = Formatter.de_serialise_details(value)
-        return TimingNotes.model_validate(value)
+        if isinstance(value, str):
+            details = Formatter.de_serialise_details(value)
+            return TimingNotes.model_validate(details)
+        raise TypeError("Notes must be str or TimingNotes")
 
     @field_validator("all_projects", mode="before")
     def parse_projects(cls, value: str | List[str]) -> List[str]:
