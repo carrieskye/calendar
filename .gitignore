@@ -5,3 +5,4 @@ credentials.json
 token.pickle
 trakt_token.json
 test.py
+.env

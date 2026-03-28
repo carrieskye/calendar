@@ -4,7 +4,6 @@ from urllib.parse import urlencode
 from uuid import uuid4
 
 import requests
-import requests.auth
 from flask import Flask, abort, request
 
 REDIRECT_URI = "http://localhost:3000/trakt_callback"
@@ -12,26 +11,40 @@ REDIRECT_URI = "http://localhost:3000/trakt_callback"
 app = Flask(__name__)
 STATE = ""
 
+CLIENT_ID = os.environ.get("TRAKT_CLIENT_ID")
+SECRET = os.environ.get("TRAKT_SECRET")
+
+if not CLIENT_ID or not SECRET:
+    raise RuntimeError("Missing env vars: TRAKT_CLIENT_ID and/or TRAKT_SECRET")
+
 
 @app.route("/")
 def homepage() -> str:
-    text = '<a href="%s">Authenticate with Trakt</a>'
-    return text % make_authorization_url()
+    return f'<a href="{make_authorization_url()}">Authenticate with Trakt</a>'
 
 
 @app.route("/trakt_callback")
-def trakt_callback() -> str:
+def trakt_callback():
     error = request.args.get("error", "")
     if error:
-        return "Error: " + error
+        return "Error: " + error, 400
+
     state = request.args.get("state", "")
     if not is_valid_state(state):
         abort(403)
+
     code = request.args.get("code")
     token = get_token(code)
+
     with open("src/credentials/trakt_token.json", "w") as file:
-        json.dump(token, file, indent="\t")
-    return token
+        json.dump(token, file, indent=2)
+
+    # Flask can't directly return a dict reliably; return JSON text
+    return app.response_class(
+        response=json.dumps(token, indent=2),
+        status=200,
+        mimetype="application/json",
+    )
 
 
 def make_authorization_url() -> str:
@@ -45,7 +58,7 @@ def make_authorization_url() -> str:
         "redirect_uri": REDIRECT_URI,
         "duration": "temporary",
     }
-    return "https://api.trakt.tv/oauth/authorize?" + urlencode(params)
+    return "https://trakt.tv/oauth/authorize?" + urlencode(params)
 
 
 def save_created_state(state: str) -> None:
@@ -57,7 +70,7 @@ def is_valid_state(state: str) -> bool:
     return STATE == state
 
 
-def get_token(code: str) -> str:
+def get_token(code: str) -> dict:
     post_data = {
         "client_id": CLIENT_ID,
         "client_secret": SECRET,
@@ -66,11 +79,15 @@ def get_token(code: str) -> str:
         "redirect_uri": REDIRECT_URI,
     }
 
-    response = requests.post("https://api.trakt.tv/oauth/token", data=post_data, timeout=60)
-    return response.json()
+    r = requests.post(
+        "https://api.trakt.tv/oauth/token",
+        json=post_data,
+        headers={"Content-Type": "application/json"},
+        timeout=60,
+    )
+    r.raise_for_status()
+    return r.json()
 
 
 if __name__ == "__main__":
-    CLIENT_ID = os.environ.get("TRAKT_CLIENT_ID")
-    SECRET = os.environ.get("TRAKT_SECRET")
     app.run(port=3000)
