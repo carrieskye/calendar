@@ -36,21 +36,22 @@ def run_multiple(task_dict: dict, tasks_str: str) -> None:
         _script.run()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+FUNCTION_MAP: Dict[str, Type[Script]] = {
+    "Parse timing export": ParseTimingExportScript,  # 0
+    "Update calendar": UpdateCalendar,  # 1
+    "Parse Hayley export": ParseHayleyExportScript,  # 2
+    "Larry default working day": LarryDefaultWorkingDayScript,  # 3
+    "Add Trakt watches to calendar": AddToCalendar,  # 4
+    "Add episodes to history": AddEpisodesToHistory,  # 5
+    "Add movie to history": AddMovieToHistory,  # 6
+    "Update event times": UpdateEventTimes,  # 7
+    "Add new location": AddLocation,  # 8
+    "Print locations": PrintLocations,  # 9
+}
 
-    FUNCTION_MAP: Dict[str, Type[Script]] = {
-        "Parse timing export": ParseTimingExportScript,  # 0
-        "Update calendar": UpdateCalendar,  # 1
-        "Parse Hayley export": ParseHayleyExportScript,  # 2
-        "Larry default working day": LarryDefaultWorkingDayScript,  # 3
-        "Add Trakt watches to calendar": AddToCalendar,  # 4
-        "Add episodes to history": AddEpisodesToHistory,  # 5
-        "Add movie to history": AddMovieToHistory,  # 6
-        "Update event times": UpdateEventTimes,  # 7
-        "Add new location": AddLocation,  # 8
-        "Print locations": PrintLocations,  # 9
-    }
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
     parser.add_argument("--task", "--t", choices=FUNCTION_MAP.keys(), required=False)
     parser.add_argument("--numbers", "--n", type=str, required=False)
     args = parser.parse_args()
@@ -59,3 +60,7 @@ if __name__ == "__main__":
         script.run()
     except KeyError:
         run_multiple(FUNCTION_MAP, args.numbers)
+
+
+if __name__ == "__main__":
+    main()
