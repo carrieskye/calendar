@@ -1,15 +1,15 @@
 import logging
-from typing import List
 
 from dateutil import tz  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.connectors.trakt import TraktAPI
-from src.data.data import Data
+from src.connectors import TraktAPI
+from src.data import Data
 from src.models.calendar import Owner
 from src.models.watch import EpisodeWatch, TempEpisodeWatch, Watch
-from src.scripts.media.media import MediaScript
-from src.utils.prompts import Input
+from src.utils import Input
+
+from .media import MediaScript
 
 
 class AddEpisodesToHistory(MediaScript):
@@ -34,7 +34,7 @@ class AddEpisodesToHistory(MediaScript):
         start = self.start.replace(tzinfo=tz.gettz(self.location.time_zone))
         show = TraktAPI.search_show(self.show_title)
         show_id = show.ids.trakt
-        watches: List[Watch] = []
+        watches: list[Watch] = []
         episodes = {}
 
         if self.first_season == self.last_season:

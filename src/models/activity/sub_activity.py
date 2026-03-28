@@ -1,15 +1,11 @@
-__all__ = ["SubActivity"]
-
-from typing import List
-
 from pydantic import BaseModel
 
-from src.models.event_datetime import EventDateTime
+from ..event_datetime import EventDateTime
 
 
 class SubActivity(BaseModel):
     activity_id: int
-    projects: List[str]
+    projects: list[str]
     start: EventDateTime
     end: EventDateTime
 

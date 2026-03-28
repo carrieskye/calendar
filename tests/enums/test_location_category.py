@@ -1,6 +1,6 @@
 import pytest
 
-from src.enums.location_category import LocationCategory
+from src.enums import LocationCategory
 
 
 @pytest.mark.parametrize(

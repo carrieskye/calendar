@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.models.location.address.address import Address
+from src.models.location.address import Address
 
 
 @pytest.mark.parametrize(

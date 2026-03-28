@@ -1,7 +1,7 @@
-from src.data.calendars import CalendarDict
-from src.data.geo_locations import GeoLocationDict
-from src.data.icons import IconsDict
-from src.data.runtime_cache import RuntimeCache
+from .calendars import CalendarDict
+from .geo_locations import GeoLocationDict
+from .icons import IconsDict
+from .runtime_cache import RuntimeCache
 
 
 class Data:

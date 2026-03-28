@@ -1,20 +1,18 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field
 
-from src.models.calendar import Calendar, Owner
-from src.models.event_datetime import EventDateTime
+from .calendar import Calendar, Owner
+from .event_datetime import EventDateTime
 
 
 class Event(BaseModel):
     summary: str
-    location: Optional[str] = Field(None)
+    location: str | None = Field(None)
     description: str = Field("")
     start: EventDateTime
     end: EventDateTime
     event_id: str = Field("")
-    calendar: Optional[Calendar] = Field(None)
-    owner: Optional[Owner] = Field(None)
+    calendar: Calendar | None = Field(None)
+    owner: Owner | None = Field(None)
 
     def serialise_for_google(self) -> dict:
         return {

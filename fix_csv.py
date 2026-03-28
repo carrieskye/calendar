@@ -1,12 +1,11 @@
 import csv
 from io import StringIO
 from pathlib import Path
-from typing import List
 
-from src.utils.file_io import File
+from src.utils import File
 
 
-def read_row_to_csv(row: str) -> List[str]:
+def read_row_to_csv(row: str) -> list[str]:
     reader = csv.reader(StringIO(row))
     for line in reader:
         return line

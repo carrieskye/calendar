@@ -1,11 +1,10 @@
 """Interactive prompts using Rich (Prompt / IntPrompt / Confirm)."""
+
 import logging
 from datetime import date, datetime, time
-from typing import Optional
 
 from dateutil.parser import parse
 from rich.prompt import Confirm, IntPrompt, Prompt
-
 
 _INPUT_PREFIX = "                    "
 
@@ -44,9 +43,9 @@ class Input:
         cls,
         name: str,
         input_type: str = "YYYY-mm-dd",
-        default: Optional[date] = None,
-        min_date: Optional[date] = None,
-        max_date: Optional[date] = None,
+        default: date | None = None,
+        min_date: date | None = None,
+        max_date: date | None = None,
     ) -> date:
         if default is None:
             default = datetime.now().date()
@@ -67,9 +66,9 @@ class Input:
     def get_time_input(
         name: str,
         input_type: str = "HH:MM:SS",
-        default: Optional[time] = None,
-        min_time: Optional[time] = None,
-        max_time: Optional[time] = None,
+        default: time | None = None,
+        min_time: time | None = None,
+        max_time: time | None = None,
     ) -> time:
         if default is None:
             default = datetime.now().time()
@@ -90,9 +89,9 @@ class Input:
     def get_date_time_input(
         name: str,
         input_type: str = "YYYY-mm-dd HH:MM",
-        default: Optional[datetime] = None,
-        min_date_time: Optional[datetime] = None,
-        max_date_time: Optional[datetime] = None,
+        default: datetime | None = None,
+        min_date_time: datetime | None = None,
+        max_date_time: datetime | None = None,
     ) -> datetime:
         if default is None:
             default = datetime.now()

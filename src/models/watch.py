@@ -1,15 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 from pydantic import BaseModel, Field
 
-from src.models.trakt.history_item import (
-    HistoryItemEpisode,
-    HistoryItemExtendedEpisode,
-    HistoryItemExtendedMovie,
-    HistoryItemMovie,
-)
+from .trakt import HistoryItemEpisode, HistoryItemExtendedEpisode, HistoryItemExtendedMovie, HistoryItemMovie
 
 
 class TempEpisodeWatch(BaseModel):
@@ -19,8 +13,8 @@ class TempEpisodeWatch(BaseModel):
     season_no: int
     episode_no: int
     episode_id: int
-    episode_title: Optional[str] = Field(None)
-    slug: Optional[str] = Field(None)
+    episode_title: str | None = Field(None)
+    slug: str | None = Field(None)
 
     @classmethod
     def from_result(cls, result: HistoryItemEpisode | HistoryItemExtendedEpisode) -> "TempEpisodeWatch":
@@ -114,7 +108,7 @@ class MovieWatch(Watch):
     def __str__(self) -> str:
         return f"{self.title} ({self.year})"
 
-    def get_export_dict(self) -> Dict[str, str | int]:
+    def get_export_dict(self) -> dict[str, str | int]:
         return {
             "title": self.movie_title,
             "year": self.year,

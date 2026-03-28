@@ -1,6 +1,3 @@
-from typing import Tuple
-
-
 class Point:
     def __init__(self, latitude: float, longitude: float):
         self.latitude = latitude
@@ -10,7 +7,7 @@ class Point:
         return f"{self.latitude}, {self.longitude}"
 
     @staticmethod
-    def get_line_through_points(point_a: "Point", point_b: "Point") -> Tuple[float, float]:
+    def get_line_through_points(point_a: "Point", point_b: "Point") -> tuple[float, float]:
         """
         m = (y_2 - y_1) / (x_2 - x_1)
         y = mx + b

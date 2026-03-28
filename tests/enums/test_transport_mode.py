@@ -1,6 +1,6 @@
 import pytest
 
-from src.enums.transport_mode import TransportMode
+from src.enums import TransportMode
 
 
 @pytest.mark.parametrize(

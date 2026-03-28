@@ -4,12 +4,12 @@ import operator
 from collections import defaultdict
 from datetime import datetime
 from math import atan2, cos, radians, sin, sqrt
-from typing import List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from src.models.point import Point
-from src.utils.tables import print_data_table
+from src.utils import print_data_table
+
+from .point import Point
 
 
 class LocationTimestamp(BaseModel):
@@ -17,10 +17,10 @@ class LocationTimestamp(BaseModel):
     latitude: float
     longitude: float
     accuracy: int
-    location_id: Optional[str] = Field(None)
+    location_id: str | None = Field(None)
 
     @classmethod
-    def from_database(cls, db_record: Tuple) -> LocationTimestamp:
+    def from_database(cls, db_record: tuple) -> LocationTimestamp:
         return cls(
             location_id=db_record[0],
             date_time=db_record[1],
@@ -57,7 +57,7 @@ class LocationTimestamp(BaseModel):
         return Point(self.latitude, self.longitude)
 
 
-class LocationTimestamps(List[LocationTimestamp]):
+class LocationTimestamps(list[LocationTimestamp]):
     def remove_duplicate_records(self) -> None:
         records_per_timestamp = defaultdict(list)
         for location in self:
@@ -91,7 +91,7 @@ class LocationTimestamps(List[LocationTimestamp]):
         print_data_table(title, headers, widths, rows)
 
     @classmethod
-    def from_database(cls, db_records: List[Tuple]) -> LocationTimestamps:
+    def from_database(cls, db_records: list[tuple]) -> LocationTimestamps:
         locations = cls()
         for db_record in db_records:
             locations.append(LocationTimestamp.from_database(db_record))

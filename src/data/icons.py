@@ -1,10 +1,9 @@
 from pathlib import Path
-from typing import Dict
 
-from src.utils.file_io import File
+from src.utils import File
 
 
-class IconsDict(Dict[str, str]):
+class IconsDict(dict[str, str]):
     geo_file = Path("data/icons.csv")
 
     def __init__(self) -> None:

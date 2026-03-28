@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Dict
 
 from src.models.location.geo_location import GeoLocation
-from src.utils.file_io import File
+from src.utils import File
 
 
-class GeoLocationDict(Dict[str, GeoLocation]):
+class GeoLocationDict(dict[str, GeoLocation]):
     geo_file = Path("data/geo_locations.csv")
 
     def __init__(self) -> None:

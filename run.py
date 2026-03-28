@@ -1,18 +1,16 @@
 import argparse
-from typing import Dict, List, Type
+from typing import Type
 
-from src.scripts.activity.partner_default_working_day import PartnerDefaultWorkingDayScript
-from src.scripts.activity.parse_child_export import ParseChildExportScript
-from src.scripts.activity.parse_timing_export import ParseTimingExportScript
-from src.scripts.activity.update_calendar import UpdateCalendar
-from src.scripts.location.add_location import AddLocation
-from src.scripts.location.print_locations import PrintLocations
-from src.scripts.location.update_event_times import UpdateEventTimes
-from src.scripts.media.add_episode_to_history import AddEpisodesToHistory
-from src.scripts.media.add_movie_to_history import AddMovieToHistory
-from src.scripts.media.add_to_calendar import AddToCalendar
-from src.scripts.script import Script
-from src.utils.logging_config import configure_logging
+from src.scripts import Script
+from src.scripts.activity import (
+    ParseChildExportScript,
+    ParseTimingExportScript,
+    PartnerDefaultWorkingDayScript,
+    UpdateCalendar,
+)
+from src.scripts.location import AddLocation, PrintLocations, UpdateEventTimes
+from src.scripts.media import AddEpisodesToHistory, AddMovieToHistory, AddToCalendar
+from src.utils import configure_logging
 
 configure_logging()
 
@@ -23,7 +21,7 @@ def run_multiple(task_dict: dict, tasks_str: str) -> None:
         tasks_str = input(
             "Please select tasks:" + "\n".join([f"{idx}) {task}" for idx, task in enumerate(task_names)]) + "\nTasks: ",
         )
-    tasks: List[int] = []
+    tasks: list[int] = []
     for number in tasks_str.split(","):
         if "-" in number:
             start, end = number.split("-")
@@ -35,7 +33,7 @@ def run_multiple(task_dict: dict, tasks_str: str) -> None:
         _script.run()
 
 
-FUNCTION_MAP: Dict[str, Type[Script]] = {
+FUNCTION_MAP: dict[str, Type[Script]] = {
     "Parse timing export": ParseTimingExportScript,  # 0
     "Update calendar": UpdateCalendar,  # 1
     "Parse Child export": ParseChildExportScript,  # 2

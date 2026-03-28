@@ -1,5 +1,4 @@
 from enum import Enum, auto
-from typing import Dict
 
 from pydantic import BaseModel
 
@@ -19,7 +18,7 @@ class Calendar(BaseModel):
     def get_cal_id(self, owner: Owner) -> str:
         return self.__getattribute__(owner.name)
 
-    def get_calendars(self) -> Dict[Owner, str]:
+    def get_calendars(self) -> dict[Owner, str]:
         return {
             k: v
             for k, v in {Owner.user: self.user, Owner.partner: self.partner, Owner.shared: self.shared}.items()
@@ -27,7 +26,7 @@ class Calendar(BaseModel):
         }
 
     @classmethod
-    def from_key(cls, key: str, original: Dict[str, str]) -> "Calendar":
+    def from_key(cls, key: str, original: dict[str, str]) -> "Calendar":
         if key not in original:
             raise ValueError(f"Key '{key}' not in original dictionary")
 

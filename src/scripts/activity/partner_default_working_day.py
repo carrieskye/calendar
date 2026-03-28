@@ -2,9 +2,9 @@ from pathlib import Path
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.scripts.activity.activity_script import ActivityScript
-from src.utils.file_io import File
-from src.utils.prompts import Input
+from src.utils import File, Input
+
+from .activity_script import ActivityScript
 
 
 class PartnerDefaultWorkingDayScript(ActivityScript):

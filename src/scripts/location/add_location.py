@@ -1,10 +1,10 @@
 import logging
 
-from src.data.data import Data
+from src.data import Data
 from src.models.location.geo_location import GeoLocation
-from src.scripts.location.location import LocationScript
-from src.utils.formatting import Formatter
-from src.utils.prompts import Input
+from src.utils import Formatter, Input
+
+from .location import LocationScript
 
 
 class AddLocation(LocationScript):

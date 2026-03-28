@@ -7,14 +7,14 @@ from pathlib import Path
 from dateutil.parser import parse  # type: ignore
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.connectors.google_calendar import GoogleCalAPI
-from src.data.data import Calendars
+from src.connectors import GoogleCalAPI
+from src.data import Calendars
 from src.models.calendar import Owner
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
-from src.scripts.activity.activity_script import ActivityScript
-from src.utils.file_io import File
-from src.utils.prompts import Input
+from src.utils import File, Input
+
+from .activity_script import ActivityScript
 
 
 class ParseChildExportScript(ActivityScript):

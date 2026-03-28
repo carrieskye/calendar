@@ -1,11 +1,8 @@
-__all__ = ["Season", "ExtendedSeason"]
-
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from src.models.trakt.trakt_ids import TraktIds
+from .trakt_ids import TraktIds
 
 
 class Season(BaseModel):
@@ -19,7 +16,7 @@ class ExtendedSeason(Season):
     episode_count: int
     aired_episodes: int
     title: str
-    overview: Optional[str] = Field(None)
-    first_aired: Optional[datetime] = Field(None)
-    updated_at: Optional[datetime] = Field(None)
+    overview: str | None = Field(None)
+    first_aired: datetime | None = Field(None)
+    updated_at: datetime | None = Field(None)
     network: str
