@@ -5,6 +5,7 @@ from uuid import uuid4
 
 import requests
 from flask import Flask, abort, request
+from flask.typing import ResponseReturnValue
 
 REDIRECT_URI = "http://localhost:3000/trakt_callback"
 
@@ -24,7 +25,7 @@ def homepage() -> str:
 
 
 @app.route("/trakt_callback")
-def trakt_callback():
+def trakt_callback() -> ResponseReturnValue:
     error = request.args.get("error", "")
     if error:
         return "Error: " + error, 400

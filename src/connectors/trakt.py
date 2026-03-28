@@ -179,10 +179,10 @@ class TraktAPI:
 
 
 class TraktError(Exception):
-    def __init__(self, response: Response, url: str, body: dict):
+    def __init__(self, response: Response, url: str, body: dict) -> None:  # noqa: B042
+        super().__init__(f"Could not process Trakt request to {url}.")
         error_file = Path(f".logs/.error_{str(datetime.now().timestamp())}.html")
 
         logging.error(f"Something went wrong. See {error_file} for details.")
         File.write_txt(str(response.text).split("\n"), error_file)
         logging.error("\n".join([f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]))
-        super().__init__(f"Could not process Trakt request to {url}.")

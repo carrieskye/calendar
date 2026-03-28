@@ -59,14 +59,17 @@ class GoogleCalAPI:
             "Christel Ceulemans (Shared met Dirk)",
             "Kevin Shared",
         ]
-        calendar_list = cls.service.calendarList().list().execute().get("items", [])
-        calendar_list = {
-            Formatter.normalise(calendar.get("summaryOverride"))
-            if calendar.get("summaryOverride")
-            else Formatter.normalise(calendar.get("summary")): calendar.get("id")
-            for calendar in calendar_list
-            if calendar.get("summary") not in ignore
-        }
+        raw_items = cls.service.calendarList().list().execute().get("items", [])
+        calendar_list: Dict[str, str] = {}
+        for calendar in raw_items:
+            if calendar.get("summary") in ignore:
+                continue
+            key = (
+                Formatter.normalise(calendar.get("summaryOverride"))
+                if calendar.get("summaryOverride")
+                else Formatter.normalise(calendar.get("summary"))
+            )
+            calendar_list[key] = calendar.get("id")
         sorted_calendars = sorted(calendar_list.items(), key=lambda x: x[0])
         return {calendar[0]: calendar[1] for calendar in sorted_calendars}
 
