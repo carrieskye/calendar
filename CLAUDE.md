@@ -20,7 +20,6 @@ Never commit personal values to the codebase — no real names, email addresses,
 - `Sequence` and `Iterable` come from `collections.abc`, not `typing`
 - Keep `Any` and `cast` from `typing`
 - Do not annotate local variables
-- Use `# type: ignore` only on third-party imports that lack stubs
 
 ### Pydantic models
 - Inherit from `BaseModel` for all data models

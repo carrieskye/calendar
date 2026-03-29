@@ -1,7 +1,7 @@
 import logging
 
-from dateutil import tz  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import TraktAPI
 from src.data import Data

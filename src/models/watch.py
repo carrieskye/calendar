@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel, Field
 
 from .trakt import HistoryItemEpisode, HistoryItemExtendedEpisode, HistoryItemExtendedMovie, HistoryItemMovie

@@ -7,7 +7,7 @@ from pathlib import Path
 from time import sleep
 from typing import Any
 
-import pytz  # type: ignore
+import pytz
 import requests
 from requests import Response
 

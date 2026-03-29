@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, time
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Data

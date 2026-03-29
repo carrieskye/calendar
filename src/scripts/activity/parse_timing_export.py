@@ -3,7 +3,7 @@ from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.data import Data
 from src.enums import Owner

@@ -4,7 +4,7 @@ import time
 from datetime import date, datetime, time as datetime_time
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 from google.auth.credentials import Credentials
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow

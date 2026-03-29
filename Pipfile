@@ -18,6 +18,7 @@ requests = ">=2.31"
 
 [dev-packages]
 pytest = ">=8"
+types-pytz = "*"
 types-python-dateutil = ">=2.9.0.0"
 
 [requires]

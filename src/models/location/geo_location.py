@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, field_validator, model_validator
-from pytz import country_timezones  # type: ignore
+from pytz import country_timezones
 
 from src.address_parser import AddressParser
 from src.enums import LocationCategory
@@ -48,7 +48,7 @@ class GeoLocation(BaseModel):
             country_code = values["address"].country_code
             if country_code == "UK":
                 country_code = "GB"
-            values["time_zone"] = country_timezones(country_code)[0]
+            values["time_zone"] = country_timezones[country_code][0]
         return {k: v for k, v in values.items() if k not in ["country", "city"]}
 
     def to_dict(self) -> dict:

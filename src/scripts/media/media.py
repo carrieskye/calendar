@@ -3,7 +3,7 @@ from abc import ABC
 from datetime import timedelta
 from random import randint, shuffle
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Calendars, Data

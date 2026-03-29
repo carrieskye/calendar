@@ -4,8 +4,8 @@ import re
 from datetime import datetime, time
 from pathlib import Path
 
-from dateutil.parser import parse  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI
 from src.data import Calendars

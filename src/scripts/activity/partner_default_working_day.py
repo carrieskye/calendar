@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.utils import File, Input
 
