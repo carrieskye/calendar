@@ -7,9 +7,11 @@ import psycopg2
 from src.enums import Owner
 from src.utils import File
 
+logger = logging.getLogger(__name__)
+
 
 class OwnTracks:
-    logging.info("Loading OwnTracks")
+    logger.info("Loading OwnTracks")
     credentials = File.read_json(Path("src/credentials/own_tracks.json"))
 
     @classmethod

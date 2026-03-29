@@ -16,6 +16,8 @@ from src.utils import File, Input
 
 from .activity_script import ActivityScript
 
+logger = logging.getLogger(__name__)
+
 
 class ParseChildExportScript(ActivityScript):
     long_categories = {
@@ -87,5 +89,5 @@ class ParseChildExportScript(ActivityScript):
                     start=EventDateTime(date_time=start, time_zone=self.location.time_zone),
                     end=EventDateTime(date_time=end, time_zone=self.location.time_zone),
                 )
-                logging.info(event.summary)
+                logger.info(event.summary)
                 GoogleCalAPI.create_event(Calendars.chores.user, event)

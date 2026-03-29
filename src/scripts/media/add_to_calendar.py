@@ -11,6 +11,8 @@ from src.utils import Input
 
 from .media import MediaScript
 
+logger = logging.getLogger(__name__)
+
 
 class AddToCalendar(MediaScript):
     def __init__(self, start: datetime | None = None, days: int | None = None):
@@ -43,5 +45,5 @@ class AddToCalendar(MediaScript):
         watches += self.get_watches_from_episode_history(episode_history)
 
         for watch in watches:
-            logging.info(watch.__str__())
+            logger.info(watch.__str__())
             self.create_watch_event(self.calendar, self.owner, watch, self.location)

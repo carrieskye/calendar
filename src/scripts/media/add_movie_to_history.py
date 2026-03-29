@@ -11,6 +11,8 @@ from src.utils import Input
 
 from .media import MediaScript
 
+logger = logging.getLogger(__name__)
+
 
 class AddMovieToHistory(MediaScript):
     def __init__(self) -> None:
@@ -34,5 +36,5 @@ class AddMovieToHistory(MediaScript):
             year=details.year,
         )
         watches: list[Watch] = [MovieWatch(temp_watch, details.runtime)]
-        logging.info(watches[0].__str__())
+        logger.info(watches[0].__str__())
         self.process_watches(watches, self.calendar, self.owner, self.location)

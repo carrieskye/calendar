@@ -24,6 +24,8 @@ from src.models.trakt.show import Show
 from src.models.watch import EpisodeWatch, MovieWatch, Watch
 from src.utils import File
 
+logger = logging.getLogger(__name__)
+
 
 def _load_trakt_access_token() -> str:
     raw = File.read_json(Path("src/credentials/trakt_token.json"))
@@ -33,7 +35,7 @@ def _load_trakt_access_token() -> str:
 
 
 class TraktAPI:
-    logging.info("Loading Trakt")
+    logger.info("Loading Trakt")
 
     base_url = "https://api.trakt.tv"
     client_id = os.environ.get("TRAKT_CLIENT_ID", "")
@@ -75,7 +77,7 @@ class TraktAPI:
             return response.json()
         except JSONDecodeError:
             if response.status_code == 429:
-                logging.warning("Rate limit exceeded, trying again in 30s.")
+                logger.warning("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.post_request(url, body)
             raise TraktError(response, url, body)
@@ -190,6 +192,6 @@ class TraktError(Exception):
         super().__init__(f"Could not process Trakt request to {url}.")
         error_file = Path(f".logs/.error_{str(datetime.now().timestamp())}.html")
 
-        logging.error(f"Something went wrong. See {error_file} for details.")
+        logger.error(f"Something went wrong. See {error_file} for details.")
         File.write_txt(str(response.text).split("\n"), error_file)
-        logging.error("\n".join([f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]))
+        logger.error("\n".join([f"Body: {body}", f"Url: {url}", f"Status code: {response.status_code}"]))

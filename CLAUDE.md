@@ -66,8 +66,10 @@ Order members as follows:
 
 ### Logging
 - Use stdlib `logging` throughout
-- Use `Formatter` helpers for structured output: `logging.info(Formatter.title("Loading"))`
-- Use f-strings for dynamic content: `logging.info(f"Processing {name}")`
+- Every module gets a named logger: `logger = logging.getLogger(__name__)` (placed after imports)
+- All logging calls use the module-level `logger` object, never `logging.info()` directly
+- Use `Formatter` helpers for structured output: `logger.info(Formatter.title("Loading"))`
+- Use f-strings for dynamic content: `logger.info(f"Processing {name}")`
 - Pass `extra={"markup": True}` when using Rich markup in messages
 
 ### File I/O

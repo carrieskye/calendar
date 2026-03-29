@@ -11,6 +11,8 @@ from src.utils import Input
 
 from .media import MediaScript
 
+logger = logging.getLogger(__name__)
+
 
 class AddEpisodesToHistory(MediaScript):
     def __init__(self) -> None:
@@ -63,7 +65,7 @@ class AddEpisodesToHistory(MediaScript):
                 watch = EpisodeWatch(temp_watch, details["runtime"])
                 start += relativedelta(minutes=details["runtime"])
                 watches.append(watch)
-                logging.info(watch.__str__())
+                logger.info(watch.__str__())
 
         if self.end:
             watches = self.spread_watches(watches, self.end - self.start)

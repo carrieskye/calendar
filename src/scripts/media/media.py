@@ -18,6 +18,8 @@ from src.utils import Formatter
 
 from ..script import Script
 
+logger = logging.getLogger(__name__)
+
 
 class MediaScript(Script, ABC):
     calendar = Calendars.lazing
@@ -30,18 +32,18 @@ class MediaScript(Script, ABC):
         owner: Owner,
         location: GeoLocation,
     ) -> None:
-        logging.info(Formatter.sub_title("Updating history"), extra={"markup": True})
+        logger.info(Formatter.sub_title("Updating history"), extra={"markup": True})
 
-        logging.info("Removing old watches from history")
+        logger.info("Removing old watches from history")
         cls.remove_watches_from_history(watches)
 
-        logging.info("Adding watches to history")
+        logger.info("Adding watches to history")
         TraktAPI.add_episodes_to_history(watches)
 
-        logging.info("Adding watch events to Google Calendar")
+        logger.info("Adding watch events to Google Calendar")
 
         for watch in watches:
-            logging.info(f"- {watch.__str__()} {watch.get_start()} - {watch.end}")
+            logger.info(f"- {watch.__str__()} {watch.get_start()} - {watch.end}")
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod

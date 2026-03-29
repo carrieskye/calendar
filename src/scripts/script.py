@@ -6,14 +6,16 @@ from src.enums import Owner
 from src.models.location.geo_location import GeoLocation
 from src.utils import Formatter, Input
 
+logger = logging.getLogger(__name__)
+
 
 class Script(ABC):
     def __init__(self) -> None:
-        logging.info(Formatter.sub_title("Input"))
+        logger.info(Formatter.sub_title("Input"))
 
     @abstractmethod
     def run(self) -> None:
-        logging.info(Formatter.sub_title("Processing"))
+        logger.info(Formatter.sub_title("Processing"))
 
     @staticmethod
     def get_owner(default: Owner = Owner.SHARED) -> Owner:
