@@ -1,12 +1,11 @@
 import logging
-import os
 import time
 from datetime import date, datetime, time as datetime_time
 from pathlib import Path
 
 from dateutil.relativedelta import relativedelta
-from google.auth.credentials import Credentials
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -14,7 +13,7 @@ from googleapiclient.errors import HttpError
 from src.enums import Owner
 from src.models.calendar import Calendar
 from src.models.event import Event
-from src.utils import File, Formatter
+from src.utils import Formatter
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
@@ -24,9 +23,9 @@ logger.info(Formatter.title("Loading connectors"))
 
 def load_credentials(scopes: list[str]) -> Credentials:
     credentials = None
-    token_file = Path("src/credentials/token.pickle")
-    if os.path.exists("src/credentials/token.pickle"):
-        credentials = File.read_pickle(token_file)
+    token_file = Path("src/credentials/token.json")
+    if token_file.exists():
+        credentials = Credentials.from_authorized_user_file(str(token_file), scopes)
 
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
@@ -34,7 +33,8 @@ def load_credentials(scopes: list[str]) -> Credentials:
         else:
             flow = InstalledAppFlow.from_client_secrets_file("src/credentials/credentials.json", scopes)
             credentials = flow.run_local_server(port=0)
-        File.write_pickle(credentials, token_file)
+        with open(token_file, "w", encoding="utf-8") as f:
+            f.write(credentials.to_json())
 
     return credentials
 
