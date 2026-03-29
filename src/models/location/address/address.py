@@ -5,15 +5,15 @@ from pydantic import BaseModel, Field, model_validator
 
 class Address(BaseModel):
     address_lines: list[str] = Field(default_factory=list)
-    house_no: str | None = Field(None)
-    street: str | None = Field(None)
-    district: str | None = Field(None)
-    postal_code: str | None = Field(None)
-    city: str | None = Field(None)
-    state: str | None = Field(None)
+    house_no: str | None = Field(default=None)
+    street: str | None = Field(default=None)
+    district: str | None = Field(default=None)
+    postal_code: str | None = Field(default=None)
+    city: str | None = Field(default=None)
+    state: str | None = Field(default=None)
     country_code: str
     country: str
-    original: str | None = Field(None)
+    original: str | None = Field(default=None)
 
     def __str__(self) -> str:
         return ", ".join([x.strip() for x in self.address_parts])
