@@ -23,7 +23,7 @@ Never commit personal values to the codebase — no real names, email addresses,
 
 ### Pydantic models
 - Inherit from `BaseModel` for all data models
-- Declare field defaults with `Field()`: `location: Optional[str] = Field(None)`, `description: str = Field("")`
+- Declare field defaults with `Field()`: `location: str | None = Field(default=None)`, `description: str = Field("")`
 - Use `@model_validator(mode="before")` for construction-time transformation
 - Serialise with `model_dump(mode="json")` and deserialise with `model_validate()`
 - Prefer `@classmethod` factory methods named `from_<source>` (e.g. `from_dict`, `from_key`, `from_result`)

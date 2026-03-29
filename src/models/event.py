@@ -8,13 +8,13 @@ from .event_datetime import EventDateTime
 
 class Event(BaseModel):
     summary: str
-    location: str | None = Field(None)
+    location: str | None = Field(default=None)
     description: str = Field("")
     start: EventDateTime
     end: EventDateTime
     event_id: str = Field("")
-    calendar: Calendar | None = Field(None)
-    owner: Owner | None = Field(None)
+    calendar: Calendar | None = Field(default=None)
+    owner: Owner | None = Field(default=None)
 
     def serialise_for_google(self) -> dict:
         return {

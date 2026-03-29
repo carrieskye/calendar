@@ -7,6 +7,7 @@ from src.data import Data
 from src.models.location.geo_location import GeoLocation
 from src.utils import Formatter, Input
 
+from ...enums import LocationCategory
 from .location import LocationScript
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class AddLocation(LocationScript):
 
         logger.info(Formatter.sub_sub_title("DETAILS"))
         self.label = Input.get_string_input("Label")
-        self.category = Input.get_string_input("Category")
+        self.category = LocationCategory.from_str(Input.get_string_input("Category"))
         self.short = Input.get_string_input("Short address")
         self.address = Input.get_string_input("Address")
 

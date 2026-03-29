@@ -13,8 +13,8 @@ class TempEpisodeWatch(BaseModel):
     season_no: int
     episode_no: int
     episode_id: int
-    episode_title: str | None = Field(None)
-    slug: str | None = Field(None)
+    episode_title: str | None = Field(default=None)
+    slug: str | None = Field(default=None)
 
     @classmethod
     def from_result(cls, result: HistoryItemEpisode | HistoryItemExtendedEpisode) -> "TempEpisodeWatch":
