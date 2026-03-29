@@ -34,8 +34,9 @@ class LocationScript(Script, ABC):
         if len(matches) > 1:
             distances = {}
             for match in matches:
-                intersection = Data.geo_location_dict[match].bounding_box.intersection
-                distances[match] = cls.get_distance(location_timestamp.get_point(), intersection)
+                bb = Data.geo_location_dict[match].bounding_box
+                if bb:
+                    distances[match] = cls.get_distance(location_timestamp.get_point(), bb.intersection)
             match = min(distances.items(), key=lambda x: x[1])
             return match[0]
         raise ValueError(f"No location found for {location_timestamp}")
