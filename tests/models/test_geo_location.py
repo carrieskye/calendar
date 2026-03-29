@@ -3,7 +3,6 @@ from datetime import datetime
 import pytest
 
 from src.enums import LocationCategory
-from src.models.location.address import UKAddress
 from src.models.location.bounding_box import BoundingBox
 from src.models.location.geo_location import GeoLocation
 from src.models.location_timestamp import LocationTimestamp
@@ -17,7 +16,7 @@ def _make_geo_location(bounding_box: BoundingBox | None = None) -> GeoLocation:
         category=LocationCategory.HOME,
         label="home",
         short="Home",
-        address=UKAddress(original="1 Example Street, Cardiff, CF10 1AA, United Kingdom"),
+        address="1 Example Street, Cardiff, CF10 1AA, United Kingdom",
         bounding_box=bounding_box,
     )
 
