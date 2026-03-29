@@ -1,4 +1,5 @@
-from src.models.calendar import Calendar, Owner
+from src.enums import Owner
+from src.models.calendar import Calendar
 from src.models.event import Event
 from src.models.event_datetime import EventDateTime
 
@@ -17,7 +18,7 @@ def test_event_serialise_for_google_structure() -> None:
         start=start,
         end=end,
         calendar=_sample_calendar(),
-        owner=Owner.user,
+        owner=Owner.USER,
     )
     payload = event.serialise_for_google()
     assert payload["summary"] == "Meeting"
@@ -38,10 +39,10 @@ def test_event_from_dict() -> None:
         "end": {"dateTime": "2025-01-10T09:30:00", "timeZone": "UTC"},
         "id": "evt_123",
     }
-    event = Event.from_dict(raw, calendar=cal, owner=Owner.partner)
+    event = Event.from_dict(raw, calendar=cal, owner=Owner.PARTNER)
     assert event.summary == "Dentist"
     assert event.location is None
     assert event.event_id == "evt_123"
     assert event.calendar is cal
-    assert event.owner is Owner.partner
+    assert event.owner is Owner.PARTNER
     assert event.start.time_zone == "UTC"

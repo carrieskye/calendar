@@ -2,7 +2,7 @@ from datetime import datetime, time
 
 from dateutil.relativedelta import relativedelta  # type: ignore
 
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.models.location_event import LocationEvents
 from src.utils import Input
 
@@ -13,7 +13,7 @@ class UpdateEventTimes(LocationScript):
     def __init__(self) -> None:
         super(UpdateEventTimes, self).__init__()
 
-        self.owner = self.get_owner(default=Owner.user)
+        self.owner = self.get_owner(default=Owner.USER)
         yesterday = (datetime.now() - relativedelta(days=1)).date()
         start = Input.get_date_input("Date", min_date=datetime(2019, 11, 20).date(), default=yesterday)
         self.start = datetime.combine(start, time(4))

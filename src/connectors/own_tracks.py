@@ -4,7 +4,7 @@ from pathlib import Path
 
 import psycopg2
 
-from src.models.calendar import Owner
+from src.enums import Owner
 from src.utils import File
 
 
@@ -14,7 +14,7 @@ class OwnTracks:
 
     @classmethod
     def get_records(cls, start: datetime, end: datetime, owner: Owner) -> list[tuple]:
-        user_id = {Owner.user: 3, Owner.partner: 2}[owner]
+        user_id = {Owner.USER: 3, Owner.PARTNER: 2}[owner]
         conditions = "WHERE " + " AND ".join(
             [
                 f'time > \'{start.strftime("%Y-%m-%d %H:%M:%S")}\'',

@@ -7,8 +7,8 @@ from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.connectors import GoogleCalAPI
 from src.data import Calendars, Data, GeoLocations
+from src.enums import Owner
 from src.models.activity import Activities, Activity
-from src.models.calendar import Owner
 from src.models.event import Event
 from src.utils import Formatter, Input
 
@@ -22,7 +22,7 @@ class UpdateCalendar(ActivityScript):
         start = Input.get_date_input("Start")
         days = Input.get_int_input("Days", "#days")
 
-        self.owner = Owner.user
+        self.owner = Owner.USER
         self.work_from_home = True
         self.location = Data.geo_location_dict["home"]
 
@@ -38,7 +38,7 @@ class UpdateCalendar(ActivityScript):
     def run(self) -> None:
         logging.info(Formatter.sub_title("Processing"), extra={"markup": True})
 
-        owner_dir = Path("data/activity") / self.owner.name
+        owner_dir = Path("data/activity") / self.owner.name.lower()
 
         day = self.start
         while day < self.end:
@@ -58,7 +58,7 @@ class UpdateCalendar(ActivityScript):
 
     def remove_events(self, day: datetime) -> None:
         for calendar in Data.calendar_dict.values():
-            for owner in [self.owner, Owner.shared]:
+            for owner in [self.owner, Owner.SHARED]:
                 if not calendar.get_cal_id(owner) or calendar == Calendars.shared_diary:
                     continue
 

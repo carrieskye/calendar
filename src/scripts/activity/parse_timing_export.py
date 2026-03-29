@@ -6,9 +6,9 @@ from pathlib import Path
 from dateutil.relativedelta import relativedelta  # type: ignore
 
 from src.data import Data
+from src.enums import Owner
 from src.models.activity.activities import Activities
 from src.models.activity.activity import Activity
-from src.models.calendar import Owner
 from src.models.timing.timing_item import TimingItem
 from src.utils import File, Formatter
 
@@ -24,10 +24,10 @@ class ParseTimingExportScript(ActivityScript):
     def run(self) -> None:
         super().run()
 
-        for owner in [Owner.user]:
-            logging.info(Formatter.sub_title(owner.name))
+        for owner in [Owner.USER]:
+            logging.info(Formatter.sub_title(owner.name.lower()))
 
-            export = File.read_csv(Path(f"data/activity/{owner.name}/All Activities.csv"))
+            export = File.read_csv(Path(f"data/activity/{owner.name.lower()}/All Activities.csv"))
             timing_items = [TimingItem.model_validate(item) for item in export]
 
             all_activities = Activities()
@@ -101,7 +101,7 @@ class ParseTimingExportScript(ActivityScript):
                         if len(sub_activity.projects) > 1 and activity.title.endswith(sub_activity.projects[0]):
                             sub_activity.projects.pop(0)
 
-                dir_name = Path(f"data/activity/{owner.name}")
+                dir_name = Path(f"data/activity/{owner.name.lower()}")
                 File.write_csv([x.flatten() for x in activities], dir_name / f"csv/{day}.csv")
                 activities.write_json_file(dir_name / f"json/{day}.json")
                 logging.info(f"Processed [bold]{day}", extra={"markup": True})

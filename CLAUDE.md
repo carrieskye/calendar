@@ -80,8 +80,29 @@ Order members as follows:
 ### Naming
 - Classes: `PascalCase`
 - Functions, methods, variables: `snake_case`
-- Enum values: `lowercase` (`Owner.user`, `Owner.shared`)
+- Enum members: `SCREAMING_SNAKE_CASE` (`Owner.USER`, `Owner.SHARED`, `LocationCategory.RESTAURANT`)
 - No private `_method` prefix convention
+
+### Enums
+- All enums use `auto()` for values — no explicit string or integer values
+- Add a `from_str(cls, value: str)` classmethod to each enum that deserializes strings: `cls[value.upper()]`
+- In Pydantic models that use enums, add `@field_validator(mode="before")` to convert strings to enum members
+- Field validators must handle both string and integer inputs (integers for backward compatibility with older serializations):
+  ```python
+  @field_validator("category", mode="before")
+  @classmethod
+  def parse_category(cls, value: str | LocationCategory | int) -> LocationCategory:
+      if isinstance(value, LocationCategory):
+          return value
+      if isinstance(value, str):
+          return LocationCategory.from_str(value)
+      if isinstance(value, int):
+          for member in LocationCategory:
+              if member.value == value:
+                  return member
+          raise ValueError(f"No LocationCategory enum member with value {value}")
+  ```
+- Serialization of enums to dict/JSON: use `enum_member.name.lower()` to get the string representation
 
 ### Strings
 - f-strings exclusively — no `.format()`, no concatenation for non-trivial strings

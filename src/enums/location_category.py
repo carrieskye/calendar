@@ -1,96 +1,103 @@
-from enum import Enum
+from enum import Enum, auto
 
 
-class LocationCategory(str, Enum):
+class LocationCategory(Enum):
     # Core places
-    AREA = "area"
-    BEACH = "beach"
-    FARM = "farm"
-    ISLAND = "island"
-    LAKE = "lake"
-    LANDMARK = "landmark"
-    LOCALITY = "locality"
-    MOUNTAIN = "mountain"
-    NATURE = "nature"
-    PARK = "park"
-    PUBLIC_SQUARE = "public_square"
-    REGION = "region"
-    TRAIL = "trail"
-    WATERFALL = "waterfall"
+    AREA = auto()
+    BEACH = auto()
+    FARM = auto()
+    ISLAND = auto()
+    LAKE = auto()
+    LANDMARK = auto()
+    LOCALITY = auto()
+    MOUNTAIN = auto()
+    NATURE = auto()
+    PARK = auto()
+    PUBLIC_SQUARE = auto()
+    REGION = auto()
+    TRAIL = auto()
+    WATERFALL = auto()
 
     # Food & drink
-    BAKERY = "bakery"
-    BAR = "bar"
-    CAFE = "cafe"
-    COFFEE_BAR = "coffee_bar"
-    FAST_FOOD = "fast_food"
-    ICE_CREAM = "ice_cream"
-    PUB = "pub"
-    RESTAURANT = "restaurant"
+    BAKERY = auto()
+    BAR = auto()
+    CAFE = auto()
+    COFFEE_BAR = auto()
+    FAST_FOOD = auto()
+    ICE_CREAM = auto()
+    PUB = auto()
+    RESTAURANT = auto()
 
     # Retail & services
-    BANK = "bank"
-    CAR_WASH = "car_wash"
-    GARAGE = "garage"
-    MARKETPLACE = "marketplace"
-    PARKING = "parking"
-    PHARMACY = "pharmacy"
-    SERVICES = "services"
-    SHOPPING_CENTRE = "shopping_centre"
-    STORE = "store"
+    BANK = auto()
+    CAR_WASH = auto()
+    GARAGE = auto()
+    MARKETPLACE = auto()
+    PARKING = auto()
+    PHARMACY = auto()
+    SERVICES = auto()
+    SHOPPING_CENTRE = auto()
+    STORE = auto()
 
     # Health & care
-    MEDICAL = "medical"
+    MEDICAL = auto()
 
     # Home & people
-    FAMILY = "family"
-    FRIENDS = "friends"
-    HOME = "home"
-    HOUSE = "house"
-    RESIDENCY = "residency"
+    FAMILY = auto()
+    FRIENDS = auto()
+    HOME = auto()
+    HOUSE = auto()
+    RESIDENCY = auto()
 
     # Travel & transport
-    AIRPORT = "airport"
-    BUS = "bus"
-    FERRY = "ferry"
-    REST_STOP = "rest_stop"
-    STATION = "station"
-    TERMINAL = "terminal"
+    AIRPORT = auto()
+    BUS = auto()
+    FERRY = auto()
+    REST_STOP = auto()
+    STATION = auto()
+    TERMINAL = auto()
 
     # Leisure & culture
-    AQUARIUM = "aquarium"
-    ARENA = "arena"
-    CASTLE = "castle"
-    CHURCH = "church"
-    CINEMA = "cinema"
-    GYM = "gym"
-    ICE_RINK = "ice_rink"
-    MUSEUM = "museum"
-    PLAYGROUND = "playground"
-    SKI_RESORT = "ski_resort"
-    SPORTS = "sports"
-    SWIMMING_POOL = "swimming_pool"
-    VENUE = "venue"
-    YOGA_STUDIO = "yoga_studio"
-    ZOO = "zoo"
+    AQUARIUM = auto()
+    ARENA = auto()
+    CASTLE = auto()
+    CHURCH = auto()
+    CINEMA = auto()
+    GYM = auto()
+    ICE_RINK = auto()
+    MUSEUM = auto()
+    PLAYGROUND = auto()
+    SKI_RESORT = auto()
+    SPORTS = auto()
+    SWIMMING_POOL = auto()
+    VENUE = auto()
+    YOGA_STUDIO = auto()
+    ZOO = auto()
 
     # Work & education
-    NURSERY = "nursery"
-    SCHOOL = "school"
-    UNIVERSITY = "university"
-    WORK = "work"
+    NURSERY = auto()
+    SCHOOL = auto()
+    UNIVERSITY = auto()
+    WORK = auto()
 
     # Accommodation
-    AIRBNB = "airbnb"
-    CAMPING = "camping"
-    CHALET = "chalet"
-    HOTEL = "hotel"
-    VACATION_HOME = "vacation_home"
+    AIRBNB = auto()
+    CAMPING = auto()
+    CHALET = auto()
+    HOTEL = auto()
+    VACATION_HOME = auto()
 
     # Official buildings
-    CEMETERY = "cemetery"
-    COMMUNITY_BUILDING = "community_building"
-    CREMATORIUM = "crematorium"
-    FUNERAL_SERVICES = "funeral_services"
-    GOVERNMENT = "government"
-    NOTARY = "notary"
+    CEMETERY = auto()
+    COMMUNITY_BUILDING = auto()
+    CREMATORIUM = auto()
+    FUNERAL_SERVICES = auto()
+    GOVERNMENT = auto()
+    NOTARY = auto()
+
+    @classmethod
+    def from_str(cls, value: str) -> "LocationCategory":
+        try:
+            return cls[value.upper()]
+        except KeyError:
+            raise ValueError(f"Unknown LocationCategory: '{value}'")

@@ -11,7 +11,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from src.models.calendar import Calendar, Owner
+from src.enums import Owner
+from src.models.calendar import Calendar
 from src.models.event import Event
 from src.utils import File, Formatter
 

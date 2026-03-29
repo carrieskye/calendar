@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 
-from .calendar import Calendar, Owner
+from src.enums import Owner
+
+from .calendar import Calendar
 from .event_datetime import EventDateTime
 
 

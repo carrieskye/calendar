@@ -8,14 +8,13 @@ __all__ = [
     "LocationTimestamp",
     "LocationTimestamps",
     "MovieWatch",
-    "Owner",
     "Point",
     "TempEpisodeWatch",
     "TempMovieWatch",
     "Watch",
 ]
 
-from .calendar import Calendar, Owner
+from .calendar import Calendar
 from .event import Event
 from .event_datetime import EventDateTime
 from .location_event import LocationEvent, LocationEvents
