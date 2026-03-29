@@ -11,8 +11,8 @@ class Address(BaseModel):
     postal_code: str | None = Field(default=None)
     city: str | None = Field(default=None)
     state: str | None = Field(default=None)
-    country_code: str
-    country: str
+    country_code: str = Field(default="")
+    country: str = Field(default="")
     original: str | None = Field(default=None)
 
     def __str__(self) -> str:

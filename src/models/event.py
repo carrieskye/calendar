@@ -9,10 +9,10 @@ from .event_datetime import EventDateTime
 class Event(BaseModel):
     summary: str
     location: str | None = Field(default=None)
-    description: str = Field("")
+    description: str = Field(default="")
     start: EventDateTime
     end: EventDateTime
-    event_id: str = Field("")
+    event_id: str = Field(default="")
     calendar: Calendar | None = Field(default=None)
     owner: Owner | None = Field(default=None)
 
