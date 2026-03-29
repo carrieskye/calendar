@@ -81,7 +81,7 @@ class UKAddress(Address):
                 if len(other_parts[-1].split()) == 1 or (
                     len(other_parts[-1].split()) == 2 and other_parts[-1].startswith("St")
                 ):
-                    district = [other_parts.pop(-1)]
+                    district = [other_parts.pop()]
                 address_lines = other_parts
 
             if street and str.isdigit(street[0]):

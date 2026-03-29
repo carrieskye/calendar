@@ -12,9 +12,9 @@ def print_data_table(
     column_widths: Sequence[int],
     rows: Iterable[Sequence[object]],
 ) -> None:
-    table = Table(title=title, show_header=True, header_style="bold", show_lines=False)
+    table = Table(title=title, header_style="bold")
     for header, width in zip(headers, column_widths):
-        table.add_column(header, width=width, overflow="ellipsis", no_wrap=False)
+        table.add_column(header, width=width)
     for row in rows:
         table.add_row(*["" if c is None else str(c) for c in row])
     Console().print(table)
