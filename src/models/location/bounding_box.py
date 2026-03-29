@@ -1,6 +1,6 @@
 from pydantic import BaseModel, model_validator
 
-from src.models.point import Point
+from ..point import Point
 
 
 class BoundingBox(BaseModel):

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from src.data import Data
 from src.enums import Owner
-from src.models.location.geo_location import GeoLocation
+from src.models import GeoLocation
 from src.utils import Formatter, Input
 
 logger = logging.getLogger(__name__)

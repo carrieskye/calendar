@@ -8,12 +8,19 @@ from dateutil.relativedelta import relativedelta
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Calendars, Data
 from src.enums import Owner
-from src.models.calendar import Calendar
-from src.models.event import Event
-from src.models.event_datetime import EventDateTime
-from src.models.location.geo_location import GeoLocation
-from src.models.trakt.history_item import HistoryItemEpisode, HistoryItemMovie
-from src.models.watch import EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch, Watch
+from src.models import (
+    Calendar,
+    EpisodeWatch,
+    Event,
+    EventDateTime,
+    GeoLocation,
+    HistoryItemEpisode,
+    HistoryItemMovie,
+    MovieWatch,
+    TempEpisodeWatch,
+    TempMovieWatch,
+    Watch,
+)
 from src.utils import Formatter
 
 from ..script import Script

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.models.location.geo_location import GeoLocation
+from src.models import GeoLocation
 from src.utils import File
 
 

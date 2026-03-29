@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Data
 from src.enums import Owner
-from src.models.watch import Watch
+from src.models import Watch
 from src.utils import Input
 
 from .media import MediaScript

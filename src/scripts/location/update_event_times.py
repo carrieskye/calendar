@@ -3,7 +3,7 @@ from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
 from src.enums import Owner
-from src.models.location_event import LocationEvents
+from src.models import LocationEvents
 from src.utils import Input
 
 from .location import LocationScript

@@ -10,8 +10,7 @@ from dateutil.relativedelta import relativedelta
 from src.connectors import GoogleCalAPI
 from src.data import Calendars
 from src.enums import Owner
-from src.models.event import Event
-from src.models.event_datetime import EventDateTime
+from src.models import Event, EventDateTime
 from src.utils import File, Input
 
 from .activity_script import ActivityScript

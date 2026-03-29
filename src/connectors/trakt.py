@@ -11,16 +11,17 @@ import pytz
 import requests
 from requests import Response
 
-from src.models.trakt.episode import ExtendedEpisode
-from src.models.trakt.history_item import (
+from src.models.trakt import (
+    ExtendedEpisode,
+    ExtendedMovie,
+    ExtendedSeason,
     HistoryItemEpisode,
     HistoryItemExtendedEpisode,
     HistoryItemExtendedMovie,
     HistoryItemMovie,
+    Movie,
+    Show,
 )
-from src.models.trakt.movie import ExtendedMovie, Movie
-from src.models.trakt.season import ExtendedSeason
-from src.models.trakt.show import Show
 from src.models.watch import EpisodeWatch, MovieWatch, Watch
 from src.utils import File
 

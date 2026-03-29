@@ -7,9 +7,8 @@ from dateutil.relativedelta import relativedelta
 
 from src.data import Data
 from src.enums import Owner
-from src.models.activity.activities import Activities
-from src.models.activity.activity import Activity
-from src.models.timing.timing_item import TimingItem
+from src.models.activity import Activities, Activity
+from src.models.timing import TimingItem
 from src.utils import File, Formatter
 
 from .activity_script import ActivityScript

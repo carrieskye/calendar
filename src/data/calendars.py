@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.connectors import GoogleCalAPI
-from src.models.calendar import Calendar
+from src.models import Calendar
 from src.utils import File
 
 

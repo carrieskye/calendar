@@ -1,7 +1,6 @@
 import pytest
 
-from src.models.location.bounding_box import BoundingBox
-from src.models.point import Point
+from src.models import BoundingBox, Point
 
 
 def _box() -> BoundingBox:

@@ -2,7 +2,7 @@ from datetime import datetime
 
 import pytest
 
-from src.models.event_datetime import EventDateTime
+from src.models import EventDateTime
 
 
 @pytest.mark.parametrize(
@@ -16,11 +16,7 @@ from src.models.event_datetime import EventDateTime
         (datetime(2020, 1, 1), "UTC", "2020-01-01 00:00:00"),
     ],
 )
-def test_str_includes_local_datetime_and_zone(
-    date_time: datetime,
-    time_zone: str,
-    expected_snippet: str,
-) -> None:
+def test_str_includes_local_datetime_and_zone(date_time: datetime, time_zone: str, expected_snippet: str) -> None:
     edt = EventDateTime(date_time=date_time, time_zone=time_zone)
     text = str(edt)
     assert expected_snippet in text

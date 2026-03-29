@@ -11,8 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from src.enums import Owner
-from src.models.calendar import Calendar
-from src.models.event import Event
+from src.models import Calendar, Event
 from src.utils import Formatter
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)

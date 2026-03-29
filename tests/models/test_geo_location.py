@@ -3,9 +3,8 @@ from datetime import datetime
 import pytest
 
 from src.enums import LocationCategory
-from src.models.location import BoundingBox, GeoLocation
+from src.models import BoundingBox, GeoLocation, LocationTimestamp
 from src.models.location.address import UKAddress
-from src.models.location_timestamp import LocationTimestamp
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 

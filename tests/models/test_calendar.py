@@ -1,7 +1,7 @@
 import pytest
 
 from src.enums import Owner
-from src.models.calendar import Calendar
+from src.models import Calendar
 
 
 def test_calendar_get_cal_id() -> None:

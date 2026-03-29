@@ -4,10 +4,10 @@ from pytz import country_timezones
 
 from src.address_parser import AddressParser
 from src.data import Data
-from src.models.location.geo_location import GeoLocation
+from src.enums import LocationCategory
+from src.models import GeoLocation
 from src.utils import Formatter, Input
 
-from ...enums import LocationCategory
 from .location import LocationScript
 
 logger = logging.getLogger(__name__)

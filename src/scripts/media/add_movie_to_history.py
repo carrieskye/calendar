@@ -6,7 +6,7 @@ from dateutil.relativedelta import relativedelta
 from src.connectors import TraktAPI
 from src.data import Data
 from src.enums import Owner
-from src.models.watch import MovieWatch, TempMovieWatch, Watch
+from src.models import MovieWatch, TempMovieWatch, Watch
 from src.utils import Input
 
 from .media import MediaScript
