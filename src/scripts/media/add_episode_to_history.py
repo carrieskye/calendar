@@ -1,15 +1,17 @@
 import logging
 
-from dateutil import tz  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import TraktAPI
 from src.data import Data
 from src.enums import Owner
-from src.models.watch import EpisodeWatch, TempEpisodeWatch, Watch
+from src.models import EpisodeWatch, TempEpisodeWatch, Watch
 from src.utils import Input
 
 from .media import MediaScript
+
+logger = logging.getLogger(__name__)
 
 
 class AddEpisodesToHistory(MediaScript):
@@ -63,7 +65,7 @@ class AddEpisodesToHistory(MediaScript):
                 watch = EpisodeWatch(temp_watch, details["runtime"])
                 start += relativedelta(minutes=details["runtime"])
                 watches.append(watch)
-                logging.info(watch.__str__())
+                logger.info(watch.__str__())
 
         if self.end:
             watches = self.spread_watches(watches, self.end - self.start)

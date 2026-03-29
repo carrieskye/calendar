@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.models.location.address.uk_address import UKAddress
+from src.models.location.address import UKAddress
 
 
 @pytest.mark.parametrize(

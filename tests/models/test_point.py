@@ -1,6 +1,6 @@
 import pytest
 
-from src.models.point import Point
+from src.models import Point
 
 
 def test_point_str() -> None:

@@ -1,7 +1,5 @@
 from src.enums import Owner
-from src.models.calendar import Calendar
-from src.models.event import Event
-from src.models.event_datetime import EventDateTime
+from src.models import Calendar, Event, EventDateTime
 
 
 def _sample_calendar() -> Calendar:

@@ -16,7 +16,7 @@ class ExtendedSeason(Season):
     episode_count: int
     aired_episodes: int
     title: str
-    overview: str | None = Field(None)
-    first_aired: datetime | None = Field(None)
-    updated_at: datetime | None = Field(None)
+    overview: str | None = Field(default=None)
+    first_aired: datetime | None = Field(default=None)
+    updated_at: datetime | None = Field(default=None)
     network: str

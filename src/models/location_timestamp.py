@@ -17,7 +17,7 @@ class LocationTimestamp(BaseModel):
     latitude: float
     longitude: float
     accuracy: int
-    location_id: str | None = Field(None)
+    location_id: str | None = Field(default=None)
 
     @classmethod
     def from_database(cls, db_record: tuple) -> LocationTimestamp:

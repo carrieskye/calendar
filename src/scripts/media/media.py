@@ -3,20 +3,29 @@ from abc import ABC
 from datetime import timedelta
 from random import randint, shuffle
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Calendars, Data
 from src.enums import Owner
-from src.models.calendar import Calendar
-from src.models.event import Event
-from src.models.event_datetime import EventDateTime
-from src.models.location.geo_location import GeoLocation
-from src.models.trakt.history_item import HistoryItemEpisode, HistoryItemMovie
-from src.models.watch import EpisodeWatch, MovieWatch, TempEpisodeWatch, TempMovieWatch, Watch
+from src.models import (
+    Calendar,
+    EpisodeWatch,
+    Event,
+    EventDateTime,
+    GeoLocation,
+    HistoryItemEpisode,
+    HistoryItemMovie,
+    MovieWatch,
+    TempEpisodeWatch,
+    TempMovieWatch,
+    Watch,
+)
 from src.utils import Formatter
 
 from ..script import Script
+
+logger = logging.getLogger(__name__)
 
 
 class MediaScript(Script, ABC):
@@ -30,18 +39,18 @@ class MediaScript(Script, ABC):
         owner: Owner,
         location: GeoLocation,
     ) -> None:
-        logging.info(Formatter.sub_title("Updating history"), extra={"markup": True})
+        logger.info(Formatter.sub_title("Updating history"), extra={"markup": True})
 
-        logging.info("Removing old watches from history")
+        logger.info("Removing old watches from history")
         cls.remove_watches_from_history(watches)
 
-        logging.info("Adding watches to history")
+        logger.info("Adding watches to history")
         TraktAPI.add_episodes_to_history(watches)
 
-        logging.info("Adding watch events to Google Calendar")
+        logger.info("Adding watch events to Google Calendar")
 
         for watch in watches:
-            logging.info(f"- {watch.__str__()} {watch.get_start()} - {watch.end}")
+            logger.info(f"- {watch.__str__()} {watch.get_start()} - {watch.end}")
             cls.create_watch_event(calendar, owner, watch, location)
 
     @classmethod

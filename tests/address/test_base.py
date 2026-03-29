@@ -25,11 +25,7 @@ def test_parse_city_and_postal_code_postal_first(line: str, expected_postal: str
         ("München 80331", "München", "80331"),
     ],
 )
-def test_parse_city_and_postal_code_city_first(
-    line: str,
-    expected_city: str,
-    expected_postal: str,
-) -> None:
+def test_parse_city_and_postal_code_city_first(line: str, expected_city: str, expected_postal: str) -> None:
     out = Address.parse_city_and_postal_code(line)
     assert out["city"] == expected_city
     assert out["postal_code"] == expected_postal

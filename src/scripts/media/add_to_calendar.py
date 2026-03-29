@@ -1,15 +1,17 @@
 import logging
 from datetime import datetime, time
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI, TraktAPI
 from src.data import Data
 from src.enums import Owner
-from src.models.watch import Watch
+from src.models import Watch
 from src.utils import Input
 
 from .media import MediaScript
+
+logger = logging.getLogger(__name__)
 
 
 class AddToCalendar(MediaScript):
@@ -43,5 +45,5 @@ class AddToCalendar(MediaScript):
         watches += self.get_watches_from_episode_history(episode_history)
 
         for watch in watches:
-            logging.info(watch.__str__())
+            logger.info(watch.__str__())
             self.create_watch_event(self.calendar, self.owner, watch, self.location)

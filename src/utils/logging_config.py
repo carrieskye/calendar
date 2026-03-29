@@ -6,13 +6,8 @@ from rich.logging import RichHandler
 
 
 def configure_logging() -> None:
-    handler = RichHandler(
-        rich_tracebacks=True,
-        markup=True,
-        show_time=True,
-        show_path=True,
-    )
-    handler.KEYWORDS = []
+    RichHandler.KEYWORDS = []
+    handler = RichHandler(rich_tracebacks=True, markup=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(message)s",

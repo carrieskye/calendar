@@ -18,8 +18,8 @@ class ExtendedMovie(Movie):
     runtime: int
     country: str
     updated_at: datetime
-    trailer: str | None = Field(None)
-    homepage: str | None = Field(None)
+    trailer: str | None = Field(default=None)
+    homepage: str | None = Field(default=None)
     status: str
     rating: float
     votes: int
@@ -27,4 +27,4 @@ class ExtendedMovie(Movie):
     language: str
     available_translations: list[str]
     genres: list[str]
-    certification: str | None = Field(None)
+    certification: str | None = Field(default=None)

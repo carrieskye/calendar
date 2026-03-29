@@ -4,17 +4,18 @@ import re
 from datetime import datetime, time
 from pathlib import Path
 
-from dateutil.parser import parse  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI
 from src.data import Calendars
 from src.enums import Owner
-from src.models.event import Event
-from src.models.event_datetime import EventDateTime
+from src.models import Event, EventDateTime
 from src.utils import File, Input
 
 from .activity_script import ActivityScript
+
+logger = logging.getLogger(__name__)
 
 
 class ParseChildExportScript(ActivityScript):
@@ -87,5 +88,5 @@ class ParseChildExportScript(ActivityScript):
                     start=EventDateTime(date_time=start, time_zone=self.location.time_zone),
                     end=EventDateTime(date_time=end, time_zone=self.location.time_zone),
                 )
-                logging.info(event.summary)
+                logger.info(event.summary)
                 GoogleCalAPI.create_event(Calendars.chores.user, event)

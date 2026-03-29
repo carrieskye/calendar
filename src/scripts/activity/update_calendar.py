@@ -2,8 +2,8 @@ import logging
 from datetime import date, datetime, time
 from pathlib import Path
 
-import pytz  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+import pytz
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI
 from src.data import Calendars, Data, GeoLocations
@@ -13,6 +13,8 @@ from src.models.event import Event
 from src.utils import Formatter, Input
 
 from .activity_script import ActivityScript
+
+logger = logging.getLogger(__name__)
 
 
 class UpdateCalendar(ActivityScript):
@@ -36,7 +38,7 @@ class UpdateCalendar(ActivityScript):
         return original_date_time - relativedelta(hours=offset)
 
     def run(self) -> None:
-        logging.info(Formatter.sub_title("Processing"), extra={"markup": True})
+        logger.info(Formatter.sub_title("Processing"), extra={"markup": True})
 
         owner_dir = Path("data/activity") / self.owner.name.lower()
 
@@ -45,7 +47,7 @@ class UpdateCalendar(ActivityScript):
             try:
                 day_str = day.strftime("%Y-%m-%d")
                 file_name = owner_dir / f"json/{day_str}.json"
-                logging.info(f"[bold]{day_str}", extra={"markup": True})
+                logger.info(f"[bold]{day_str}", extra={"markup": True})
                 activities = Activities.read_json_file(file_name)
 
                 self.remove_events(day)
@@ -72,7 +74,7 @@ class UpdateCalendar(ActivityScript):
 
     def create_events(self, activities: Activities) -> None:
         for activity in activities:
-            logging.info(
+            logger.info(
                 f"{activity.start.date_time.strftime('%H:%M:%S')} - "
                 f"{activity.end.date_time.strftime('%H:%M:%S')}: "
                 f"{activity.title} ({activity.calendar.name})",

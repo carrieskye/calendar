@@ -6,6 +6,8 @@ from datetime import date, datetime, time
 from dateutil.parser import parse
 from rich.prompt import Confirm, IntPrompt, Prompt
 
+logger = logging.getLogger(__name__)
+
 _INPUT_PREFIX = "                    "
 
 
@@ -53,11 +55,11 @@ class Input:
         parsed = parse(value).date() if value else default
 
         if min_date and parsed < min_date:
-            logging.error(f"Minimum date is {min_date}")
+            logger.error(f"Minimum date is {min_date}")
             return cls.get_date_input(name, input_type, default, min_date, max_date)
 
         if max_date and parsed > max_date:
-            logging.error(f"Maximum date is {max_date}")
+            logger.error(f"Maximum date is {max_date}")
             return cls.get_date_input(name, input_type, default, min_date, max_date)
 
         return parsed
@@ -76,11 +78,11 @@ class Input:
         parsed = parse(value).time() if value else default
 
         if min_time and parsed < min_time:
-            logging.error(f"Minimum time is {min_time}")
+            logger.error(f"Minimum time is {min_time}")
             return Input.get_time_input(name, input_type, default, min_time, max_time)
 
         if max_time and parsed > max_time:
-            logging.error(f"Maximum time is {max_time}")
+            logger.error(f"Maximum time is {max_time}")
             return Input.get_time_input(name, input_type, default, min_time, max_time)
 
         return parsed
@@ -100,11 +102,11 @@ class Input:
         parsed = datetime.combine(date_part, time_part)
 
         if min_date_time and parsed < min_date_time:
-            logging.error(f"Minimum datetime is {min_date_time}")
+            logger.error(f"Minimum datetime is {min_date_time}")
             return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time)
 
         if max_date_time and parsed > max_date_time:
-            logging.error(f"Maximum datetime is {max_date_time}")
+            logger.error(f"Maximum datetime is {max_date_time}")
             return Input.get_date_time_input(name, input_type, default, min_date_time, max_date_time)
 
         return parsed

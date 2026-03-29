@@ -1,15 +1,17 @@
 import logging
 
-from dateutil import tz  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil import tz
+from dateutil.relativedelta import relativedelta
 
 from src.connectors import TraktAPI
 from src.data import Data
 from src.enums import Owner
-from src.models.watch import MovieWatch, TempMovieWatch, Watch
+from src.models import MovieWatch, TempMovieWatch, Watch
 from src.utils import Input
 
 from .media import MediaScript
+
+logger = logging.getLogger(__name__)
 
 
 class AddMovieToHistory(MediaScript):
@@ -34,5 +36,5 @@ class AddMovieToHistory(MediaScript):
             year=details.year,
         )
         watches: list[Watch] = [MovieWatch(temp_watch, details.runtime)]
-        logging.info(watches[0].__str__())
+        logger.info(watches[0].__str__())
         self.process_watches(watches, self.calendar, self.owner, self.location)

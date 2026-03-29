@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
-import pytz  # type: ignore
-from dateutil.relativedelta import relativedelta  # type: ignore
+import pytz
+from dateutil.relativedelta import relativedelta
 from pydantic import BaseModel
 
 from src.utils import print_data_table
@@ -129,6 +129,7 @@ class LocationEvents(list[LocationEvent]):
 
     @staticmethod
     def ignore_dst(event_time: datetime, time_zone: str) -> datetime:
-        if pytz.timezone(time_zone).dst(event_time) != timedelta():
-            return event_time + pytz.timezone(time_zone).dst(event_time)
+        dst_offset = pytz.timezone(time_zone).dst(event_time)
+        if dst_offset and dst_offset != timedelta():
+            return event_time + dst_offset
         return event_time

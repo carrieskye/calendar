@@ -20,11 +20,10 @@ Never commit personal values to the codebase — no real names, email addresses,
 - `Sequence` and `Iterable` come from `collections.abc`, not `typing`
 - Keep `Any` and `cast` from `typing`
 - Do not annotate local variables
-- Use `# type: ignore` only on third-party imports that lack stubs
 
 ### Pydantic models
 - Inherit from `BaseModel` for all data models
-- Declare field defaults with `Field()`: `location: Optional[str] = Field(None)`, `description: str = Field("")`
+- Declare field defaults with `Field()`: `location: str | None = Field(default=None)`, `description: str = Field(default="")`
 - Use `@model_validator(mode="before")` for construction-time transformation
 - Serialise with `model_dump(mode="json")` and deserialise with `model_validate()`
 - Prefer `@classmethod` factory methods named `from_<source>` (e.g. `from_dict`, `from_key`, `from_result`)
@@ -67,8 +66,10 @@ Order members as follows:
 
 ### Logging
 - Use stdlib `logging` throughout
-- Use `Formatter` helpers for structured output: `logging.info(Formatter.title("Loading"))`
-- Use f-strings for dynamic content: `logging.info(f"Processing {name}")`
+- Every module gets a named logger: `logger = logging.getLogger(__name__)` (placed after imports)
+- All logging calls use the module-level `logger` object, never `logging.info()` directly
+- Use `Formatter` helpers for structured output: `logger.info(Formatter.title("Loading"))`
+- Use f-strings for dynamic content: `logger.info(f"Processing {name}")`
 - Pass `extra={"markup": True}` when using Rich markup in messages
 
 ### File I/O

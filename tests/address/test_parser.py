@@ -1,8 +1,7 @@
 import pytest
 
 from src.address_parser import AddressParser
-from src.models.location.address.de_address import DEAddress
-from src.models.location.address.uk_address import UKAddress
+from src.models.location.address import DEAddress, UKAddress
 
 
 def test_uk_cardiff_full_string() -> None:

@@ -6,14 +6,14 @@ from .timing_trajectory import TimingTrajectory
 
 
 class TimingNotes(BaseModel):
-    details: str | None = Field(None)
-    location: str | None = Field(None)
-    shared: bool | None = Field(None)
-    trajectory: TimingTrajectory | None = Field(None)
-    transport: TransportMode | None = Field(None)
-    url: str | None = Field(None)
-    episode: str | None = Field(None)
-    year: str | None = Field(None)
+    details: str | None = Field(default=None)
+    location: str | None = Field(default=None)
+    shared: bool | None = Field(default=None)
+    trajectory: TimingTrajectory | None = Field(default=None)
+    transport: TransportMode | None = Field(default=None)
+    url: str | None = Field(default=None)
+    episode: str | None = Field(default=None)
+    year: str | None = Field(default=None)
 
     @field_validator("transport", mode="before")
     @classmethod

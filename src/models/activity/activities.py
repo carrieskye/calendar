@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
 
-from pytz import timezone  # type: ignore
+from pytz import timezone
 
 from src.utils import File
 

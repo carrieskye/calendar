@@ -3,16 +3,17 @@ from collections import defaultdict
 from datetime import timedelta
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta  # type: ignore
+from dateutil.relativedelta import relativedelta
 
 from src.data import Data
 from src.enums import Owner
-from src.models.activity.activities import Activities
-from src.models.activity.activity import Activity
-from src.models.timing.timing_item import TimingItem
+from src.models.activity import Activities, Activity
+from src.models.timing import TimingItem
 from src.utils import File, Formatter
 
 from .activity_script import ActivityScript
+
+logger = logging.getLogger(__name__)
 
 
 class ParseTimingExportScript(ActivityScript):
@@ -25,7 +26,7 @@ class ParseTimingExportScript(ActivityScript):
         super().run()
 
         for owner in [Owner.USER]:
-            logging.info(Formatter.sub_title(owner.name.lower()))
+            logger.info(Formatter.sub_title(owner.name.lower()))
 
             export = File.read_csv(Path(f"data/activity/{owner.name.lower()}/All Activities.csv"))
             timing_items = [TimingItem.model_validate(item) for item in export]
@@ -104,9 +105,9 @@ class ParseTimingExportScript(ActivityScript):
                 dir_name = Path(f"data/activity/{owner.name.lower()}")
                 File.write_csv([x.flatten() for x in activities], dir_name / f"csv/{day}.csv")
                 activities.write_json_file(dir_name / f"json/{day}.json")
-                logging.info(f"Processed [bold]{day}", extra={"markup": True})
+                logger.info(f"Processed [bold]{day}", extra={"markup": True})
 
-            logging.info(
+            logger.info(
                 f"\n[bold pale_green3]Processed {len(activities_per_day) - 1} days.",
                 extra={"markup": True},
             )

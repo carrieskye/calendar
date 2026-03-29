@@ -1,30 +1,30 @@
 import logging
-import os
 import time
 from datetime import date, datetime, time as datetime_time
 from pathlib import Path
 
-from dateutil.relativedelta import relativedelta  # type: ignore
-from google.auth.credentials import Credentials
+from dateutil.relativedelta import relativedelta
 from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from src.enums import Owner
-from src.models.calendar import Calendar
-from src.models.event import Event
-from src.utils import File, Formatter
+from src.models import Calendar, Event
+from src.utils import Formatter
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
-logging.info(Formatter.title("Loading connectors"))
+
+logger = logging.getLogger(__name__)
+logger.info(Formatter.title("Loading connectors"))
 
 
 def load_credentials(scopes: list[str]) -> Credentials:
     credentials = None
-    token_file = Path("src/credentials/token.pickle")
-    if os.path.exists("src/credentials/token.pickle"):
-        credentials = File.read_pickle(token_file)
+    token_file = Path("src/credentials/token.json")
+    if token_file.exists():
+        credentials = Credentials.from_authorized_user_file(str(token_file), scopes)
 
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
@@ -32,13 +32,14 @@ def load_credentials(scopes: list[str]) -> Credentials:
         else:
             flow = InstalledAppFlow.from_client_secrets_file("src/credentials/credentials.json", scopes)
             credentials = flow.run_local_server(port=0)
-        File.write_pickle(credentials, token_file)
+        with open(token_file, "w", encoding="utf-8") as f:
+            f.write(credentials.to_json())
 
     return credentials
 
 
 class GoogleCalAPI:
-    logging.info("Loading Google Calendar")
+    logger.info("Loading Google Calendar")
     scopes = ["https://www.googleapis.com/auth/calendar"]
     service = build("calendar", "v3", credentials=load_credentials(scopes))
 
@@ -98,7 +99,7 @@ class GoogleCalAPI:
             return [Event.from_dict(event, calendar, owner) for event in events]
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.get_events(calendar, owner, max_results, time_min, time_max)
             raise e
@@ -123,7 +124,7 @@ class GoogleCalAPI:
             return cls.service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.delete_event(calendar_id, event_id)
             raise e
@@ -134,7 +135,7 @@ class GoogleCalAPI:
             return cls.service.events().insert(calendarId=calendar_id, body=event.serialise_for_google()).execute()
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.create_event(calendar_id, event)
             raise e
@@ -153,7 +154,7 @@ class GoogleCalAPI:
             )
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.update_event(calendar_id, event_id, event)
             raise e
@@ -166,7 +167,7 @@ class GoogleCalAPI:
             )
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.move_event(calendar_id, event_id, destination)
             raise e
@@ -177,7 +178,7 @@ class GoogleCalAPI:
             return cls.service.events().instances(calendarId=calendar_id, eventId=event_id).execute()
         except HttpError as e:
             if e.reason == "Rate Limit Exceeded":
-                logging.error("Rate limit exceeded, trying again in 30s.")
+                logger.error("Rate limit exceeded, trying again in 30s.")
                 time.sleep(30)
                 return cls.get_event_instances(calendar_id, event_id)
             raise e

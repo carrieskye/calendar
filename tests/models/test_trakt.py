@@ -1,5 +1,4 @@
-from src.models.trakt.movie import Movie
-from src.models.trakt.trakt_ids import TraktIds
+from src.models.trakt import Movie, TraktIds
 
 
 def test_trakt_ids_minimal() -> None:
