@@ -4,7 +4,7 @@ from dateutil import tz
 from dateutil.relativedelta import relativedelta
 
 from src.connectors import TraktAPI
-from src.data import Data
+from src.data import GeoLocations
 from src.enums import Owner
 from src.models import MovieWatch, TempMovieWatch, Watch
 from src.utils import Input
@@ -21,7 +21,7 @@ class AddMovieToHistory(MediaScript):
         self.movie_title = Input.get_string_input("Movie", "title")
         self.start = Input.get_date_time_input("Start")
         self.owner = Owner.USER
-        self.location = Data.geo_location_dict["home"]
+        self.location = GeoLocations.home
 
     def run(self) -> None:
         start = self.start.replace(tzinfo=tz.gettz(self.location.time_zone))

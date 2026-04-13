@@ -4,7 +4,7 @@ from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 
 from src.connectors import GoogleCalAPI, TraktAPI
-from src.data import Data
+from src.data import GeoLocations
 from src.enums import Owner
 from src.models import Watch
 from src.utils import Input
@@ -27,7 +27,7 @@ class AddToCalendar(MediaScript):
         self.start = start + relativedelta(hours=4)
         self.end = self.start + relativedelta(days=days)
         self.owner = Owner.USER
-        self.location = Data.geo_location_dict["home"]
+        self.location = GeoLocations.home
 
     def run(self) -> None:
         events = GoogleCalAPI.get_events(self.calendar, self.owner, 1000, self.start, self.end)
