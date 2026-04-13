@@ -22,11 +22,8 @@ class Data:
 
 
 class GeoLocations:
-    home_uk = Data.geo_location_dict["home_uk"]
-    home_uk_2 = Data.geo_location_dict["home_uk_2"]
     home = Data.geo_location_dict["home"]
     tramshed_tech = Data.geo_location_dict["tramshed_tech"]
-    viola_arena = Data.geo_location_dict["viola_arena"]
 
 
 class Calendars:

@@ -5,6 +5,7 @@ class LocationCategory(Enum):
     # Core places
     AREA = auto()
     BEACH = auto()
+    CITY = auto()
     FARM = auto()
     ISLAND = auto()
     LAKE = auto()
@@ -30,6 +31,7 @@ class LocationCategory(Enum):
 
     # Retail & services
     BANK = auto()
+    CAR_RENTAL = auto()
     CAR_WASH = auto()
     GARAGE = auto()
     MARKETPLACE = auto()
