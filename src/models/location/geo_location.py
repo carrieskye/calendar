@@ -85,6 +85,18 @@ class GeoLocation(BaseModel):
             "max_longitude": self.bounding_box.max_longitude if self.bounding_box else "",
         }
 
+    def to_city_location(self) -> "GeoLocation":
+        if not self.address.city:
+            raise ValueError(f"Cannot create city-level location for '{self.label}': address.city is None")
+        return self.model_copy(
+            update={
+                "short": self.address.city,
+                "label": f"city_{self.address.city.lower()}",
+                "category": LocationCategory.CITY,
+                "bounding_box": None,
+            },
+        )
+
     def within_bounding_box(self, location_timestamp: LocationTimestamp) -> bool:
         """Returns True if the location timestamp's coordinates fall within this location's bounding box."""
         if not self.bounding_box:

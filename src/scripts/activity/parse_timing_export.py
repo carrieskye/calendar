@@ -5,7 +5,7 @@ from pathlib import Path
 
 from dateutil.relativedelta import relativedelta
 
-from src.data import Data
+from src.data import Data, GeoLocations
 from src.enums import Owner
 from src.models.activity import Activities, Activity
 from src.models.timing import TimingItem
@@ -20,7 +20,7 @@ class ParseTimingExportScript(ActivityScript):
     def __init__(self) -> None:
         super().__init__()
 
-        self.location = Data.geo_location_dict["home"]
+        self.location = GeoLocations.home
 
     def run(self) -> None:
         super().run()

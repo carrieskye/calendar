@@ -48,8 +48,14 @@ class Activities(list[Activity]):
                     continue
                 if activity.calendar != next_activity.calendar:
                     continue
-                if activity.location and next_activity.location and activity.location != next_activity.location:
-                    continue
+                if activity.location and next_activity.location:
+                    city_a = activity.location.address.city
+                    city_b = next_activity.location.address.city
+                    if city_a and city_b:
+                        if city_a != city_b:
+                            continue
+                    elif activity.location != next_activity.location:
+                        continue
                 to_merge.append(index)
 
             for index in sorted(to_merge, reverse=True):
@@ -73,16 +79,25 @@ class Activities(list[Activity]):
         self.sort_chronically()
 
     def merge(self, index: int) -> None:
-        # TODO: if there are multiple locations, keep the most frequent one when merging
         next_activity = self.pop(index + 1)
         activity = self.pop(index)
 
-        longest_activity = max([activity, next_activity], key=lambda x: (x.location is not None, x.duration))
+        if not activity.location:
+            merged_location = next_activity.location
+        elif not next_activity.location or activity.location == next_activity.location:
+            merged_location = activity.location
+        else:
+            city_a = activity.location.address.city
+            city_b = next_activity.location.address.city
+            if city_a and city_b and city_a == city_b:
+                merged_location = activity.location.to_city_location()
+            else:
+                merged_location = max([activity, next_activity], key=lambda x: x.duration).location
 
-        longest_activity.sub_activities = activity.sub_activities + next_activity.sub_activities
-        longest_activity.start = activity.start
-        longest_activity.end = next_activity.end
-        self.insert(index, longest_activity)
+        activity.location = merged_location
+        activity.sub_activities = activity.sub_activities + next_activity.sub_activities
+        activity.end = next_activity.end
+        self.insert(index, activity)
 
     def remove_double_activities(self) -> None:
         self.sort_chronically()
