@@ -21,5 +21,5 @@ class ExtendedEpisode(Episode):
     votes: int
     comment_count: int
     available_translations: list[str]
-    runtime: int
+    runtime: int | None
     episode_type: str
